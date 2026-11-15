@@ -1,0 +1,83 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/comparar_kmeans_sensibilidade_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/comparar_kmeans_sensibilidade_teco.py</h2>
+<p>Comparar kmeans sensibilidade teco. Processamento ou módulo de apoio. As instruções são executadas no corpo principal, na ordem do arquivo.</p>
+<p><strong>Papel.</strong> Processamento ou módulo de apoio. <strong>Fonte inspecionada.</strong> E:\teco\codigo\comparar_kmeans_sensibilidade_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:/teco/entrega_final/00_documentacao/tabelas/kmeans_grade.csv — chamada pd.read_csv, linha 33.</li>
+<li>E:/teco/entrega_final/00_documentacao/tabelas/cenarios_grade.csv — chamada pd.read_csv, linha 33.</li>
+<li>E:/teco/entrega_final/00_documentacao/manifesto.json — chamada mfile.read_text, linha 49.</li>
+<p><strong>Saídas.</strong></p>
+<li>{directory}/Comparacao_kmeans_sensibilidade.json — chamada .write_text, linha 41.</li>
+<li>E:/teco/entrega_final/00_documentacao/Comparacao_kmeans_sensibilidade.csv — chamada table.to_csv, linha 42.</li>
+<li>E:/teco/entrega_final/00_documentacao/Comparacao_kmeans_sensibilidade.md — chamada .write_text, linha 48.</li>
+<li>E:/teco/entrega_final/00_documentacao/manifesto.json — chamada mfile.write_text, linha 49.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>best: cenario, k, menor_grupo, silhouette.</li>
+<li>table: ARI, cenario, descricao, k, menor_grupo, mesmo_grupo_pct, peso_aih_local, peso_populacao, peso_sem_rede, silhouette.</li>
+<li>x: ARI, cenario, mesmo_grupo_pct, peso_aih_local, peso_populacao, peso_sem_rede, silhouette.</li>
+<p><strong>Campos e chaves gerados.</strong></p>
+<li>m: comparacao_kmeans_sensibilidade.</li>
+<p><strong>Sequência.</strong> A rotina executa no corpo principal. Os pontos de leitura/escrita acima e os trechos abaixo mostram a ordem de processamento. Não é uma função que possa ser importada sem considerar esses efeitos.</p>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/comparar_kmeans_sensibilidade_teco.py, linhas 32-40.</p>
+<pre><code>R=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));F=R/&#x27;entrega_final&#x27;;D=F/&#x27;00_documentacao&#x27;;T=D/&#x27;tabelas&#x27;
+fits=pd.read_csv(T/&#x27;kmeans_grade.csv&#x27;,sep=&#x27;;&#x27;,decimal=&#x27;,&#x27;);scenarios=pd.read_csv(T/&#x27;cenarios_grade.csv&#x27;,sep=&#x27;;&#x27;,decimal=&#x27;,&#x27;)
+best=fits.loc[fits.groupby(&#x27;cenario&#x27;).silhouette.idxmax()].copy();assert best.k.eq(2).all()
+table=scenarios.merge(best[[&#x27;cenario&#x27;,&#x27;k&#x27;,&#x27;silhouette&#x27;,&#x27;menor_grupo&#x27;]],on=&#x27;cenario&#x27;,validate=&#x27;one_to_one&#x27;)
+selected=table.loc[table.silhouette.idxmax()];assert selected.cenario==&#x27;S2&#x27;
+records=table[[&#x27;cenario&#x27;,&#x27;descricao&#x27;,&#x27;peso_populacao&#x27;,&#x27;peso_sem_rede&#x27;,&#x27;peso_aih_local&#x27;,&#x27;k&#x27;,&#x27;silhouette&#x27;,&#x27;ARI&#x27;,&#x27;mesmo_grupo_pct&#x27;,&#x27;menor_grupo&#x27;]].to_dict(&#x27;records&#x27;)
+text=&#x27;Entre os cenários testados, S2 com dois grupos apresentou a maior silhouette (0,742), mantendo 98,3% das unidades no mesmo perfil de S0 e ARI de 0,932. S2 atribui pesos 1:3:1 a população, ausência de rede e internações locais. O cenário base S0, com pesos iguais, permanece como referência e apresentou silhouette de 0,668. Todos os cinco cenários selecionaram dois grupos entre as soluções com k de 2 a 6.&#x27;
+limit=&#x27;As silhouettes descrevem geometrias de distâncias alteradas pelos pesos. O maior valor em S2 indica maior separação sob a ênfase em ausência de rede, não comprova maior acurácia ambiental ou sanitária. A escolha de um peso três vezes maior exige justificativa substantiva; por isso S2 é mantido como sensibilidade e S0 como referência.&#x27;
+data={&#x27;resultado&#x27;:text,&#x27;interpretacao&#x27;:limit,&#x27;numero_unidades_validas&#x27;:592,&#x27;unidades_alteradas_S2&#x27;:10,&#x27;referencia&#x27;:&#x27;S0&#x27;,&#x27;maior_separacao&#x27;:&#x27;S2&#x27;,&#x27;melhor_k_em_todos_cenarios&#x27;:2,&#x27;comparacao&#x27;:records}</code></pre>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:/teco/entrega_final/00_documentacao/tabelas/kmeans_grade.csv | pd.read_csv.
+    5  # Entrada: E:/teco/entrega_final/00_documentacao/tabelas/cenarios_grade.csv | pd.read_csv.
+    6  # Entrada: E:/teco/entrega_final/00_documentacao/manifesto.json | mfile.read_text.
+    7  # Campos/chaves em best: cenario, k, menor_grupo, silhouette.
+    8  # Campos/chaves em table: ARI, cenario, descricao, k, menor_grupo, mesmo_grupo_pct, peso_aih_local, peso_populacao, peso_sem_rede, silhouette.
+    9  # Campos/chaves em x: ARI, cenario, mesmo_grupo_pct, peso_aih_local, peso_populacao, peso_sem_rede, silhouette.
+   10  # Saída: {directory}/Comparacao_kmeans_sensibilidade.json | .write_text.
+   11  # Saída: E:/teco/entrega_final/00_documentacao/Comparacao_kmeans_sensibilidade.csv | table.to_csv.
+   12  # Saída: E:/teco/entrega_final/00_documentacao/Comparacao_kmeans_sensibilidade.md | .write_text.
+   13  # Saída: E:/teco/entrega_final/00_documentacao/manifesto.json | mfile.write_text.
+   14  # Campos/chaves gerados em m: comparacao_kmeans_sensibilidade.
+   15  # CÓDIGO DO PROCESSAMENTO
+   16  
+   17  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   18  import sys as _cp_sys
+   19  from pathlib import Path as _cp_Path
+   20  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   21  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   22      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   23      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   24          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   25          break
+   26  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   27  # FIM DOS CAMINHOS PORTÁTEIS
+   28  
+   29  from pathlib import Path
+   30  import json
+   31  import pandas as pd
+   32  R=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));F=R/&#x27;entrega_final&#x27;;D=F/&#x27;00_documentacao&#x27;;T=D/&#x27;tabelas&#x27;
+   33  fits=pd.read_csv(T/&#x27;kmeans_grade.csv&#x27;,sep=&#x27;;&#x27;,decimal=&#x27;,&#x27;);scenarios=pd.read_csv(T/&#x27;cenarios_grade.csv&#x27;,sep=&#x27;;&#x27;,decimal=&#x27;,&#x27;)
+   34  best=fits.loc[fits.groupby(&#x27;cenario&#x27;).silhouette.idxmax()].copy();assert best.k.eq(2).all()
+   35  table=scenarios.merge(best[[&#x27;cenario&#x27;,&#x27;k&#x27;,&#x27;silhouette&#x27;,&#x27;menor_grupo&#x27;]],on=&#x27;cenario&#x27;,validate=&#x27;one_to_one&#x27;)
+   36  selected=table.loc[table.silhouette.idxmax()];assert selected.cenario==&#x27;S2&#x27;
+   37  records=table[[&#x27;cenario&#x27;,&#x27;descricao&#x27;,&#x27;peso_populacao&#x27;,&#x27;peso_sem_rede&#x27;,&#x27;peso_aih_local&#x27;,&#x27;k&#x27;,&#x27;silhouette&#x27;,&#x27;ARI&#x27;,&#x27;mesmo_grupo_pct&#x27;,&#x27;menor_grupo&#x27;]].to_dict(&#x27;records&#x27;)
+   38  text=&#x27;Entre os cenários testados, S2 com dois grupos apresentou a maior silhouette (0,742), mantendo 98,3% das unidades no mesmo perfil de S0 e ARI de 0,932. S2 atribui pesos 1:3:1 a população, ausência de rede e internações locais. O cenário base S0, com pesos iguais, permanece como referência e apresentou silhouette de 0,668. Todos os cinco cenários selecionaram dois grupos entre as soluções com k de 2 a 6.&#x27;
+   39  limit=&#x27;As silhouettes descrevem geometrias de distâncias alteradas pelos pesos. O maior valor em S2 indica maior separação sob a ênfase em ausência de rede, não comprova maior acurácia ambiental ou sanitária. A escolha de um peso três vezes maior exige justificativa substantiva; por isso S2 é mantido como sensibilidade e S0 como referência.&#x27;
+   40  data={&#x27;resultado&#x27;:text,&#x27;interpretacao&#x27;:limit,&#x27;numero_unidades_validas&#x27;:592,&#x27;unidades_alteradas_S2&#x27;:10,&#x27;referencia&#x27;:&#x27;S0&#x27;,&#x27;maior_separacao&#x27;:&#x27;S2&#x27;,&#x27;melhor_k_em_todos_cenarios&#x27;:2,&#x27;comparacao&#x27;:records}
+   41  for directory in [D,R/&#x27;output/04_grade_500m/auditoria&#x27;]:(directory/&#x27;Comparacao_kmeans_sensibilidade.json&#x27;).write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;)
+   42  table.to_csv(D/&#x27;Comparacao_kmeans_sensibilidade.csv&#x27;,sep=&#x27;;&#x27;,decimal=&#x27;,&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+   43  lines=[&#x27;# K-means e sensibilidade: seleção e interpretação&#x27;,&#x27;&#x27;,text,&#x27;&#x27;,limit,&#x27;&#x27;,&#x27;| Cenário | Pesos população / sem rede / AIH | k | Silhouette | Mesmo perfil de S0 | ARI |&#x27;,&#x27;|---|---|---:|---:|---:|---:|&#x27;]
+   44  for x in records:
+   45   fmt=lambda n,d:f&#x27;{n:.{d}f}&#x27;.replace(&#x27;.&#x27;,&#x27;,&#x27;)
+   46   lines.append(&#x27;| &#x27;+x[&#x27;cenario&#x27;]+&#x27; | &#x27;+str(int(x[&#x27;peso_populacao&#x27;]))+&#x27; / &#x27;+str(int(x[&#x27;peso_sem_rede&#x27;]))+&#x27; / &#x27;+str(int(x[&#x27;peso_aih_local&#x27;]))+&#x27; | 2 | &#x27;+fmt(x[&#x27;silhouette&#x27;],3)+&#x27; | &#x27;+fmt(x[&#x27;mesmo_grupo_pct&#x27;],1)+&#x27;% | &#x27;+fmt(x[&#x27;ARI&#x27;],3)+&#x27; |&#x27;)
+   47  lines+=[&#x27;&#x27;,&#x27;Silhouette não é valor de p. ARI compara duas partições, corrigindo a concordância esperada ao acaso; 1 indica partições iguais. A concordância percentual considera rótulos alinhados. Os grupos não são níveis de risco.&#x27;]
+   48  (D/&#x27;Comparacao_kmeans_sensibilidade.md&#x27;).write_text(&#x27;\n&#x27;.join(lines),encoding=&#x27;utf8&#x27;)
+   49  mfile=D/&#x27;manifesto.json&#x27;;m=json.loads(mfile.read_text(&#x27;utf8&#x27;));m[&#x27;comparacao_kmeans_sensibilidade&#x27;]=data;mfile.write_text(json.dumps(m,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(text,flush=True)</code></pre></article></html>

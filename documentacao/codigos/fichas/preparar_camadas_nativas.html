@@ -1,0 +1,126 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/preparar_camadas_nativas.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/preparar_camadas_nativas.py</h2>
+<p>Preparar camadas nativas. Processamento ou módulo de apoio. A organização passa por main.</p>
+<p><strong>Papel.</strong> Processamento ou módulo de apoio. <strong>Fonte inspecionada.</strong> E:\teco\codigo\preparar_camadas_nativas.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>geopandas</td><td>Camadas vetoriais com referência espacial, reprojeção, recorte e interseção de geometrias.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>numpy</td><td>Matrizes numéricas, máscaras de validade, transformações, percentis e estatísticas vetorizadas.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:/teco/output/04_grade_500m/teco_grade_500m.gpkg [camada &#x27;bacias_estudo&#x27;] — chamada gpd.read_file, linha 48.</li>
+<li>E:/teco/output/02_avaliacao_espacial/teco_avaliacao.gpkg [camada &#x27;saude_hosp_inativos_candidatos&#x27;] — chamada gpd.read_file, linha 57.</li>
+<li>E:/teco/output/05_auditoria_saude/RD_MG_todos_estabelecimentos_2016_2025.csv — chamada pd.read_csv, linha 63.</li>
+<li>E:/teco/output/04_grade_500m/tabelas/sih_todas_causas_mensal.csv — chamada pd.read_csv, linha 64.</li>
+<li>E:/teco/output/04_grade_500m/tabelas/sih_total_mensal.csv — chamada pd.read_csv, linha 64.</li>
+<li>E:/teco/output/04_grade_500m/auditoria/metodo_grade.json — chamada .read_text, linha 77.</li>
+<p><strong>Saídas.</strong></p>
+<li>E:/teco/output/04_grade_500m/teco_grade_500m.gpkg [camada &#x27;entradas_censitarias_nativas&#x27;] — chamada c.to_file, linha 55.</li>
+<li>E:/teco/output/04_grade_500m/teco_grade_500m.gpkg [camada &#x27;saude_todos&#x27;] — chamada health.to_file, linha 68.</li>
+<li>E:/teco/output/04_grade_500m/tabelas/estabelecimentos_todos_bacias.csv — chamada .to_csv, linha 69.</li>
+<li>E:/teco/output/04_grade_500m/tabelas/estatisticas_entradas_nativas.csv — chamada .to_csv, linha 74.</li>
+<li>E:/teco/output/04_grade_500m/auditoria/camadas_nativas.json — chamada .write_text, linha 76.</li>
+<li>E:/teco/output/04_grade_500m/auditoria/metodo_grade.json — chamada .write_text, linha 77.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>c: ANO_DADO, BACIA, ORIG_GEOM, geometry, setor_id.</li>
+<li>b: geometry, id.</li>
+<li>health: AIH_FILT, AIH_TODAS, CADASTRO, CNES, GRUPO, QA_MUN.</li>
+<li>pp.loc: CNES.</li>
+<li>pp: AIH.</li>
+<p><strong>Campos e chaves gerados.</strong></p>
+<li>c: ANO_DADO, ORIG_GEOM.</li>
+<li>health: AIH_ANO, AIH_FILT, AIH_TODAS, CADASTRO, CNES, GRUPO, SIH_STATUS.</li>
+<li>old: CADASTRO.</li>
+<li>meta: mapas_entrada, status.</li>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>main()</td><td>47-77</td><td>lê dados; grava produtos</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/preparar_camadas_nativas.py, linhas 64-70.</p>
+<pre><code> allf=pd.read_csv(O/&#x27;tabelas/sih_todas_causas_mensal.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str});sel=pd.read_csv(O/&#x27;tabelas/sih_total_mensal.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str})
+ alltot=allf.groupby(&#x27;CNES&#x27;).internacoes.sum();seltot=sel.groupby(&#x27;CNES&#x27;).internacoes.sum()
+ health[&#x27;AIH_TODAS&#x27;]=health.CNES.map(alltot);health[&#x27;AIH_FILT&#x27;]=health.CNES.map(seltot);health[&#x27;AIH_ANO&#x27;]=health.AIH_FILT/10
+ health[&#x27;SIH_STATUS&#x27;]=np.where(health.AIH_TODAS.notna(),&#x27;Com AIH normais 2016-2025&#x27;,&#x27;Sem AIH localizada; não significa ausência de atendimento&#x27;)
+ health[&#x27;GRUPO&#x27;]=health.GRUPO.fillna(&#x27;Hospital / hospital-dia&#x27;);health.to_file(G,layer=&#x27;saude_todos&#x27;,driver=&#x27;GPKG&#x27;)
+ health.drop(columns=&#x27;geometry&#x27;).to_csv(O/&#x27;tabelas/estabelecimentos_todos_bacias.csv&#x27;,index=False,sep=&#x27;;&#x27;,encoding=&#x27;utf-8-sig&#x27;)
+ stats=[]</code></pre>
+<p>Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</p>
+<p><strong>Cálculos a observar nesta rotina.</strong></p>
+<li>sum: Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</li>
+<li>mean: Média no eixo explicitado. Não representa automaticamente média anual ou diária sem a seleção temporal correspondente.</li>
+<li>std: Desvio-padrão. Na padronização z, coloca colunas em escala comparável; conferir ddof no trecho.</li>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:/teco/output/04_grade_500m/teco_grade_500m.gpkg | gpd.read_file | camada=&#x27;bacias_estudo&#x27;.
+    5  # Entrada: E:/teco/output/02_avaliacao_espacial/teco_avaliacao.gpkg | gpd.read_file | camada=&#x27;saude_hosp_inativos_candidatos&#x27;.
+    6  # Entrada: E:/teco/output/05_auditoria_saude/RD_MG_todos_estabelecimentos_2016_2025.csv | pd.read_csv.
+    7  # Entrada: E:/teco/output/04_grade_500m/tabelas/sih_todas_causas_mensal.csv | pd.read_csv.
+    8  # Entrada: E:/teco/output/04_grade_500m/tabelas/sih_total_mensal.csv | pd.read_csv.
+    9  # Entrada: E:/teco/output/04_grade_500m/auditoria/metodo_grade.json | .read_text.
+   10  # Campos/chaves em c: ANO_DADO, BACIA, ORIG_GEOM, geometry, setor_id.
+   11  # Campos/chaves em b: geometry, id.
+   12  # Campos/chaves em health: AIH_FILT, AIH_TODAS, CADASTRO, CNES, GRUPO, QA_MUN.
+   13  # Campos/chaves em pp.loc: CNES.
+   14  # Campos/chaves em pp: AIH.
+   15  # Saída: E:/teco/output/04_grade_500m/teco_grade_500m.gpkg | c.to_file.
+   16  # Saída: E:/teco/output/04_grade_500m/teco_grade_500m.gpkg | health.to_file.
+   17  # Saída: E:/teco/output/04_grade_500m/tabelas/estabelecimentos_todos_bacias.csv | .to_csv.
+   18  # Saída: E:/teco/output/04_grade_500m/tabelas/estatisticas_entradas_nativas.csv | .to_csv.
+   19  # Saída: E:/teco/output/04_grade_500m/auditoria/camadas_nativas.json | .write_text.
+   20  # Saída: E:/teco/output/04_grade_500m/auditoria/metodo_grade.json | .write_text.
+   21  # Campos/chaves gerados em c: ANO_DADO, ORIG_GEOM.
+   22  # Campos/chaves gerados em health: AIH_ANO, AIH_FILT, AIH_TODAS, CADASTRO, CNES, GRUPO, SIH_STATUS.
+   23  # Campos/chaves gerados em old: CADASTRO.
+   24  # Campos/chaves gerados em meta: mapas_entrada, status.
+   25  # CNES: identificador do estabelecimento de saúde.
+   26  # BACIA: identificador da bacia.
+   27  # CÓDIGO DO PROCESSAMENTO
+   28  
+   29  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   30  import sys as _cp_sys
+   31  from pathlib import Path as _cp_Path
+   32  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   33  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   34      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   35      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   36          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   37          break
+   38  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   39  # FIM DOS CAMINHOS PORTÁTEIS
+   40  
+   41  from pathlib import Path
+   42  import json
+   43  import numpy as np,pandas as pd,geopandas as gpd
+   44  R=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));O=R/&#x27;output/04_grade_500m&#x27;;B=R/&#x27;output/02_avaliacao_espacial&#x27;;G=O/&#x27;teco_grade_500m.gpkg&#x27;
+   45  
+   46  # Main
+   47  def main():
+   48   b=gpd.read_file(G,layer=&#x27;bacias_estudo&#x27;)
+   49   c=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;analise_setores&#x27;).rename(columns={&#x27;bas_id&#x27;:&#x27;BACIA&#x27;})
+   50   mapping={&#x27;POP_OFIC&#x27;:&#x27;pop_2022&#x27;,&#x27;POP_REC&#x27;:&#x27;pop_a_est&#x27;,&#x27;DENS_POP&#x27;:&#x27;dens_pop&#x27;,&#x27;REDE_PCT&#x27;:&#x27;pct_rede&#x27;,&#x27;SEM_REDE_OBS&#x27;:&#x27;pct_nrede&#x27;,&#x27;DESC_RIO&#x27;:&#x27;pct_vrio&#x27;}
+   51   for dst,src in mapping.items():c[dst]=c[src]
+   52  
+   53   c[&#x27;ORIG_GEOM&#x27;]=&#x27;Recorte do setor censitário na bacia&#x27;;c[&#x27;ANO_DADO&#x27;]=2022
+   54   c=c[[&#x27;setor_id&#x27;,&#x27;BACIA&#x27;,*mapping.keys(),&#x27;ORIG_GEOM&#x27;,&#x27;ANO_DADO&#x27;,&#x27;geometry&#x27;]].copy()
+   55   c.to_file(G,layer=&#x27;entradas_censitarias_nativas&#x27;,driver=&#x27;GPKG&#x27;)
+   56   health=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;saude_cnes_ativos&#x27;);health[&#x27;CADASTRO&#x27;]=&#x27;Ativo na extração CNES&#x27;
+   57   old=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;saude_hosp_inativos_candidatos&#x27;);old[&#x27;CADASTRO&#x27;]=&#x27;Inativo / referência histórica&#x27;
+   58   health=gpd.GeoDataFrame(pd.concat([health,old],ignore_index=True),crs=health.crs);health=health.drop_duplicates(&#x27;CNES&#x27;).drop(columns=[&#x27;bacia&#x27;],errors=&#x27;ignore&#x27;)
+   59   health=health.drop(columns=[&#x27;BACIA&#x27;,&#x27;id&#x27;],errors=&#x27;ignore&#x27;);health=gpd.sjoin(health,b[[&#x27;id&#x27;,&#x27;geometry&#x27;]].rename(columns={&#x27;id&#x27;:&#x27;BACIA&#x27;}),how=&#x27;inner&#x27;,predicate=&#x27;intersects&#x27;).drop(columns=&#x27;index_right&#x27;)
+   60   health=health.drop_duplicates([&#x27;CNES&#x27;,&#x27;BACIA&#x27;]);health[&#x27;CNES&#x27;]=health.CNES.astype(str).str.replace(r&#x27;\.0$&#x27;,&#x27;&#x27;,regex=True).str.zfill(7)
+   61   production=R/&#x27;output/05_auditoria_saude/RD_MG_todos_estabelecimentos_2016_2025.csv&#x27;
+   62   if production.exists():
+   63    pp=pd.read_csv(production,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str});health=health[health.CNES.isin(pp.loc[pp.AIH.gt(0),&#x27;CNES&#x27;])].copy()
+   64   allf=pd.read_csv(O/&#x27;tabelas/sih_todas_causas_mensal.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str});sel=pd.read_csv(O/&#x27;tabelas/sih_total_mensal.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str})
+   65   alltot=allf.groupby(&#x27;CNES&#x27;).internacoes.sum();seltot=sel.groupby(&#x27;CNES&#x27;).internacoes.sum()
+   66   health[&#x27;AIH_TODAS&#x27;]=health.CNES.map(alltot);health[&#x27;AIH_FILT&#x27;]=health.CNES.map(seltot);health[&#x27;AIH_ANO&#x27;]=health.AIH_FILT/10
+   67   health[&#x27;SIH_STATUS&#x27;]=np.where(health.AIH_TODAS.notna(),&#x27;Com AIH normais 2016-2025&#x27;,&#x27;Sem AIH localizada; não significa ausência de atendimento&#x27;)
+   68   health[&#x27;GRUPO&#x27;]=health.GRUPO.fillna(&#x27;Hospital / hospital-dia&#x27;);health.to_file(G,layer=&#x27;saude_todos&#x27;,driver=&#x27;GPKG&#x27;)
+   69   health.drop(columns=&#x27;geometry&#x27;).to_csv(O/&#x27;tabelas/estabelecimentos_todos_bacias.csv&#x27;,index=False,sep=&#x27;;&#x27;,encoding=&#x27;utf-8-sig&#x27;)
+   70   stats=[]
+   71   for key,g in c.groupby(&#x27;BACIA&#x27;):
+   72    for col in mapping:
+   73     v=g[col].dropna();stats.append({&#x27;bacia&#x27;:key,&#x27;variavel&#x27;:col,&#x27;suporte&#x27;:&#x27;Setor censitário recortado; sem grade de 500 m&#x27;,&#x27;n_validos&#x27;:len(v),&#x27;n_ausentes&#x27;:int(g[col].isna().sum()),&#x27;min&#x27;:v.min(),&#x27;mediana&#x27;:v.median(),&#x27;media&#x27;:v.mean(),&#x27;max&#x27;:v.max(),&#x27;desvio_padrao&#x27;:v.std()})
+   74   pd.DataFrame(stats).to_csv(O/&#x27;tabelas/estatisticas_entradas_nativas.csv&#x27;,sep=&#x27;;&#x27;,decimal=&#x27;,&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+   75   info={&#x27;geometrias&#x27;:&#x27;Setores censitários, pontos CNES, linhas de vias/cursos dágua e rasters nativos; grade somente em classificações/análises.&#x27;,&#x27;estabelecimentos&#x27;:len(health),&#x27;CNES_unicos&#x27;:health.CNES.nunique(),&#x27;por_bacia&#x27;:health.groupby(&#x27;BACIA&#x27;).size().to_dict(),&#x27;por_grupo&#x27;:health.groupby(&#x27;GRUPO&#x27;).size().to_dict(),&#x27;inativos&#x27;:int(health.CADASTRO.str.startswith(&#x27;Inativo&#x27;).sum()),&#x27;QA_municipal_divergente&#x27;:int(health.QA_MUN.eq(0).sum()),&#x27;limite&#x27;:&#x27;Somente produção SIH positiva 2016-2025 e localização dentro da bacia. Rede que interna residentes dos quatro municípios: 383 hospitais em tabela separada NRMG, não limitada ao interior da bacia.&#x27;}
+   76   (O/&#x27;auditoria/camadas_nativas.json&#x27;).write_text(json.dumps(info,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(&#x27;NATIVAS_PREPARADAS&#x27;,json.dumps(info,ensure_ascii=True),flush=True)
+   77   meta=json.loads((O/&#x27;auditoria/metodo_grade.json&#x27;).read_text(&#x27;utf8&#x27;));meta[&#x27;status&#x27;]=&#x27;Exploratório local: filtro amplo de etiologias bacterianas codificadas e síndromes compatíveis (A+B). Não atribui internações à residência nem confirma RAM.&#x27;;meta[&#x27;mapas_entrada&#x27;]=&#x27;Geometrias nativas; grade restrita a classificação, k-means, Moran e análises multivariadas.&#x27;;(O/&#x27;auditoria/metodo_grade.json&#x27;).write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;)
+   78  if __name__==&#x27;__main__&#x27;:main()</code></pre></article></html>

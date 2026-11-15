@@ -1,0 +1,326 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/dicionario_campos_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/dicionario_campos_teco.py</h2>
+<p>Centraliza o significado, a unidade, a natureza e a linhagem de cada campo por produto. É a referência para evitar que nomes iguais sejam interpretados como o mesmo universo.</p>
+<p><strong>Papel.</strong> Documentação/apoio. <strong>Fonte inspecionada.</strong> E:\teco\codigo\dicionario_campos_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>re</td><td>Extração e validação de padrões textuais, datas, identificadores e linhas dos modelos.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<p>Interface por parâmetros, retorno de funções ou programas chamados; os caminhos literais e as funções estão no inventário e no código integral.</p>
+<p><strong>Saídas.</strong></p>
+<p>Interface por parâmetros, retorno de funções ou programas chamados; os caminhos literais e as funções estão no inventário e no código integral.</p>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>definicao(campo, arquivo=&#x27;&#x27;)</td><td>190-227</td><td>Chamadas efetivas: campo.startswith, re.fullmatch, campo.split, KeyError, sum Retorno: DEFINICOES[campo], CAMPOS_CNES_2026[campo].</td></tr><tr><td>linhagem(campo, arquivo)</td><td>230-297</td><td>Chamadas efetivas: arquivo.startswith, any, KeyError, campo.startswith, apoios.append, .join Retorno: (&#x27;cruzamento CNES/SIH por código e interseção espacial em Python&#x27;, script, anchor, &#x27;consolidar_entrega_final.py&#x27;), (&#x27;calculado em Python&#x27;, grid, ancora, &#x27;; &#x27;.join(apoios)).</td></tr><tr><td>descrever_campo(campo, arquivo=&#x27;&#x27;)</td><td>300-301</td><td>Chamadas efetivas: definicao Retorno: definicao(campo, arquivo)[0].</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/dicionario_campos_teco.py, linhas 213-219.</p>
+<pre><code>        if tipo == &#x27;I&#x27;:
+            return (f&#x27;Escore do cenário {co}: 100 × ({w[0]} × N_POP_DENS + {w[1]} × N_SEM_REDE + {w[2]} × N_AIH_LOCAL) / {sum(w)}. Pesos população/ausência de rede/atividade hospitalar = {pesos}; não é probabilidade de contaminação.&#x27;, &#x27;escore 0-100&#x27;)
+        if tipo == &#x27;F&#x27;:
+            return (f&#x27;Classe de I_{co} em faixas fixas: 1 [0,20), 2 [20,40), 3 [40,60), 4 [60,80), 5 [80,100]; 0 entrada incompleta. Não é classificação por percentis nem risco comprovado.&#x27;, &#x27;classe 1-5; 0 sem classe&#x27;)
+        return (f&#x27;Perfil k-means com k = 2 no cenário {co}, ajustado nas três entradas normalizadas multiplicadas pela raiz quadrada dos pesos {pesos}. Rótulos alinhados a S0 por correspondência ótima: 1 maior adensamento e maior ligação à rede; 2 menor adensamento e menor ligação à rede; 0 entrada incompleta. O número não ordena risco.&#x27;, &#x27;perfil 1/2; 0 sem classe&#x27;)
+    if campo.startswith(&#x27;RES8_&#x27;) or campo.startswith(&#x27;PROD_&#x27;):
+        residencial = campo.startswith(&#x27;RES8_&#x27;)</code></pre>
+<p>Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</p>
+<p><strong>Cálculos a observar nesta rotina.</strong></p>
+<li>sum: Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</li>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entradas: argumentos do chamador e módulos locais relacionados no relatório.
+    5  # Saídas: retorno de funções, verificações ou arquivos definidos pelo chamador.
+    6  # CÓDIGO DO PROCESSAMENTO
+    7  
+    8  # INÍCIO DOS CAMINHOS PORTÁTEIS
+    9  import sys as _cp_sys
+   10  from pathlib import Path as _cp_Path
+   11  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   12  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   13      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   14      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   15          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   16          break
+   17  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   18  # FIM DOS CAMINHOS PORTÁTEIS
+   19  
+   20  from pathlib import Path
+   21  import re
+   22  
+   23  DEFINICOES = {
+   24      &#x27;id&#x27;: (&#x27;Identificador da bacia hidrográfica: pampulha, vargem_flores ou ibirite_regap.&#x27;, &#x27;código&#x27;),
+   25      &#x27;BACIA&#x27;: (&#x27;Identificador da bacia à qual pertence a feição ou o recorte: pampulha, vargem_flores ou ibirite_regap.&#x27;, &#x27;código&#x27;),
+   26      &#x27;bacia&#x27;: (&#x27;Identificador da bacia em que foi traçada a trajetória topográfica D8.&#x27;, &#x27;código&#x27;),
+   27      &#x27;reserv&#x27;: (&#x27;Nome do reservatório associado à delimitação da bacia ou ao exutório de referência.&#x27;, &#x27;texto&#x27;),
+   28      &#x27;area_km2&#x27;: (&#x27;Área da bacia exclusiva, após retirar sobreposições entre as três bacias, calculada em SIRGAS 2000 / UTM 23S.&#x27;, &#x27;km²&#x27;),
+   29      &#x27;orig_km2&#x27;: (&#x27;Área da bacia integrada e suavizada antes do ajuste que elimina sobreposições com as outras bacias.&#x27;, &#x27;km²&#x27;),
+   30      &#x27;reduz_km2&#x27;: (&#x27;Área retirada da delimitação original para resolver sobreposições entre bacias; corresponde à diferença entre orig_km2 e area_km2, limitada a valores não negativos.&#x27;, &#x27;km²&#x27;),
+   31      &#x27;incl_pct&#x27;: (&#x27;Percentual da área do espelho do reservatório que permanece incluído na bacia exclusiva: 100 × área da interseção entre bacia e reservatório / área do reservatório. Não é percentual da bacia original preservada.&#x27;, &#x27;% do reservatório&#x27;),
+   32      &#x27;situacao&#x27;: (&#x27;Registro das verificações da delimitação, incluindo integração das áreas contribuintes do lago, possível truncamento do MDE e ajuste de sobreposição entre bacias.&#x27;, &#x27;texto&#x27;),
+   33      &#x27;NOME&#x27;: (&#x27;Nome do reservatório representado pelo polígono.&#x27;, &#x27;texto&#x27;),
+   34      &#x27;NOME_BACIA&#x27;: (&#x27;Nome do reservatório que identifica a bacia do trecho de rede ou da estação de tratamento.&#x27;, &#x27;texto&#x27;),
+   35      &#x27;setor_id&#x27;: (&#x27;Código IBGE de 15 dígitos do setor censitário de origem, armazenado como texto. O mesmo setor pode ter recortes em bacias diferentes.&#x27;, &#x27;código&#x27;),
+   36      &#x27;POP_OFIC&#x27;: (&#x27;Total oficial de pessoas do setor censitário inteiro no Censo 2022, equivalente à variável básica V0001. Não se restringe ao recorte do setor dentro da bacia.&#x27;, &#x27;pessoas&#x27;),
+   37      &#x27;POP_REC&#x27;: (&#x27;População estimada no recorte do setor dentro da bacia: população do setor inteiro × fração da área do setor interceptada pela bacia.&#x27;, &#x27;pessoas estimadas&#x27;),
+   38      &#x27;DENS_POP&#x27;: (&#x27;Densidade populacional do setor inteiro: total oficial de pessoas / área original do setor em km². O valor é mantido nos recortes do mesmo setor.&#x27;, &#x27;pessoas/km²&#x27;),
+   39      &#x27;DOM_TOT&#x27;: (&#x27;Domicílios particulares permanentes ocupados do setor inteiro, variável V00001 da tabela Características do Domicílio - Parte 1 do Censo 2022. Ausências e sigilo não são convertidos em zero.&#x27;, &#x27;domicílios&#x27;),
+   40      &#x27;DOM_REDE&#x27;: (&#x27;Domicílios particulares permanentes ocupados do setor com destinação à rede geral ou pluvial (V00309) ou a fossa séptica/filtro ligada à rede (V00310). A soma exige disponibilidade das duas parcelas e não comprova tratamento do esgoto.&#x27;, &#x27;domicílios&#x27;),
+   41      &#x27;REDE_PCT&#x27;: (&#x27;Percentual observado de domicílios do setor com rede geral/pluvial ou fossa ligada à rede: 100 × (V00309 + V00310) / V00001. Denominador zero, ausência ou sigilo das parcelas permanecem nulos.&#x27;, &#x27;% dos domicílios&#x27;),
+   42      &#x27;SEM_REDE_OBS&#x27;: (&#x27;Percentual observado de domicílios do setor sem rede geral/pluvial ou fossa ligada à rede: 100 − REDE_PCT. Mantém as lacunas de publicação; não mede diretamente falta de tratamento.&#x27;, &#x27;% dos domicílios&#x27;),
+   43      &#x27;DESC_RIO&#x27;: (&#x27;Percentual de domicílios do setor com destinação à vala OU a rio, lago, córrego ou mar: 100 × (V00313 + V00314) / V00001. Exige ambas as categorias publicadas; não representa apenas lançamento em rio.&#x27;, &#x27;% dos domicílios&#x27;),
+   44      &#x27;REDE_DIR&#x27;: (&#x27;Domicílios particulares permanentes ocupados do setor cuja destinação do esgoto é a rede geral ou pluvial, variável V00309 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   45      &#x27;FOSS_REDE&#x27;: (&#x27;Domicílios particulares permanentes ocupados do setor cuja destinação do esgoto é fossa séptica ou fossa filtro ligada à rede, variável V00310 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   46      &#x27;FOSS_SREDE&#x27;: (&#x27;Domicílios particulares permanentes ocupados do setor cuja destinação do esgoto é fossa séptica ou fossa filtro não ligada à rede, variável V00311 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   47      &#x27;FOSSA_RUD&#x27;: (&#x27;Domicílios particulares permanentes ocupados do setor cuja destinação do esgoto é fossa rudimentar ou buraco, variável V00312 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   48      &#x27;VALA&#x27;: (&#x27;Domicílios particulares permanentes ocupados do setor cuja destinação do esgoto é vala, variável V00313 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   49      &#x27;RIO_LAGO&#x27;: (&#x27;Domicílios particulares permanentes ocupados do setor cuja destinação do esgoto é rio, lago, córrego ou mar, variável V00314 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   50      &#x27;OUTRO&#x27;: (&#x27;Domicílios particulares permanentes ocupados do setor com outra forma de destinação do esgoto, variável V00315 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   51      &#x27;SEM_BANH&#x27;: (&#x27;Domicílios particulares permanentes ocupados do setor sem banheiro nem sanitário, categoria V00316 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   52      &#x27;SIGILO_N&#x27;: (&#x27;Número de células com símbolo X nas nove variáveis censitárias de esgotamento utilizadas: V00001 e V00309 a V00316. Não é quantidade de domicílios nem de dados ausentes por outros motivos.&#x27;, &#x27;variáveis com sigilo&#x27;),
+   53      &#x27;v0001&#x27;: (&#x27;Total de pessoas do setor censitário inteiro, variável básica V0001 do Censo 2022. É o total populacional; as variáveis V0002 a V0009 não devem ser somadas a ele.&#x27;, &#x27;pessoas&#x27;),
+   54      &#x27;v0002&#x27;: (&#x27;Total de domicílios do setor censitário inteiro, incluindo particulares permanentes ocupados, vagos ou de uso ocasional, particulares improvisados ocupados e coletivos com ou sem morador, variável básica V0002 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   55      &#x27;v0003&#x27;: (&#x27;Total de domicílios particulares do setor censitário inteiro, incluindo permanentes ocupados, vagos ou de uso ocasional e improvisados ocupados, variável básica V0003 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   56      &#x27;v0004&#x27;: (&#x27;Total de domicílios coletivos com ou sem morador no setor censitário inteiro, variável básica V0004 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   57      &#x27;v0005&#x27;: (&#x27;Média de moradores por domicílio particular ocupado, considerando permanentes e improvisados ocupados no setor inteiro, variável básica V0005 do Censo 2022.&#x27;, &#x27;pessoas/domicílio&#x27;),
+   58      &#x27;v0006&#x27;: (&#x27;Percentual de domicílios particulares ocupados imputados pelo IBGE entre os domicílios particulares ocupados do setor inteiro, variável básica V0006 do Censo 2022.&#x27;, &#x27;% dos domicílios particulares ocupados&#x27;),
+   59      &#x27;v0007&#x27;: (&#x27;Total de domicílios particulares ocupados, permanentes e improvisados, no setor inteiro, variável básica V0007 do Censo 2022. Difere do denominador V00001, que considera apenas permanentes ocupados.&#x27;, &#x27;domicílios&#x27;),
+   60      &#x27;v0008&#x27;: (&#x27;Total de domicílios particulares de uso ocasional no setor censitário inteiro, variável básica V0008 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   61      &#x27;v0009&#x27;: (&#x27;Total de domicílios particulares permanentes vagos no setor censitário inteiro, variável básica V0009 do Censo 2022.&#x27;, &#x27;domicílios&#x27;),
+   62      &#x27;COMP_KM&#x27;: (&#x27;Comprimento da geometria linear após o recorte espacial, medido em SIRGAS 2000 / UTM 23S e dividido por 1.000.&#x27;, &#x27;km&#x27;),
+   63      &#x27;ogc_fid&#x27;: (&#x27;Identificador original da feição viária no arquivo de origem; pode repetir-se quando uma via é dividida pelo recorte espacial.&#x27;, &#x27;identificador&#x27;),
+   64      &#x27;hier_legal&#x27;: (&#x27;Categoria de hierarquia viária informada na malha original. Expressa a classificação cadastral da via, sem estimar tráfego ou escoamento.&#x27;, &#x27;categoria&#x27;),
+   65      &#x27;TIPO_VIA&#x27;: (&#x27;Classe cartográfica derivada de hier_legal: Principal para ARTÉRIA PRIMÁRIA/EXPRESSA; Secundária / coletora para as demais arteriais e coletoras; Local para vias locais; Sem classe cadastrada nos outros casos. Não representa tráfego medido.&#x27;, &#x27;categoria&#x27;),
+   66      &#x27;CNES&#x27;: (&#x27;Código de sete dígitos do estabelecimento no Cadastro Nacional de Estabelecimentos de Saúde, armazenado como texto para preservar zeros iniciais.&#x27;, &#x27;código&#x27;),
+   67      &#x27;GRUPO&#x27;: (&#x27;Grupo assistencial atribuído ao tipo de estabelecimento CNES; na camada local atual, Hospital / hospital-dia identifica as instituições com produção SIH positiva dentro das bacias.&#x27;, &#x27;categoria&#x27;),
+   68      &#x27;TIPO&#x27;: (&#x27;Tipo de estabelecimento informado no CNES, como HOSPITAL GERAL ou HOSPITAL ESPECIALIZADO.&#x27;, &#x27;categoria&#x27;),
+   69      &#x27;AIH_TODAS&#x27;: (&#x27;Total de autorizações de internação hospitalar normais (IDENT = 1) processadas no estabelecimento em 2016-2025, todas as causas e todas as origens dos pacientes. É produção hospitalar local, não total de residentes da bacia.&#x27;, &#x27;internações no período&#x27;),
+   70      &#x27;AIH_FILT&#x27;: (&#x27;Total de AIH normais processadas no estabelecimento em 2016-2025 com diagnóstico principal incluído no filtro A+B: etiologias bacterianas codificadas ou síndromes compatíveis. Considera pacientes de todas as origens; não confirma resistência antimicrobiana.&#x27;, &#x27;internações A+B no período&#x27;),
+   71      &#x27;AIH_ANO&#x27;: (&#x27;Média anual da produção hospitalar selecionada A+B: AIH_FILT / 10 anos, para 2016-2025. Não é média somente dos anos em que houve registro.&#x27;, &#x27;internações A+B/ano&#x27;),
+   72      &#x27;QA_MUN&#x27;: (&#x27;Verificação espacial do cadastro CNES: 1 quando o código do município cadastrado coincide com o município obtido pela localização do ponto; 0 quando não coincide.&#x27;, &#x27;indicador 0/1&#x27;),
+   73      &#x27;NOME_TABNET&#x27;: (&#x27;Nome do estabelecimento na identificação da rede hospitalar consultada no SIH/TabNet.&#x27;, &#x27;texto&#x27;),
+   74      &#x27;MUNICIPIO&#x27;: (&#x27;Código do município de localização do estabelecimento obtido no cadastro hospitalar/CNES. Não é município de residência do paciente.&#x27;, &#x27;código municipal&#x27;),
+   75      &#x27;SIT_ESPACIAL&#x27;: (&#x27;Situação da localização do hospital: dentro das bacias, fora das bacias ou coordenada pendente com produção confirmada. Não define a residência nem a área atendida pelos pacientes.&#x27;, &#x27;categoria&#x27;),
+   76      &#x27;AIH_NRMG&#x27;: (&#x27;Total oficial de internações, consulta NRMG/SIH por residência, de pacientes dos oito municípios interceptados pelas bacias, atendidos no estabelecimento em 2016-2025. Não se limita à população efetivamente residente nas bacias.&#x27;, &#x27;internações por residência&#x27;),
+   77      &#x27;RES_RD&#x27;: (&#x27;Total bruto de AIH normais nos arquivos RD, 2016-2025, com residência nos oito municípios interceptados pelas bacias e atendimento no estabelecimento; inclui códigos de diagnóstico sem correspondência no dicionário utilizado.&#x27;, &#x27;internações por residência&#x27;),
+   78      &#x27;DIF_RES&#x27;: (&#x27;Diferença entre o total residencial bruto dos RD e a consulta oficial NRMG do estabelecimento: RES_RD − AIH_NRMG. Preserva divergências de tabulação, em vez de ajustar os totais artificialmente.&#x27;, &#x27;internações&#x27;),
+   79      &#x27;AIH_A&#x27;: (&#x27;AIH normais de residentes dos oito municípios, atendidos no estabelecimento em 2016-2025, com diagnóstico principal de etiologia bacteriana explicitamente codificada no filtro A. Não comprova resistência antimicrobiana.&#x27;, &#x27;internações do filtro A&#x27;),
+   80      &#x27;AIH_B&#x27;: (&#x27;AIH normais de residentes dos oito municípios, atendidos no estabelecimento em 2016-2025, com diagnóstico principal de síndrome compatível com infecção bacteriana no filtro B, sem confirmação do agente.&#x27;, &#x27;internações do filtro B&#x27;),
+   81      &#x27;AIH_AB&#x27;: (&#x27;Soma AIH_A + AIH_B para residentes dos oito municípios em 2016-2025. Constitui o filtro amplo selecionado; não é produção hospitalar de todas as origens.&#x27;, &#x27;internações do filtro A+B&#x27;),
+   82      &#x27;MEDIA_ANUAL_AB&#x27;: (&#x27;Média anual do filtro A+B entre residentes dos oito municípios atendidos no estabelecimento em 2016-2025: AIH_AB / 10.&#x27;, &#x27;internações A+B/ano&#x27;),
+   83      &#x27;RES_AB&#x27;: (&#x27;AIH normais do filtro A+B entre residentes dos quatro municípios da referência anterior (Belo Horizonte, Betim, Contagem e Ibirité), atendidos no estabelecimento em 2016-2025. Campo histórico mantido na camada local; não é o total dos oito municípios.&#x27;, &#x27;internações A+B no recorte anterior&#x27;),
+   84      &#x27;DIST_BACIA_M&#x27;: (&#x27;Menor distância plana entre o ponto de localização do hospital e a união das três bacias, em SIRGAS 2000 / UTM 23S. É zero para pontos internos; não representa percurso rodoviário.&#x27;, &#x27;m&#x27;),
+   85      &#x27;metodo&#x27;: (&#x27;Procedimento usado para posicionar o exutório: candidato de saída D8 ou referência cartográfica da margem/hidrografia próxima ao vertedouro de Vargem das Flores.&#x27;, &#x27;categoria&#x27;),
+   86      &#x27;utm_e&#x27;: (&#x27;Coordenada leste do ponto de exutório de referência, em SIRGAS 2000 / UTM zona 23S (EPSG:31983).&#x27;, &#x27;m&#x27;),
+   87      &#x27;utm_n&#x27;: (&#x27;Coordenada norte do ponto de exutório de referência, em SIRGAS 2000 / UTM zona 23S (EPSG:31983).&#x27;, &#x27;m&#x27;),
+   88      &#x27;acum_cel&#x27;: (&#x27;Acumulação de células contribuintes D8 no pixel do exutório candidato original. Nula em Vargem das Flores após a mudança para referência cartográfica; a acumulação do ponto anterior não foi transferida.&#x27;, &#x27;células de MDE&#x27;),
+   89      &#x27;status&#x27;: (&#x27;Grau de conferência do exutório: candidato D8 sem verificação independente ou referência cartográfica conferida no EIA COPASA 2025 para Vargem das Flores.&#x27;, &#x27;texto&#x27;),
+   90      &#x27;prec_m&#x27;: (&#x27;Resolução/precisão cartográfica aproximada de 30 m adotada para os pontos de referência; não é uma estimativa estatística de erro nem levantamento de campo.&#x27;, &#x27;m aproximados&#x27;),
+   91      &#x27;COLETA_ID&#x27;: (&#x27;Nome do ponto fornecido na camada de coleta. LP01-LP03, VF01-VF03 e IB01-IB03 são pontos de amostragem; Microcosm1 e Microcosm2 são locais de experimento in situ.&#x27;, &#x27;código de ponto&#x27;),
+   92      &#x27;sit_rede&#x27;: (&#x27;Situação do trecho no cadastro de esgoto de Belo Horizonte: S com rede; N sem rede; NI sem informação; C sobreposição espacial de registros S e N, mantida como conflito.&#x27;, &#x27;categoria S/N/NI/C&#x27;),
+   93      &#x27;sit_nome&#x27;: (&#x27;Descrição textual da situação sit_rede: com rede cadastrada, sem rede cadastrada, sem informação ou conflito S/N na origem.&#x27;, &#x27;texto&#x27;),
+   94      &#x27;comp_m&#x27;: (&#x27;Comprimento do trecho cadastral de esgoto após consolidar geometrias coincidentes e recortar à interseção entre Belo Horizonte e as bacias.&#x27;, &#x27;m&#x27;),
+   95      &#x27;ete_id&#x27;: (&#x27;Identificador da estação de tratamento no cadastro IDE-Sisema utilizado no projeto; não é código CNES.&#x27;, &#x27;identificador cadastral&#x27;),
+   96      &#x27;mun_nome&#x27;: (&#x27;Nome do município informado no cadastro IDE-Sisema da estação de tratamento.&#x27;, &#x27;texto&#x27;),
+   97      &#x27;fase_lic&#x27;: (&#x27;Fase do licenciamento registrada para a estação de tratamento na base IDE-Sisema consultada.&#x27;, &#x27;categoria cadastral&#x27;),
+   98      &#x27;situ_lic&#x27;: (&#x27;Situação do licenciamento registrada para a estação de tratamento na base IDE-Sisema consultada; não foi inferida a partir de sua proximidade ao reservatório.&#x27;, &#x27;texto cadastral&#x27;),
+   99      &#x27;GRID_ID&#x27;: (&#x27;Identificador do centro da malha de análise. A combinação GRID_ID + BACIA identifica cada recorte de círculo ou hexágono; um centro pode originar recortes em mais de uma bacia.&#x27;, &#x27;código&#x27;),
+  100      &#x27;E&#x27;: (&#x27;Coordenada leste do centro gerador da vizinhança de 500 m em SIRGAS 2000 / UTM 23S. Pode ficar fora do polígono recortado na borda da bacia.&#x27;, &#x27;m&#x27;),
+  101      &#x27;N&#x27;: (&#x27;Coordenada norte do centro gerador da vizinhança de 500 m em SIRGAS 2000 / UTM 23S. Pode ficar fora do polígono recortado na borda da bacia.&#x27;, &#x27;m&#x27;),
+  102      &#x27;RAIO_M&#x27;: (&#x27;Raio nominal de 500 m do círculo de cálculo e raio externo do hexágono de apresentação antes do recorte à bacia.&#x27;, &#x27;m&#x27;),
+  103      &#x27;CENTRO_INT&#x27;: (&#x27;Indicador de posição do centro gerador: 1 se a união das três bacias cobre o centro; 0 se o centro está fora, mas a célula ou vizinhança intercepta a área de estudo.&#x27;, &#x27;indicador 0/1&#x27;),
+  104      &#x27;AREA_KM2&#x27;: (&#x27;Área do círculo de cálculo com raio nominal de 500 m, após recorte à respectiva bacia. Refere-se ao suporte de cálculo, inclusive quando apresentada em geometria hexagonal.&#x27;, &#x27;km²&#x27;),
+  105      &#x27;AREA_CEL&#x27;: (&#x27;Área do hexágono de apresentação após recorte à bacia, calculada em SIRGAS 2000 / UTM 23S. Difere da área do círculo usado nos cálculos.&#x27;, &#x27;km²&#x27;),
+  106      &#x27;AREA&#x27;: (&#x27;Soma das áreas de interseção dos setores censitários com o círculo de cálculo recortado à bacia. Mede a área coberta pela malha censitária no cálculo; pode diferir de AREA_KM2.&#x27;, &#x27;km²&#x27;),
+  107      &#x27;POP&#x27;: (&#x27;População estimada dentro do círculo recortado: soma da densidade de pessoas de cada setor inteiro × área da interseção setor-círculo. A distribuição dentro do setor é assumida uniforme.&#x27;, &#x27;pessoas estimadas&#x27;),
+  108      &#x27;DOM&#x27;: (&#x27;Domicílios particulares permanentes ocupados estimados no círculo recortado: soma da densidade domiciliar V00001 de cada setor × área da interseção setor-círculo.&#x27;, &#x27;domicílios estimados&#x27;),
+  109      &#x27;SEM&#x27;: (&#x27;Domicílios estimados sem rede no círculo recortado: soma dos domicílios alocados por área × percentual analítico sem rede do setor / 100. Inclui os preenchimentos analíticos identificados por EST_ESG.&#x27;, &#x27;domicílios estimados&#x27;),
+  110      &#x27;DOM_OBS&#x27;: (&#x27;Domicílios alocados ao círculo em interseções de setores com percentual de rede efetivamente observado/publicado. É o denominador usado para avaliar a cobertura dos dados de esgotamento.&#x27;, &#x27;domicílios estimados&#x27;),
+  111      &#x27;SEM_OBS&#x27;: (&#x27;Domicílios estimados sem rede apenas nas interseções com percentual observado: soma de domicílios alocados × (1 − percentual observado de rede / 100).&#x27;, &#x27;domicílios estimados&#x27;),
+  112      &#x27;DOM_EST&#x27;: (&#x27;Domicílios alocados ao círculo em setores cujo percentual sem rede foi preenchido na matriz analítica. Identifica o peso domiciliar das estimativas, não uma observação censitária.&#x27;, &#x27;domicílios estimados&#x27;),
+  113      &#x27;POP_DENS&#x27;: (&#x27;Densidade populacional estimada na vizinhança recortada: POP / AREA_KM2, em habitantes por km². Calculada no círculo de 500 m, mesmo quando exibida no hexágono.&#x27;, &#x27;pessoas/km²&#x27;),
+  114      &#x27;SEM_REDE&#x27;: (&#x27;Percentual analítico de domicílios sem rede na vizinhança: 100 × SEM / DOM, com zero quando DOM = 0. Lacunas setoriais são preenchidas pela mediana do município e situação censitária, com alternativas pela mediana municipal e global; EST_ESG informa a parcela estimada. Lacunas sem denominador válido permanecem nulas.&#x27;, &#x27;% dos domicílios&#x27;),
+  115      &#x27;SEM_OBS_P&#x27;: (&#x27;Percentual sem rede calculado somente com dados observados na vizinhança: 100 × SEM_OBS / DOM_OBS. Denominador nulo ou zero resulta em valor ausente.&#x27;, &#x27;% dos domicílios observados&#x27;),
+  116      &#x27;COB_ESG&#x27;: (&#x27;Cobertura de observação do esgotamento no círculo: 100 × DOM_OBS / DOM. Mede disponibilidade do dado publicado, não atendimento por rede; exige-se pelo menos 95% no teste local de Moran.&#x27;, &#x27;% do denominador domiciliar&#x27;),
+  117      &#x27;EST_ESG&#x27;: (&#x27;Parcela dos domicílios alocados ao círculo cuja informação de esgotamento foi preenchida na matriz analítica: 100 × DOM_EST / DOM.&#x27;, &#x27;% do denominador domiciliar&#x27;),
+  118      &#x27;SAUDE_N&#x27;: (&#x27;Número de estabelecimentos hospitalares com produção SIH positiva e coordenadas aceitas que interceptam o círculo recortado. Não é número de unidades atendendo exclusivamente os moradores da vizinhança.&#x27;, &#x27;estabelecimentos&#x27;),
+  119      &#x27;AIH_LOCAL&#x27;: (&#x27;Soma das médias anuais de internações A+B em 2016-2025 dos hospitais localizados no círculo recortado. Usa produção de pacientes de todas as origens; é uma referência de atividade hospitalar local, não internações dos moradores nem carga de genes.&#x27;, &#x27;internações A+B/ano&#x27;),
+  120      &#x27;AIH_ORIG&#x27;: (&#x27;Componente previsto para internações por origem residencial dos pacientes. Permanece nulo enquanto não houver geografia de residência validada; não foi substituído por proximidade de hospitais.&#x27;, &#x27;internações/ano; não preenchido&#x27;),
+  121      &#x27;ORIG_STATUS&#x27;: (&#x27;Situação da atribuição das internações à residência dos pacientes. Registra a pendência de geografia de CEP/residência validada; distingue esse componente da atividade hospitalar local.&#x27;, &#x27;texto&#x27;),
+  122      &#x27;URB_PCT&#x27;: (&#x27;Percentual de pixels válidos de uso do solo classificados como área urbanizada, código 24, dentro do círculo recortado. O denominador exclui pixels NoData.&#x27;, &#x27;% dos pixels válidos&#x27;),
+  123      &#x27;USO_N&#x27;: (&#x27;Quantidade de pixels válidos do raster de uso do solo incluídos no círculo recortado, usada como suporte de URB_PCT.&#x27;, &#x27;pixels&#x27;),
+  124      &#x27;HIPS_M&#x27;: (&#x27;Média das altitudes válidas do MDE Copernicus no círculo recortado; representa o relevo médio da vizinhança.&#x27;, &#x27;m de altitude&#x27;),
+  125      &#x27;DECL_PCT&#x27;: (&#x27;Média da declividade percentual dos pixels válidos no círculo recortado. Declividade percentual corresponde a 100 × razão entre desnível e distância horizontal.&#x27;, &#x27;% de declividade&#x27;),
+  126      &#x27;DIST_KM&#x27;: (&#x27;Média das distâncias topográficas D8 válidas dos pixels do círculo até o reservatório. Soma passos ortogonais e diagonais da grade do MDE; não é distância pela rede de esgoto nem tempo de transporte.&#x27;, &#x27;km&#x27;),
+  127      &#x27;TERRA_PCT&#x27;: (&#x27;Percentual da área geométrica do círculo recortado que fica fora dos polígonos dos reservatórios: 100 × área terrestre / área total do círculo recortado.&#x27;, &#x27;% da área&#x27;),
+  128      &#x27;HIDRO_KM&#x27;: (&#x27;Soma dos comprimentos dos trechos de hidrografia dentro do círculo recortado, em quilômetros. É um descritor físico, sem estimativa de vazão.&#x27;, &#x27;km&#x27;),
+  129      &#x27;VIAS_KM&#x27;: (&#x27;Soma dos comprimentos dos trechos de vias dentro do círculo recortado, em quilômetros. Não incorpora volume de tráfego nem simula escoamento sobre as vias.&#x27;, &#x27;km&#x27;),
+  130      &#x27;VALIDO&#x27;: (&#x27;Indicador de entrada completa nas três variáveis principais (POP_DENS, SEM_REDE e AIH_LOCAL): 1 quando todas são finitas; 0 quando falta alguma. As seis unidades incompletas não recebem perfil.&#x27;, &#x27;indicador 0/1&#x27;),
+  131      &#x27;ESTABILIDADE&#x27;: (&#x27;Percentual dos cinco cenários S0-S4 cujo perfil k-means, com k = 2 e rótulos alinhados, coincide com o perfil S0 da mesma unidade: 100 × concordâncias / 5. Inclui S0 na contagem.&#x27;, &#x27;% dos cinco cenários&#x27;),
+  132      &#x27;QUINTIL&#x27;: (&#x27;Grupo relativo 1-5 obtido por qcut dos postos médios do escore I_S0 no conjunto das três bacias. Representa aproximadamente 20% das unidades válidas por grupo; 0 indica informação incompleta. Não equivale às faixas fixas F_S0.&#x27;, &#x27;quintil 1-5; 0 sem classe&#x27;),
+  133      &#x27;MORAN&#x27;: (&#x27;Resultado local de Moran para I_S0: HH alto com vizinhos altos, LL baixo com vizinhos baixos, HL alto entre baixos, LH baixo entre altos, NS não significativo após FDR de 5%, ISO sem vizinho elegível e ND não elegível. Usa contiguidade Queen e permutações dentro de cada bacia.&#x27;, &#x27;categoria espacial&#x27;),
+  134      &#x27;MORAN_Q&#x27;: (&#x27;Valor p local ajustado por Benjamini-Hochberg para controlar falsas descobertas no conjunto elegível de cada bacia. O teste usa 999 permutações; valores até 0,05 sustentam a classe espacial inferencial.&#x27;, &#x27;valor q, 0-1&#x27;),
+  135      &#x27;MOR_ELIG&#x27;: (&#x27;Elegibilidade preliminar para o teste de Moran: 1 quando VALIDO é verdadeiro e COB_ESG ≥ 95%; 0 nos demais casos. Uma unidade elegível ainda pode ser ISO se não tiver vizinho elegível.&#x27;, &#x27;indicador 0/1&#x27;),
+  136      &#x27;PERFIL_S0&#x27;: (&#x27;Descrição do perfil k-means S0 com k = 2: 1 maior adensamento e maior ligação à rede; 2 menor adensamento e menor ligação à rede; 0 informação incompleta. São perfis multivariados, não classes de risco de resistência.&#x27;, &#x27;texto&#x27;),
+  137      &#x27;SCENARIO&#x27;: (&#x27;Código da ponderação do teste. Na ordem população / ausência de rede / atividade hospitalar local, S0 = 1/1/1; S1 = 1/1/3; S2 = 1/3/1; S3 = 3/1/1; S4 = 1/1/0.&#x27;, &#x27;código de cenário&#x27;),
+  138      &#x27;W_POP&#x27;: (&#x27;Peso atribuído à densidade populacional normalizada no cenário indicado em SCENARIO; valor 3 em S3 e 1 nos demais cenários.&#x27;, &#x27;peso relativo&#x27;),
+  139      &#x27;W_SEWER&#x27;: (&#x27;Peso atribuído ao percentual sem rede normalizado no cenário indicado em SCENARIO; valor 3 em S2 e 1 nos demais cenários.&#x27;, &#x27;peso relativo&#x27;),
+  140      &#x27;W_HEALTH&#x27;: (&#x27;Peso atribuído à atividade hospitalar local normalizada: 3 em S1, 0 em S4 e 1 em S0, S2 e S3.&#x27;, &#x27;peso relativo&#x27;),
+  141      &#x27;K&#x27;: (&#x27;Número de grupos solicitado no ajuste k-means específico da pasta de teste; foram avaliados k = 2, 3, 4, 5 e 6.&#x27;, &#x27;grupos&#x27;),
+  142      &#x27;PROFILE&#x27;: (&#x27;Perfil atribuído pelo k-means do cenário e k desta pasta; 0 indica entrada incompleta. Para k = 2, os rótulos foram alinhados à referência S0; para k &gt; 2, foram ordenados pela média do escore do próprio cenário. Não são classes legais nem níveis universais de risco.&#x27;, &#x27;perfil 1-k; 0 sem classe&#x27;),
+  143      &#x27;SCORE&#x27;: (&#x27;Escore relativo do cenário desta pasta: 100 × média ponderada das três entradas normalizadas, com os pesos indicados por SCENARIO. Não é probabilidade de contaminação nem concentração.&#x27;, &#x27;escore 0-100&#x27;),
+  144      &#x27;dist_km&#x27;: (&#x27;Comprimento da trajetória candidata amostrada na direção D8 até o reservatório, calculado pela soma dos passos ortogonais/diagonais do MDE. A linha é um caminho topográfico candidato, sem modelagem de vazão ou transporte de genes.&#x27;, &#x27;km&#x27;),
+  145  }
+  146  
+  147  NORMALIZADAS = {
+  148      &#x27;POP_DENS&#x27;: (&#x27;densidade populacional POP_DENS&#x27;, &#x27;log1p(x)&#x27;, &#x27;entra nas três variáveis do índice e do k-means&#x27;),
+  149      &#x27;SEM_REDE&#x27;: (&#x27;percentual analítico sem rede SEM_REDE&#x27;, &#x27;x&#x27;, &#x27;entra nas três variáveis do índice e do k-means&#x27;),
+  150      &#x27;AIH_LOCAL&#x27;: (&#x27;atividade hospitalar local AIH_LOCAL&#x27;, &#x27;log1p(x)&#x27;, &#x27;entra nas três variáveis do índice e do k-means&#x27;),
+  151      &#x27;URB_PCT&#x27;: (&#x27;percentual urbanizado URB_PCT&#x27;, &#x27;x&#x27;, &#x27;é complementar e não entra no índice nem no k-means atuais&#x27;),
+  152      &#x27;HIPS_M&#x27;: (&#x27;altitude média HIPS_M&#x27;, &#x27;x&#x27;, &#x27;é complementar e não entra no índice nem no k-means atuais&#x27;),
+  153      &#x27;DECL_PCT&#x27;: (&#x27;declividade média DECL_PCT&#x27;, &#x27;x&#x27;, &#x27;é complementar e não entra no índice nem no k-means atuais&#x27;),
+  154      &#x27;DIST_KM&#x27;: (&#x27;distância topográfica média DIST_KM&#x27;, &#x27;x&#x27;, &#x27;é complementar e não entra no índice nem no k-means atuais&#x27;),
+  155      &#x27;VIAS_KM&#x27;: (&#x27;comprimento de vias VIAS_KM&#x27;, &#x27;x&#x27;, &#x27;é complementar e não entra no índice nem no k-means atuais&#x27;),
+  156      &#x27;HIDRO_KM&#x27;: (&#x27;comprimento da hidrografia HIDRO_KM&#x27;, &#x27;x&#x27;, &#x27;é complementar e não entra no índice nem no k-means atuais&#x27;),
+  157  }
+  158  PESOS = {&#x27;S0&#x27;: (1,1,1), &#x27;S1&#x27;: (1,1,3), &#x27;S2&#x27;: (1,3,1), &#x27;S3&#x27;: (3,1,1), &#x27;S4&#x27;: (1,1,0)}
+  159  MUNICIPIOS8 = &#x27;Belo Horizonte, Betim, Brumadinho, Contagem, Esmeraldas, Ibirité, Ribeirão das Neves e Sarzedo&#x27;
+  160  
+  161  CAMPOS_CNES_2026={
+  162   &#x27;CNES&#x27;:(&#x27;Código CNES de sete dígitos utilizado para cruzar a exportação ElastiCNES com a produção hospitalar SIH estadual; armazenado como texto.&#x27;,&#x27;código&#x27;),
+  163   &#x27;NOME_CNES&#x27;:(&#x27;Nome fantasia do estabelecimento na exportação ElastiCNES, competência 2026/09.&#x27;,&#x27;texto&#x27;),
+  164   &#x27;NOME_SIH&#x27;:(&#x27;Nome do estabelecimento na tabela estadual SIH por local de internação enviada pelo usuário; pode diferir do nome atual do CNES. Nulo quando o código não aparece nessa tabela.&#x27;,&#x27;texto&#x27;),
+  165   &#x27;TIPO_CNES&#x27;:(&#x27;Código e descrição do tipo de estabelecimento na exportação CNES de setembro de 2026, como hospital, consultório ou unidade ambulatorial.&#x27;,&#x27;categoria cadastral&#x27;),
+  166   &#x27;MUN_COD&#x27;:(&#x27;Código de seis dígitos do município de localização cadastrado no CNES, sem o dígito verificador IBGE. Não indica residência do paciente.&#x27;,&#x27;código municipal&#x27;),
+  167   &#x27;MUN_NOME&#x27;:(&#x27;Nome do município de localização do estabelecimento no cadastro CNES de setembro de 2026.&#x27;,&#x27;texto&#x27;),
+  168   &#x27;COMP_CNES&#x27;:(&#x27;Competência da exportação ElastiCNES utilizada no cruzamento: 2026/09. Não é data de abertura do estabelecimento.&#x27;,&#x27;ano/mês&#x27;),
+  169   &#x27;ATIVO_CAD&#x27;:(&#x27;Status cadastral informado na exportação ElastiCNES recebida. Todos os 64.706 registros constam como ATIVO; a ausência de produção SIH recente não altera este campo.&#x27;,&#x27;status cadastral&#x27;),
+  170   &#x27;SUS_CAD&#x27;:(&#x27;Indicador de convênio SUS informado no cadastro ElastiCNES, preservado separadamente da presença efetiva de internações na consulta SIH.&#x27;,&#x27;categoria cadastral&#x27;),
+  171   &#x27;CEP&#x27;:(&#x27;CEP do endereço do estabelecimento informado pelo CNES. Não representa a lista de CEPs dos pacientes atendidos.&#x27;,&#x27;código postal&#x27;),
+  172   &#x27;ENDERECO&#x27;:(&#x27;Logradouro e complemento do endereço cadastral do estabelecimento, concatenados quando o complemento está informado.&#x27;,&#x27;texto&#x27;),
+  173   &#x27;LAT&#x27;:(&#x27;Latitude em graus decimais extraída da primeira coordenada do campo location do ElastiCNES; usada na criação do ponto antes da reprojeção para EPSG:31983.&#x27;,&#x27;graus decimais&#x27;),
+  174   &#x27;LON&#x27;:(&#x27;Longitude em graus decimais extraída da segunda coordenada do campo location do ElastiCNES; usada na criação do ponto antes da reprojeção para EPSG:31983.&#x27;,&#x27;graus decimais&#x27;),
+  175   &#x27;SIH_HIST&#x27;:(&#x27;Indicador de correspondência do CNES com a tabela estadual SIH enviada, selecionada por processamento Jan/2015-Set/2026: 1 código encontrado; 0 código ausente. Ausência não comprova inexistência de atendimento ou desativação.&#x27;,&#x27;indicador 0/1&#x27;),
+  176   &#x27;INT_FONTE&#x27;:(&#x27;Total do estabelecimento em todas as 151 colunas mensais de atendimento da tabela SIH enviada, incluindo registros de 2014. Confere com a coluna Total da fonte; nulo para CNES ausente da consulta.&#x27;,&#x27;internações SUS registradas&#x27;),
+  177   &#x27;INT_15_26&#x27;:(&#x27;Soma das internações do estabelecimento por mês de atendimento de janeiro de 2015 a setembro de 2026, dentro da exportação por processamento Jan/2015-Set/2026. Todas as causas e origens dos pacientes; nulo para CNES ausente da consulta.&#x27;,&#x27;internações SUS registradas&#x27;),
+  178   &#x27;INT_24_26&#x27;:(&#x27;Soma das internações por atendimento entre janeiro de 2024 e setembro de 2026; define a janela operacional recente de 33 meses. Todas as causas e origens dos pacientes; nulo para CNES ausente da consulta.&#x27;,&#x27;internações SUS registradas&#x27;),
+  179   &#x27;INT_2024&#x27;:(&#x27;Internações SUS do estabelecimento nas colunas de atendimento de janeiro a dezembro de 2024, todas as causas e origens. Nulo se o CNES não consta na tabela estadual.&#x27;,&#x27;internações SUS registradas&#x27;),
+  180   &#x27;INT_2025&#x27;:(&#x27;Internações SUS do estabelecimento nas colunas de atendimento de janeiro a dezembro de 2025, todas as causas e origens. Nulo se o CNES não consta na tabela estadual.&#x27;,&#x27;internações SUS registradas&#x27;),
+  181   &#x27;INT_2026&#x27;:(&#x27;Internações SUS do estabelecimento nas colunas de atendimento de janeiro a setembro de 2026; período parcial, sujeito a atualização. Nulo se o CNES não consta na tabela estadual.&#x27;,&#x27;internações SUS registradas&#x27;),
+  182   &#x27;ULT_ATEND&#x27;:(&#x27;Último mês de atendimento com contagem positiva de internações na tabela SIH enviada, no formato AAAA-MM. Não é data confirmada de encerramento da unidade.&#x27;,&#x27;ano-mês&#x27;),
+  183   &#x27;MES_REC&#x27;:(&#x27;Número de meses com internações positivas entre janeiro de 2024 e setembro de 2026, máximo 33. Não conta meses assinalados apenas com traço na exportação.&#x27;,&#x27;meses com produção&#x27;),
+  184   &#x27;SELEC_SIH&#x27;:(&#x27;Seleção operacional de atividade: 1 para CNES cadastrado como ATIVO e com INT_24_26 maior que zero; 0 nos demais casos. Na camada interna, aplica-se também a interseção do ponto com a bacia.&#x27;,&#x27;indicador 0/1&#x27;),
+  185   &#x27;DIST_BAC_M&#x27;:(&#x27;Menor distância plana do ponto cadastral à união das três bacias, em EPSG:31983. Zero para pontos internos; valor positivo para os hospitais auxiliares de conferência das bordas.&#x27;,&#x27;m&#x27;),
+  186   &#x27;BACIA&#x27;:(&#x27;Identificador da bacia intersectada pelo ponto cadastral do estabelecimento, incluindo pontos exatamente sobre o limite.&#x27;,&#x27;código&#x27;),
+  187  }
+  188  
+  189  # Definicao
+  190  def definicao(campo, arquivo=&#x27;&#x27;):
+  191      if &#x27;17_estabelecimentos_2026&#x27; in arquivo:
+  192          if campo==&#x27;BACIA&#x27; and &#x27;/03_bordas/&#x27; in arquivo:
+  193              return (&#x27;Identificador da bacia mais próxima do hospital externo, utilizado somente na conferência de estabelecimentos até 1,5 km dos limites. Não indica inclusão na bacia.&#x27;,&#x27;código da bacia mais próxima&#x27;)
+  194          return CAMPOS_CNES_2026[campo]
+  195      if campo == &#x27;id&#x27; and &#x27;05_hidrografia&#x27; in arquivo:
+  196          return (&#x27;Identificador do trecho hidrográfico da base de origem, mantido após o recorte às bacias; pode repetir-se quando uma feição é dividida.&#x27;, &#x27;identificador&#x27;)
+  197      if campo == &#x27;AREA_KM2&#x27; and &#x27;02_reservatorios&#x27; in arquivo:
+  198          return (&#x27;Área do polígono consolidado do espelho do reservatório, calculada em SIRGAS 2000 / UTM 23S; não é a área da bacia.&#x27;, &#x27;km²&#x27;)
+  199      if campo == &#x27;NOME&#x27; and &#x27;08_saude_local&#x27; in arquivo:
+  200          return (&#x27;Nome do estabelecimento hospitalar informado no cadastro CNES utilizado na camada local.&#x27;, &#x27;texto&#x27;)
+  201      if campo == &#x27;AIH_NRMG&#x27; and &#x27;08_saude_local&#x27; in arquivo:
+  202          return (&#x27;Total oficial NRMG de internações de residentes de Belo Horizonte, Betim, Contagem e Ibirité atendidos no estabelecimento em 2016-2025. É o recorte histórico de quatro municípios, mantido em RES_NRMG; não é o total dos oito municípios nem a produção completa do hospital.&#x27;, &#x27;internações no recorte anterior&#x27;)
+  203      if campo.startswith(&#x27;N_&#x27;):
+  204          base = campo[2:]
+  205          if base not in NORMALIZADAS:
+  206              raise KeyError((arquivo, campo))
+  207          nome, transformacao, uso = NORMALIZADAS[base]
+  208          return (f&#x27;Normalização min-max da {nome}, após transformação {transformacao}: (valor transformado − mínimo) / (máximo − mínimo). Limites comuns ao conjunto das três bacias; {uso}. Nulos são mantidos.&#x27;, &#x27;adimensional 0-1&#x27;)
+  209      if re.fullmatch(&#x27;[IFK]_S[0-4]&#x27;, campo):
+  210          tipo, co = campo.split(&#x27;_&#x27;)
+  211          w = PESOS[co]
+  212          pesos = f&#x27;{w[0]}/{w[1]}/{w[2]}&#x27;
+  213          if tipo == &#x27;I&#x27;:
+  214              return (f&#x27;Escore do cenário {co}: 100 × ({w[0]} × N_POP_DENS + {w[1]} × N_SEM_REDE + {w[2]} × N_AIH_LOCAL) / {sum(w)}. Pesos população/ausência de rede/atividade hospitalar = {pesos}; não é probabilidade de contaminação.&#x27;, &#x27;escore 0-100&#x27;)
+  215          if tipo == &#x27;F&#x27;:
+  216              return (f&#x27;Classe de I_{co} em faixas fixas: 1 [0,20), 2 [20,40), 3 [40,60), 4 [60,80), 5 [80,100]; 0 entrada incompleta. Não é classificação por percentis nem risco comprovado.&#x27;, &#x27;classe 1-5; 0 sem classe&#x27;)
+  217          return (f&#x27;Perfil k-means com k = 2 no cenário {co}, ajustado nas três entradas normalizadas multiplicadas pela raiz quadrada dos pesos {pesos}. Rótulos alinhados a S0 por correspondência ótima: 1 maior adensamento e maior ligação à rede; 2 menor adensamento e menor ligação à rede; 0 entrada incompleta. O número não ordena risco.&#x27;, &#x27;perfil 1/2; 0 sem classe&#x27;)
+  218      if campo.startswith(&#x27;RES8_&#x27;) or campo.startswith(&#x27;PROD_&#x27;):
+  219          residencial = campo.startswith(&#x27;RES8_&#x27;)
+  220          prefixo = &#x27;AIH normais de residentes dos oito municípios (&#x27; + MUNICIPIOS8 + &#x27;)&#x27; if residencial else &#x27;AIH normais produzidas no estabelecimento, de pacientes de todas as origens&#x27;
+  221          grupo = campo.split(&#x27;_&#x27;,1)[1]
+  222          sufixos = {&#x27;A&#x27;:&#x27;diagnóstico principal de etiologia bacteriana codificada, filtro A&#x27;, &#x27;B&#x27;:&#x27;diagnóstico principal de síndrome compatível, filtro B&#x27;, &#x27;AB&#x27;:&#x27;filtro amplo A+B, soma das categorias A e B&#x27;, &#x27;C&#x27;:&#x27;categoria C, condições associadas ou sequelas mantidas separadas do filtro principal A+B&#x27;, &#x27;SEM_DIC&#x27;:&#x27;código de diagnóstico sem correspondência no dicionário CID utilizado; mantido no total bruto, fora do filtro A+B&#x27;, &#x27;TOT&#x27;:&#x27;todas as causas, inclusive diagnósticos sem descrição no dicionário&#x27;}
+  223          if grupo in sufixos:
+  224              return (f&#x27;{prefixo}, processadas em 2016-2025: {sufixos[grupo]}. Não constituem contagem de casos confirmados de resistência antimicrobiana.&#x27;, &#x27;internações no período&#x27;)
+  225      if campo not in DEFINICOES:
+  226          raise KeyError(f&#x27;Campo sem descrição específica: {arquivo} | {campo}&#x27;)
+  227      return DEFINICOES[campo]
+  228  
+  229  # Linhagem
+  230  def linhagem(campo, arquivo):
+  231      if &#x27;17_estabelecimentos_2026&#x27; in arquivo:
+  232          script=&#x27;revisar_cnes_sih_mg_teco.py&#x27;
+  233          anchor=&#x27;def ler_sih&#x27; if campo.startswith(&#x27;INT_&#x27;) or campo in [&#x27;ULT_ATEND&#x27;,&#x27;MES_REC&#x27;,&#x27;NOME_SIH&#x27;] else &#x27;def cruzar&#x27; if campo in [&#x27;BACIA&#x27;,&#x27;SELEC_SIH&#x27;,&#x27;SIH_HIST&#x27;,&#x27;DIST_BAC_M&#x27;] else &#x27;def ler_cnes&#x27;
+  234          return (&#x27;cruzamento CNES/SIH por código e interseção espacial em Python&#x27;,script,anchor,&#x27;consolidar_entrega_final.py&#x27;)
+  235      grid = &#x27;grade_500m_teco.py&#x27;
+  236      export = &#x27;consolidar_entrega_final.py&#x27;
+  237      consolidado = &#x27;consolidar_final_auditado_teco.py&#x27;
+  238      if arquivo.startswith(&#x27;02_saidas/&#x27;):
+  239          if campo in [&#x27;PROFILE&#x27;,&#x27;K&#x27;,&#x27;SCORE&#x27;] or (&#x27;02_kmeans/&#x27; in arquivo and campo == &#x27;SCENARIO&#x27;):
+  240              return (&#x27;calculado em Python&#x27;, &#x27;auditar_consolidacao_final_teco.py&#x27;, &quot;out[&#x27;&quot; + campo + &quot;&#x27;]&quot;, grid + &#x27;; analise_espacial_teco.py; multivariada_teco.py; &#x27; + consolidado)
+  241          if campo in [&#x27;SCENARIO&#x27;,&#x27;W_POP&#x27;,&#x27;W_SEWER&#x27;,&#x27;W_HEALTH&#x27;,&#x27;AREA_CEL&#x27;,&#x27;PERFIL_S0&#x27;,&#x27;MOR_ELIG&#x27;]:
+  242              return (&#x27;calculado em Python&#x27;, consolidado, campo, grid)
+  243          if campo in [&#x27;bacia&#x27;,&#x27;dist_km&#x27;]:
+  244              return (&#x27;calculado em Python&#x27;, &#x27;analise_espacial_teco.py&#x27;, &#x27;terrain_routing&#x27;, &#x27;&#x27;)
+  245          if campo == &#x27;BACIA&#x27;:
+  246              return (&#x27;identificador atribuído por interseção espacial&#x27;, grid, &quot;rename(columns={&#x27;id&#x27;:&#x27;BACIA&#x27;})&quot;, &#x27;sub_bacia/delimitar_subbacias_teco.py&#x27;)
+  247          apoios = []
+  248          if campo.startswith(&#x27;K_S&#x27;):
+  249              apoios = [&#x27;analise_espacial_teco.py&#x27;, &#x27;multivariada_teco.py&#x27;]
+  250          if campo.startswith(&#x27;MORAN&#x27;):
+  251              apoios = [&#x27;multivariada_teco.py&#x27;, &#x27;analise_espacial_teco.py&#x27;]
+  252          if campo.startswith(&#x27;N_&#x27;) or campo.startswith((&#x27;I_S&#x27;,&#x27;F_S&#x27;)):
+  253              ancora = &quot;feats=[&#x27;POP_DENS&#x27;&quot; if campo[2:] in [&#x27;POP_DENS&#x27;,&#x27;SEM_REDE&#x27;,&#x27;AIH_LOCAL&#x27;] else &quot;for f in [&#x27;URB_PCT&#x27;&quot;
+  254              if not campo.startswith(&#x27;N_&#x27;):
+  255                  ancora = &quot;scen={&#x27;S0&#x27;&quot;
+  256          else:
+  257              ancora = campo
+  258          if campo.startswith(&#x27;K_S&#x27;):
+  259              ancora = &quot;circles[&#x27;K_&#x27;+co]&quot;
+  260          if campo in [&#x27;SEM&#x27;,&#x27;DOM_EST&#x27;,&#x27;SEM_REDE&#x27;,&#x27;EST_ESG&#x27;]:
+  261              apoios.append(&#x27;multivariada_teco.py&#x27;)
+  262          return (&#x27;calculado em Python&#x27;, grid, ancora, &#x27;; &#x27;.join(apoios))
+  263      if &#x27;01_bacias/&#x27; in arquivo:
+  264          return (&#x27;calculado em PyQGIS&#x27;, &#x27;delimitar_subbacias_teco.py&#x27;, &quot;campos_b =&quot;, &#x27;analise_espacial_teco.py&#x27;)
+  265      if &#x27;02_reservatorios/&#x27; in arquivo:
+  266          return (&#x27;calculado em Python&#x27; if campo == &#x27;AREA_KM2&#x27; else &#x27;identificação do polígono fornecido&#x27;, export, &quot;water=[]&quot;, &#x27;&#x27;)
+  267      if &#x27;03_populacao/&#x27; in arquivo:
+  268          if campo.startswith(&#x27;v000&#x27;):
+  269              return (&#x27;variável oficial IBGE, unida por código do setor&#x27;, consolidado, &quot;poppath=&quot;, &#x27;preparar_ibge_consolidacao_teco.py&#x27;)
+  270          return (&#x27;calculado em Python&#x27; if campo in [&#x27;POP_REC&#x27;,&#x27;DENS_POP&#x27;] else &#x27;dado oficial IBGE, identificado no recorte&#x27;, &#x27;integrar_populacao_uso_rede.py&#x27;, &#x27;pop_table&#x27; if campo != &#x27;POP_REC&#x27; else &quot;pop_a_est&quot;, &#x27;preparar_saneamento_ibge.py; &#x27; + export)
+  271      if &#x27;04_esgotamento/&#x27; in arquivo:
+  272          return (&#x27;variável oficial IBGE&#x27; if campo in [&#x27;REDE_DIR&#x27;,&#x27;FOSS_REDE&#x27;,&#x27;FOSS_SREDE&#x27;,&#x27;FOSSA_RUD&#x27;,&#x27;VALA&#x27;,&#x27;RIO_LAGO&#x27;,&#x27;OUTRO&#x27;,&#x27;SEM_BANH&#x27;,&#x27;DOM_TOT&#x27;,&#x27;setor_id&#x27;] else &#x27;calculado em Python&#x27;, &#x27;preparar_saneamento_ibge.py&#x27;, &#x27;n_sigilo&#x27; if campo == &#x27;SIGILO_N&#x27; else &#x27;pct_rede&#x27;, export)
+  273      if &#x27;05_hidrografia/&#x27; in arquivo:
+  274          return (&#x27;calculado em Python&#x27; if campo in [&#x27;COMP_KM&#x27;,&#x27;BACIA&#x27;] else &#x27;identificador da hidrografia de origem&#x27;, export, &quot;hyd=gpd.read_file&quot;, &#x27;analise_espacial_teco.py&#x27;)
+  275      if any(x in arquivo for x in [&#x27;06_vias_contexto/&#x27;,&#x27;07_vias_bacias/&#x27;]):
+  276          if campo == &#x27;TIPO_VIA&#x27;:
+  277              return (&#x27;classificação cartográfica em Python&#x27;, &#x27;mapas_grade_teco.py&#x27;, &#x27;def roadtype&#x27;, export)
+  278          return (&#x27;calculado em Python&#x27; if campo in [&#x27;COMP_KM&#x27;,&#x27;BACIA&#x27;] else &#x27;classificação/identificador da malha viária&#x27;, export, &quot;roads=gpd.read_file&quot;, &#x27;analise_espacial_teco.py; integrar_refino_entrega_teco.py&#x27;)
+  279      if &#x27;08_saude_local/&#x27; in arquivo:
+  280          if campo in [&#x27;AIH_NRMG&#x27;,&#x27;RES_AB&#x27;]:
+  281              return (&#x27;recorte histórico de quatro municípios, unido por CNES&#x27;, &#x27;integrar_refino_entrega_teco.py&#x27;, &quot;&#x27;RES_NRMG&#x27;&quot;, &#x27;preparar_refino_sih_teco.py; consolidar_saude_residencia.py&#x27;)
+  282          if campo in [&#x27;AIH_TODAS&#x27;,&#x27;AIH_FILT&#x27;,&#x27;AIH_ANO&#x27;]:
+  283              return (&#x27;calculado em Python a partir do SIH/RD&#x27;, &#x27;preparar_camadas_nativas.py&#x27;, &quot;health[&#x27;AIH_TODAS&#x27;]&quot;, &#x27;obter_rd_grade.py; filtro_bacteriano_teco.py; refinar_credibilidade_sih_teco.py; avaliar_saude_grade.py&#x27;)
+  284          if campo == &#x27;QA_MUN&#x27;:
+  285              return (&#x27;verificação espacial em Python&#x27;, &#x27;analise_espacial_teco.py&#x27;, &quot;qa[&#x27;QA_MUN&#x27;]&quot;, &#x27;obter_cnes.py&#x27;)
+  286          return (&#x27;cadastro CNES e localização dentro das bacias&#x27;, &#x27;analise_espacial_teco.py&#x27;, &#x27;def cnes&#x27;, &#x27;obter_cnes.py; preparar_camadas_nativas.py; &#x27; + export)
+  287      if &#x27;09_saude_residencia/&#x27; in arquivo:
+  288          return (&#x27;consulta oficial NRMG&#x27; if campo == &#x27;AIH_NRMG&#x27; else &#x27;calculado ou integrado por CNES em Python&#x27;, consolidado, &quot;units=pd.read_csv&quot;, &#x27;saude_todos_municipios_teco.py; filtro_bacteriano_teco.py; refinar_credibilidade_sih_teco.py; auditar_tabnet_estabelecimentos.py&#x27;)
+  289      if &#x27;10_exutorios/&#x27; in arquivo:
+  290          return (&#x27;calculado em Python/PyQGIS&#x27;, &#x27;auditar_relevo_lancamentos_teco.py&#x27;, &quot;v=ex.copy()&quot;, &#x27;delimitar_subbacias_teco.py&#x27;)
+  291      if &#x27;11_pontos_coleta/&#x27; in arquivo:
+  292          return (&#x27;atributo do ponto fornecido&#x27; if campo == &#x27;COLETA_ID&#x27; else &#x27;identificação da bacia de origem&#x27;, export, &quot;samples=[]&quot;, &#x27;&#x27;)
+  293      if &#x27;14_rede_cadastral_BH/&#x27; in arquivo:
+  294          return (&#x27;calculado em Python sobre cadastro PBH&#x27;, &#x27;integrar_populacao_uso_rede.py&#x27;, &#x27;def network_layers&#x27;, &#x27;complementar_entrega_final.py&#x27;)
+  295      if &#x27;15_ETE_cadastro/&#x27; in arquivo:
+  296          return (&#x27;atributo do cadastro IDE-Sisema&#x27; if campo not in [&#x27;BACIA&#x27;,&#x27;NOME_BACIA&#x27;] else &#x27;interseção espacial em Python&#x27;, &#x27;integrar_populacao_uso_rede.py&#x27;, &#x27;def etes&#x27;, &#x27;complementar_entrega_final.py&#x27;)
+  297      raise KeyError((arquivo, campo))
+  298  
+  299  # Descrever campo
+  300  def descrever_campo(campo, arquivo=&#x27;&#x27;):
+  301      return definicao(campo, arquivo)[0]</code></pre></article></html>

@@ -1,0 +1,434 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/preparar_saneamento_ibge.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/preparar_saneamento_ibge.py</h2>
+<p>Preparar saneamento ibge. Processamento ou módulo de apoio. A organização passa por sha, polygon, filtered_csv, styles, shapefile, archive_existing, main, write_readme, preview.</p>
+<p><strong>Papel.</strong> Processamento ou módulo de apoio. <strong>Fonte inspecionada.</strong> E:\teco\codigo\preparar_saneamento_ibge.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>csv</td><td>Leitura/escrita de tabelas delimitadas com separador e codificação explícitos.</td></tr><tr><td>datetime</td><td>Calendários, datas e duração dos períodos avaliados.</td></tr><tr><td>geopandas</td><td>Camadas vetoriais com referência espacial, reprojeção, recorte e interseção de geometrias.</td></tr><tr><td>hashlib</td><td>Assinaturas SHA-256 para identificar alterações de arquivos; não é validação do conteúdo científico.</td></tr><tr><td>html</td><td>Escape e construção de páginas HTML de documentação/visualização.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>matplotlib</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.colors</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.patches</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.pyplot</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.ticker</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>numpy</td><td>Matrizes numéricas, máscaras de validade, transformações, percentis e estatísticas vetorizadas.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>pyogrio</td><td>Dependência importada; conferir as chamadas efetivas abaixo e a instalação do ambiente correspondente.</td></tr><tr><td>shapely</td><td>Operações geométricas usadas nas áreas, distâncias, limites e relações espaciais.</td></tr><tr><td>shapely.ops</td><td>Operações geométricas usadas nas áreas, distâncias, limites e relações espaciais.</td></tr><tr><td>shutil</td><td>Cópia e movimentação de arquivos, inclusive preservação de versões geradas.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr><tr><td>xml.sax.saxutils</td><td>Leitura/edição de XML de projetos e documentos.</td></tr><tr><td>zipfile</td><td>Leitura/empacotamento de arquivos ZIP e estruturas internas de documentos.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>{p} — chamada p.open, linha 138.</li>
+<li>{path} — chamada pd.read_csv, linha 152.</li>
+<li>E:/teco/saneamento_ibge/resultados/shapefiles/{name}.shp — chamada gpd.read_file, linha 190.</li>
+<li>E:/teco/sub_bacia/shapefiles_v6_20261109_141015/sub_bacias_exclusivas.shp — chamada gpd.read_file, linha 211.</li>
+<li>E:/teco/saneamento_ibge/malha_setores_2022/MG_setores_CD2022.gpkg — chamada gpd.read_file, linha 217.</li>
+<p><strong>Saídas.</strong></p>
+<li>path.with_suffix(&#x27;.qml&#x27;) — chamada .write_text, linha 179.</li>
+<li>E:/teco/saneamento_ibge/resultados/shapefiles/{name}.shp — chamada g.to_file, linha 188.</li>
+<li>E:/teco/descontinuado/dt.datetime.now().strftime(&#x27;%Y%m%d_%H%M%S_saneamento_ibge&#x27;)/manifesto_arquivamento.json — chamada .write_text, linha 206.</li>
+<li>Argumento fornecido pelo chamador — chamada .to_json, linha 242.</li>
+<li>E:/teco/saneamento_ibge/resultados/saneamento_teco.gpkg [camada name] — chamada data.to_file, linha 279.</li>
+<li>E:/teco/saneamento_ibge/resultados/saneamento_teco.gpkg [camada &#x27;lacunas_malha&#x27;] — chamada gap_gdf.to_file, linha 281.</li>
+<li>E:/teco/saneamento_ibge/resultados/valores_originais_selecionados.csv — chamada original.to_csv, linha 282.</li>
+<li>E:/teco/saneamento_ibge/resultados/atributos_setores_bacias.csv — chamada .to_csv, linha 283.</li>
+<li>E:/teco/saneamento_ibge/resultados/resumo_bacias.csv — chamada .to_csv, linha 284.</li>
+<li>E:/teco/saneamento_ibge/resultados/municipios_interceptados.csv — chamada .to_csv, linha 285.</li>
+<li>E:/teco/saneamento_ibge/resultados/dicionario_campos.csv — chamada .to_csv, linha 288.</li>
+<li>E:/teco/saneamento_ibge/resultados/auditoria_saneamento.json — chamada .write_text, linha 293.</li>
+<li>E:/teco/saneamento_ibge/resultados/Shapefiles_saneamento_TECO.zip — chamada zipfile.ZipFile, linha 296.</li>
+<li>E:/teco/saneamento_ibge/resultados/LEIA_PRIMEIRO.md — chamada .write_text, linha 334.</li>
+<li>E:/teco/saneamento_ibge/resultados/Previa_saneamento_bacias.png — chamada fig.savefig, linha 365.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>a: created_at, intersection_count, sector_count, setor, summary.</li>
+<li>out: setor.</li>
+<li>check: setor_id.</li>
+<li>g: dom_set, setor_id.</li>
+<li>bas: bas_id.</li>
+<li>geom: setor_id.</li>
+<li>raw: V00001, V00309, V00310, V00311, V00313, V00314, _merge, dif_soma, dom_set, nred_set, pct_rede, rede_set, soma8.</li>
+<li>geo: V00001, bas_id, dpo_malha, mun_cod, mun_nome, n_ausente, n_sigilo, pct_rdir, pct_rede, pop_malha, qual_dado, setor_id, sig_vars.</li>
+<li>clip: V00309, bas_id, dom_a_est, frac_area, nrd_a_est, rec_km2, red_a_est, set_km2, setor_id.</li>
+<li>v: bas_id, bas_nome.</li>
+<li>c: dom_a_est, dom_set, pct_rdir, pct_rede.</li>
+<li>c.loc: dir_a_est, dom_a_est, nrd_a_est, red_a_est.</li>
+<li>clip.loc: dom_a_est, nrd_a_est, red_a_est.</li>
+<li>geo.loc: setor_id.</li>
+<li>x: bas_id, bas_nome, cov_dir, dom_a_est, gap_m2, n_setores, pct_rdir.</li>
+<li>audit: qualities, summary.</li>
+<li>b: bas_id.</li>
+<li>bg: bas_id.</li>
+<p><strong>Campos e chaves gerados.</strong></p>
+<li>geom: setor_id.</li>
+<li>raw: dif_soma, dom_set, n_ausente, n_sigilo, nred_set, pct_fossa, pct_nrede, pct_rdir, pct_rede, pct_vrio, qual_dado, rede_set, sig_vars, soma8.</li>
+<li>geo: ano, n_ausente, n_bacias, n_sigilo, set_km2, sig_vars, tot_origem.</li>
+<li>clip: dir_a_est, frac_area, n_bacias, rec_km2.</li>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>sha(p)</td><td>136-140</td><td>Chamadas efetivas: hashlib.sha256, h.hexdigest, p.open, iter, h.update, f.read Retorno: h.hexdigest().</td></tr><tr><td>polygon(g)</td><td>143-147</td><td>Chamadas efetivas: make_valid, unary_union Retorno: unary_union([v for v in g.geoms if v.geom_type in [&#x27;Polygon&#x27;, &#x27;MultiPolygon&#x27;]]), g.</td></tr><tr><td>filtered_csv(path, columns, ids)</td><td>150-159</td><td>lê dados Retorno: out.</td></tr><tr><td>styles(path, columns, title)</td><td>162-179</td><td>grava produtos</td></tr><tr><td>shapefile(g, name, title)</td><td>182-197</td><td>lê dados; grava produtos Retorno: path.</td></tr><tr><td>archive_existing()</td><td>200-207</td><td>grava produtos</td></tr><tr><td>main()</td><td>210-299</td><td>lê dados; grava produtos</td></tr><tr><td>write_readme(a)</td><td>302-334</td><td>grava produtos</td></tr><tr><td>preview(clip, bas, summary)</td><td>337-365</td><td>grava produtos</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/preparar_saneamento_ibge.py, linhas 213-219.</p>
+<pre><code>    bas.geometry=bas.geometry.map(polygon)
+    overlap=float(sum(bas.geometry.iloc[i].intersection(bas.geometry.iloc[j]).area for i in range(3) for j in range(i)))
+    assert overlap&lt;=1.01,(&#x27;Sobreposição de bacias superior a 1m²&#x27;,overlap)
+    union=bas.geometry.union_all();bb=bas.to_crs(4674).total_bounds
+    geom=gpd.read_file(MESH,bbox=tuple(bb),columns=[&#x27;CD_SETOR&#x27;,&#x27;CD_MUN&#x27;,&#x27;NM_MUN&#x27;,&#x27;SITUACAO&#x27;,&#x27;v0001&#x27;,&#x27;v0007&#x27;]).to_crs(CRS)
+    invalid=int((~geom.is_valid).sum());geom.geometry=geom.geometry.map(polygon)
+    geom=geom[geom.intersects(union)].copy();geom=geom[geom.intersection(union).area&gt;0.01].copy()</code></pre>
+<p>Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</p>
+<p><strong>Cálculos a observar nesta rotina.</strong></p>
+<li>sum: Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</li>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: {p} | p.open.
+    5  # Entrada: {path} | pd.read_csv.
+    6  # Entrada: E:/teco/saneamento_ibge/resultados/shapefiles/{name}.shp | gpd.read_file.
+    7  # Entrada: E:/teco/sub_bacia/shapefiles_v6_20261109_141015/sub_bacias_exclusivas.shp | gpd.read_file.
+    8  # Entrada: E:/teco/saneamento_ibge/malha_setores_2022/MG_setores_CD2022.gpkg | gpd.read_file.
+    9  # Campos/chaves em a: created_at, intersection_count, sector_count, setor, summary.
+   10  # Campos/chaves em out: setor.
+   11  # Campos/chaves em check: setor_id.
+   12  # Campos/chaves em g: dom_set, setor_id.
+   13  # Campos/chaves em bas: bas_id.
+   14  # Campos/chaves em geom: setor_id.
+   15  # Campos/chaves em raw: V00001, V00309, V00310, V00311, V00313, V00314, _merge, dif_soma, dom_set, nred_set, pct_rede, rede_set, soma8.
+   16  # Campos/chaves em geo: V00001, bas_id, dpo_malha, mun_cod, mun_nome, n_ausente, n_sigilo, pct_rdir, pct_rede, pop_malha, qual_dado, setor_id, sig_vars.
+   17  # Campos/chaves em clip: V00309, bas_id, dom_a_est, frac_area, nrd_a_est, rec_km2, red_a_est, set_km2, setor_id.
+   18  # Campos/chaves em v: bas_id, bas_nome.
+   19  # Campos/chaves em c: dom_a_est, dom_set, pct_rdir, pct_rede.
+   20  # Campos/chaves em c.loc: dir_a_est, dom_a_est, nrd_a_est, red_a_est.
+   21  # Campos/chaves em clip.loc: dom_a_est, nrd_a_est, red_a_est.
+   22  # Campos/chaves em geo.loc: setor_id.
+   23  # Campos/chaves em x: bas_id, bas_nome, cov_dir, dom_a_est, gap_m2, n_setores, pct_rdir.
+   24  # Campos/chaves em audit: qualities, summary.
+   25  # Campos/chaves em b: bas_id.
+   26  # Campos/chaves em bg: bas_id.
+   27  # Saída: path.with_suffix(&#x27;.qml&#x27;) | .write_text.
+   28  # Saída: E:/teco/saneamento_ibge/resultados/shapefiles/{name}.shp | g.to_file.
+   29  # Saída: E:/teco/descontinuado/dt.datetime.now().strftime(&#x27;%Y%m%d_%H%M%S_saneamento_ibge&#x27;)/manifesto_arquivamento.json | .write_text.
+   30  # Saída: Argumento fornecido pelo chamador | .to_json.
+   31  # Saída: E:/teco/saneamento_ibge/resultados/saneamento_teco.gpkg | data.to_file.
+   32  # Saída: E:/teco/saneamento_ibge/resultados/saneamento_teco.gpkg | gap_gdf.to_file.
+   33  # Saída: E:/teco/saneamento_ibge/resultados/valores_originais_selecionados.csv | original.to_csv.
+   34  # Saída: E:/teco/saneamento_ibge/resultados/atributos_setores_bacias.csv | .to_csv.
+   35  # Saída: E:/teco/saneamento_ibge/resultados/resumo_bacias.csv | .to_csv.
+   36  # Saída: E:/teco/saneamento_ibge/resultados/municipios_interceptados.csv | .to_csv.
+   37  # Saída: E:/teco/saneamento_ibge/resultados/dicionario_campos.csv | .to_csv.
+   38  # Saída: E:/teco/saneamento_ibge/resultados/auditoria_saneamento.json | .write_text.
+   39  # Saída: E:/teco/saneamento_ibge/resultados/Shapefiles_saneamento_TECO.zip | zipfile.ZipFile.
+   40  # Saída: E:/teco/saneamento_ibge/resultados/LEIA_PRIMEIRO.md | .write_text.
+   41  # Saída: E:/teco/saneamento_ibge/resultados/Previa_saneamento_bacias.png | fig.savefig.
+   42  # Campos/chaves gerados em geom: setor_id.
+   43  # Campos/chaves gerados em raw: dif_soma, dom_set, n_ausente, n_sigilo, nred_set, pct_fossa, pct_nrede, pct_rdir, pct_rede, pct_vrio, qual_dado, rede_set, sig_vars, soma8.
+   44  # Campos/chaves gerados em geo: ano, n_ausente, n_bacias, n_sigilo, set_km2, sig_vars, tot_origem.
+   45  # Campos/chaves gerados em clip: dir_a_est, frac_area, n_bacias, rec_km2.
+   46  # CÓDIGO DO PROCESSAMENTO
+   47  
+   48  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   49  import sys as _cp_sys
+   50  from pathlib import Path as _cp_Path
+   51  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   52  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   53      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   54      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   55          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   56          break
+   57  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   58  # FIM DOS CAMINHOS PORTÁTEIS
+   59  
+   60  from pathlib import Path
+   61  import json,datetime as dt,hashlib,shutil,zipfile,html,csv
+   62  import numpy as np
+   63  import pandas as pd
+   64  import geopandas as gpd
+   65  import pyogrio
+   66  from shapely import make_valid
+   67  from shapely.ops import unary_union
+   68  from xml.sax.saxutils import escape
+   69  
+   70  ROOT=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;))
+   71  INPUT=ROOT/&#x27;saneamento_ibge&#x27;
+   72  OUT=INPUT/&#x27;resultados&#x27;
+   73  SHP=OUT/&#x27;shapefiles&#x27;
+   74  CRS=&#x27;EPSG:31983&#x27;
+   75  BASIN=ROOT/&#x27;sub_bacia/shapefiles_v6_20261109_141015/sub_bacias_exclusivas.shp&#x27;
+   76  MESH=INPUT/&#x27;malha_setores_2022/MG_setores_CD2022.gpkg&#x27;
+   77  CODES=[f&#x27;V{i:05d}&#x27; for i in range(309,317)]
+   78  RAW=[&#x27;V00001&#x27;]+CODES
+   79  DESC={
+   80   &#x27;V00001&#x27;:&#x27;Domicílios particulares permanentes ocupados do setor inteiro&#x27;,
+   81   &#x27;V00309&#x27;:&#x27;Domicílios do setor: rede geral ou pluvial&#x27;,
+   82   &#x27;V00310&#x27;:&#x27;Domicílios do setor: fossa séptica ou filtro ligado à rede&#x27;,
+   83   &#x27;V00311&#x27;:&#x27;Domicílios do setor: fossa séptica ou filtro não ligado à rede&#x27;,
+   84   &#x27;V00312&#x27;:&#x27;Domicílios do setor: fossa rudimentar ou buraco&#x27;,
+   85   &#x27;V00313&#x27;:&#x27;Domicílios do setor: vala&#x27;,
+   86   &#x27;V00314&#x27;:&#x27;Domicílios do setor: rio, lago, córrego ou mar&#x27;,
+   87   &#x27;V00315&#x27;:&#x27;Domicílios do setor: outra destinação&#x27;,
+   88   &#x27;V00316&#x27;:&#x27;Domicílios do setor: sem banheiro e sanitário&#x27;,
+   89   &#x27;setor_id&#x27;:&#x27;Código do setor censitário; texto, 15 dígitos&#x27;,
+   90   &#x27;mun_cod&#x27;:&#x27;Código IBGE do município; texto, 7 dígitos&#x27;,
+   91   &#x27;mun_nome&#x27;:&#x27;Município do setor censitário&#x27;,
+   92   &#x27;situacao&#x27;:&#x27;Situação urbana/rural informada na malha IBGE&#x27;,
+   93   &#x27;pop_malha&#x27;:&#x27;Total de pessoas da malha IBGE com atributos; variável básica v0001&#x27;,
+   94   &#x27;dpo_malha&#x27;:&#x27;Domicílios particulares ocupados da malha IBGE; v0007, inclui permanentes e improvisados&#x27;,
+   95   &#x27;tot_origem&#x27;:&#x27;Origem de dom_set: tabela_p1, malha_DPO0 (ausência de domicílios ocupados confirmada) ou sem_valor&#x27;,
+   96   &#x27;ano&#x27;:&#x27;Ano de referência do Censo, 2022; não é a data de publicação do CSV&#x27;,
+   97   &#x27;dom_set&#x27;:&#x27;Total do setor inteiro, igual a V00001&#x27;,
+   98   &#x27;rede_set&#x27;:&#x27;V00309 + V00310 no setor inteiro; nulo se qualquer parcela for indisponível&#x27;,
+   99   &#x27;nred_set&#x27;:&#x27;V00001 - rede_set; complemento agregado, sem preencher categorias X individuais&#x27;,
+  100   &#x27;pct_rede&#x27;:&#x27;100 × rede_set / dom_set; rede geral/pluvial ou fossa ligada; não comprova tratamento&#x27;,
+  101   &#x27;pct_nrede&#x27;:&#x27;100 × nred_set / dom_set; sem conexão às modalidades censitárias acima; não equivale a lançamento sem tratamento&#x27;,
+  102   &#x27;pct_rdir&#x27;:&#x27;100 × V00309 / V00001; somente destinação direta à rede geral/pluvial&#x27;,
+  103   &#x27;pct_fossa&#x27;:&#x27;100 × V00311 / V00001; fossa séptica/filtro não ligado à rede&#x27;,
+  104   &#x27;pct_vrio&#x27;:&#x27;100 × (V00313 + V00314) / V00001; nulo se alguma parcela for X ou ausente&#x27;,
+  105   &#x27;n_sigilo&#x27;:&#x27;Quantidade de variáveis RAW com X; o X não foi convertido em zero&#x27;,
+  106   &#x27;sig_vars&#x27;:&#x27;Códigos das variáveis com X no registro recebido&#x27;,
+  107   &#x27;n_ausente&#x27;:&#x27;Quantidade de RAW ausentes ou com outros símbolos não numéricos&#x27;,
+  108   &#x27;qual_dado&#x27;:&#x27;completo, rede_disp (demais variáveis parciais), parcial, sem_dom, sem_agreg ou revisar&#x27;,
+  109   &#x27;soma8&#x27;:&#x27;Soma das oito categorias de esgotamento, apenas se todas estiverem disponíveis&#x27;,
+  110   &#x27;dif_soma&#x27;:&#x27;soma8 - V00001, apenas quando os dois totais são conhecidos&#x27;,
+  111   &#x27;set_km2&#x27;:&#x27;Área do setor inteiro em SIRGAS 2000 / UTM 23S&#x27;,
+  112   &#x27;n_bacias&#x27;:&#x27;Número de bacias com interseção de área positiva com o setor&#x27;,
+  113   &#x27;bas_id&#x27;:&#x27;Identificador da bacia delimitada no projeto TECO&#x27;,
+  114   &#x27;bas_nome&#x27;:&#x27;Nome da bacia/reservatório&#x27;,
+  115   &#x27;rec_km2&#x27;:&#x27;Área da interseção setor × bacia, km²&#x27;,
+  116   &#x27;frac_area&#x27;:&#x27;rec_km2 / set_km2; não é fração observada dos domicílios&#x27;,
+  117   &#x27;dom_a_est&#x27;:&#x27;Domicílios estimados no recorte por rateio de área, dom_set × frac_area&#x27;,
+  118   &#x27;red_a_est&#x27;:&#x27;Domicílios estimados com destinação à rede por rateio de área, rede_set × frac_area&#x27;,
+  119   &#x27;nrd_a_est&#x27;:&#x27;Domicílios estimados sem conexão às modalidades de rede por rateio de área, nred_set × frac_area&#x27;,
+  120   &#x27;area_km2&#x27;:&#x27;Área da bacia de trabalho fornecida&#x27;,
+  121   &#x27;n_setores&#x27;:&#x27;Número de setores com interseção de área positiva&#x27;,
+  122   &#x27;n_rede_av&#x27;:&#x27;Número de interseções com indicador de rede calculável e dom_set &gt; 0&#x27;,
+  123   &#x27;n_dir_av&#x27;:&#x27;Número de interseções com pct_rdir calculável&#x27;,
+  124   &#x27;n_sem_dom&#x27;:&#x27;Número de interseções com zero domicílios permanentes ocupados&#x27;,
+  125   &#x27;n_parcial&#x27;:&#x27;Número de interseções sem indicador de rede calculável, excluindo zero domicílios&#x27;,
+  126   &#x27;den_a_av&#x27;:&#x27;Denominador estimado somente dos recortes em que pct_rede é calculável&#x27;,
+  127   &#x27;dir_a_est&#x27;:&#x27;Domicílios estimados com destinação direta à rede geral/pluvial, somente nos recortes avaliáveis&#x27;,
+  128   &#x27;den_dir&#x27;:&#x27;Denominador estimado somente dos recortes em que pct_rdir é calculável&#x27;,
+  129   &#x27;cov_dir&#x27;:&#x27;100 × den_dir / dom_a_est; cobertura da modalidade direta sobre domicílios com total conhecido&#x27;,
+  130   &#x27;cov_dom&#x27;:&#x27;100 × den_a_av / dom_a_est; cobertura sobre domicílios com total conhecido, não sobre totais protegidos&#x27;,
+  131   &#x27;cov_geo&#x27;:&#x27;Percentual da área da bacia coberta pela malha censitária&#x27;,
+  132   &#x27;met_rateio&#x27;:&#x27;Método de agregação: area_uniforme, estimativa exploratória; não dasimétrico&#x27;,
+  133  }
+  134  
+  135  # Sha
+  136  def sha(p):
+  137      h=hashlib.sha256()
+  138      with p.open(&#x27;rb&#x27;) as f:
+  139          for b in iter(lambda:f.read(4*1024*1024),b&#x27;&#x27;):h.update(b)
+  140      return h.hexdigest()
+  141  
+  142  # Polygon
+  143  def polygon(g):
+  144      if g is None or g.is_empty:return g
+  145      g=make_valid(g)
+  146      if g.geom_type in [&#x27;Polygon&#x27;,&#x27;MultiPolygon&#x27;]:return g
+  147      return unary_union([v for v in g.geoms if v.geom_type in [&#x27;Polygon&#x27;,&#x27;MultiPolygon&#x27;]])
+  148  
+  149  # Filtered csv
+  150  def filtered_csv(path,columns,ids):
+  151      rows=[];read=0
+  152      for a in pd.read_csv(path,sep=&#x27;;&#x27;,dtype=&#x27;string&#x27;,usecols=columns,chunksize=20000,keep_default_na=False):
+  153          read+=len(a);selected=a[a[&#x27;setor&#x27;].isin(ids)]
+  154          if len(selected):rows.append(selected)
+  155      assert rows,f&#x27;Nenhum setor localizado em {path}&#x27;
+  156      out=pd.concat(rows,ignore_index=True)
+  157      assert not out[&#x27;setor&#x27;].duplicated().any(),f&#x27;Código duplicado em {path}&#x27;
+  158      print(path.name,read,&#x27;linhas nacionais;&#x27;,len(out),&#x27;setores selecionados&#x27;,flush=True)
+  159      return out
+  160  
+  161  # Styles
+  162  def styles(path,columns,title):
+  163  
+  164      colors=[&#x27;#eef5f4&#x27;,&#x27;#c9e3dd&#x27;,&#x27;#98c8bf&#x27;,&#x27;#5b9e98&#x27;,&#x27;#246d70&#x27;,&#x27;#d0d2d3&#x27;,&#x27;#ffffff&#x27;]
+  165      rules=[]
+  166      for i in range(5):
+  167          expr=f&#x27;&quot;pct_rdir&quot; &gt;= {i*20} AND &quot;pct_rdir&quot; &lt;= {(i+1)*20}&#x27; if i==0 else f&#x27;&quot;pct_rdir&quot; &gt; {i*20} AND &quot;pct_rdir&quot; &lt;= {(i+1)*20}&#x27;
+  168          rules.append(f&#x27;&lt;rule symbol=&quot;{i}&quot; filter=&quot;{escape(expr, {chr(34):&quot;&amp;quot;&quot;})}&quot; label=&quot;{i*20}–{(i+1)*20}%&quot;/&gt;&#x27;)
+  169      if &#x27;dom_set&#x27; in columns:
+  170          rules.append(&#x27;&lt;rule symbol=&quot;5&quot; filter=&quot;&amp;quot;pct_rdir&amp;quot; IS NULL AND (&amp;quot;dom_set&amp;quot; IS NULL OR &amp;quot;dom_set&amp;quot; &amp;gt; 0)&quot; label=&quot;Indicador indisponível&quot;/&gt;&#x27;)
+  171          rules.append(&#x27;&lt;rule symbol=&quot;6&quot; filter=&quot;&amp;quot;dom_set&amp;quot; = 0&quot; label=&quot;Sem domicílios ocupados&quot;/&gt;&#x27;)
+  172      else:rules.append(&#x27;&lt;rule symbol=&quot;5&quot; filter=&quot;&amp;quot;pct_rdir&amp;quot; IS NULL&quot; label=&quot;Indicador indisponível&quot;/&gt;&#x27;)
+  173      symbols=[]
+  174      for i,color in enumerate(colors):
+  175          symbols.append(f&#x27;&lt;symbol name=&quot;{i}&quot; type=&quot;fill&quot; alpha=&quot;1&quot;&gt;&lt;layer class=&quot;SimpleFill&quot; enabled=&quot;1&quot;&gt;&lt;Option type=&quot;Map&quot;&gt;&lt;Option name=&quot;color&quot; value=&quot;{color}&quot;/&gt;&lt;Option name=&quot;outline_color&quot; value=&quot;65,77,81,255&quot;/&gt;&lt;Option name=&quot;outline_width&quot; value=&quot;0.12&quot;/&gt;&lt;Option name=&quot;outline_width_unit&quot; value=&quot;MM&quot;/&gt;&lt;Option name=&quot;style&quot; value=&quot;solid&quot;/&gt;&lt;Option name=&quot;outline_style&quot; value=&quot;solid&quot;/&gt;&lt;Option name=&quot;joinstyle&quot; value=&quot;round&quot;/&gt;&lt;/Option&gt;&lt;/layer&gt;&lt;/symbol&gt;&#x27;)
+  176      aliases=&#x27;&#x27;.join(f&#x27;&lt;alias field=&quot;{c}&quot; index=&quot;{i}&quot; name=&quot;{escape(DESC.get(c,c),{chr(34):&quot;&amp;quot;&quot;})}&quot;/&gt;&#x27; for i,c in enumerate(columns))
+  177      display=&#x27;setor_id&#x27; if &#x27;setor_id&#x27; in columns else &#x27;bas_nome&#x27;
+  178      qml=f&#x27;&lt;!DOCTYPE qgis PUBLIC &quot;http://mrcc.com/qgis.dtd&quot; &quot;SYSTEM&quot;&gt;&lt;qgis version=&quot;3.40.0&quot; styleCategories=&quot;AllStyleCategories&quot;&gt;&lt;layername&gt;{escape(title)}&lt;/layername&gt;&lt;renderer-v2 type=&quot;RuleRenderer&quot; symbollevels=&quot;0&quot;&gt;&lt;rules&gt;&#x27;+&#x27;&#x27;.join(rules)+&#x27;&lt;/rules&gt;&lt;symbols&gt;&#x27;+&#x27;&#x27;.join(symbols)+f&#x27;&lt;/symbols&gt;&lt;/renderer-v2&gt;&lt;aliases&gt;{aliases}&lt;/aliases&gt;&lt;displayfield&gt;{display}&lt;/displayfield&gt;&lt;/qgis&gt;&#x27;
+  179      path.with_suffix(&#x27;.qml&#x27;).write_text(qml,encoding=&#x27;utf8&#x27;)
+  180  
+  181  # Shapefile
+  182  def shapefile(g,name,title):
+  183      cols=[c for c in g.columns if c!=&#x27;geometry&#x27;]
+  184      assert all(len(c)&lt;=10 for c in cols),cols
+  185      g=g.copy()
+  186      for c in cols:
+  187          if isinstance(g[c].dtype,pd.StringDtype):g[c]=g[c].astype(object).where(g[c].notna(),None)
+  188      path=SHP/f&#x27;{name}.shp&#x27;;g.to_file(path,driver=&#x27;ESRI Shapefile&#x27;,encoding=&#x27;UTF-8&#x27;,index=False)
+  189      styles(path,cols,title)
+  190      check=gpd.read_file(path)
+  191      assert len(check)==len(g) and check.crs.to_epsg()==31983
+  192      if &#x27;setor_id&#x27; in cols:assert list(check[&#x27;setor_id&#x27;])==list(g[&#x27;setor_id&#x27;])
+  193      for c in [&#x27;V00309&#x27;,&#x27;pct_nrede&#x27;,&#x27;dom_a_est&#x27;]:
+  194          if c in cols:
+  195              assert np.array_equal(check[c].isna(),g[c].isna()),(name,c,&#x27;null altered&#x27;)
+  196              assert np.allclose(check[c].fillna(0),g[c].fillna(0),rtol=1e-9,atol=1e-7),(name,c,&#x27;values changed&#x27;)
+  197      return path
+  198  
+  199  # Archive existing
+  200  def archive_existing():
+  201      if OUT.exists() and any(OUT.iterdir()):
+  202          dest=ROOT/&#x27;descontinuado&#x27;/dt.datetime.now().strftime(&#x27;%Y%m%d_%H%M%S_saneamento_ibge&#x27;)
+  203          assert OUT.resolve().is_relative_to(ROOT) and dest.resolve().is_relative_to(ROOT)
+  204          dest.parent.mkdir(parents=True,exist_ok=True)
+  205          shutil.move(str(OUT),str(dest))
+  206          (dest/&#x27;manifesto_arquivamento.json&#x27;).write_text(json.dumps(dict(original=str(OUT),archived=str(dest),reason=&#x27;Resultados gerados substituídos; arquivos-base preservados&#x27;),ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;)
+  207      SHP.mkdir(parents=True,exist_ok=True)
+  208  
+  209  # Main
+  210  def main():
+  211      bas=gpd.read_file(BASIN).to_crs(CRS)[[&#x27;id&#x27;,&#x27;reserv&#x27;,&#x27;geometry&#x27;]].rename(columns={&#x27;id&#x27;:&#x27;bas_id&#x27;,&#x27;reserv&#x27;:&#x27;bas_nome&#x27;})
+  212      assert len(bas)==3 and bas[&#x27;bas_id&#x27;].is_unique
+  213      bas.geometry=bas.geometry.map(polygon)
+  214      overlap=float(sum(bas.geometry.iloc[i].intersection(bas.geometry.iloc[j]).area for i in range(3) for j in range(i)))
+  215      assert overlap&lt;=1.01,(&#x27;Sobreposição de bacias superior a 1m²&#x27;,overlap)
+  216      union=bas.geometry.union_all();bb=bas.to_crs(4674).total_bounds
+  217      geom=gpd.read_file(MESH,bbox=tuple(bb),columns=[&#x27;CD_SETOR&#x27;,&#x27;CD_MUN&#x27;,&#x27;NM_MUN&#x27;,&#x27;SITUACAO&#x27;,&#x27;v0001&#x27;,&#x27;v0007&#x27;]).to_crs(CRS)
+  218      invalid=int((~geom.is_valid).sum());geom.geometry=geom.geometry.map(polygon)
+  219      geom=geom[geom.intersects(union)].copy();geom=geom[geom.intersection(union).area&gt;0.01].copy()
+  220      geom=geom.rename(columns={&#x27;CD_SETOR&#x27;:&#x27;setor_id&#x27;,&#x27;CD_MUN&#x27;:&#x27;mun_cod&#x27;,&#x27;NM_MUN&#x27;:&#x27;mun_nome&#x27;,&#x27;SITUACAO&#x27;:&#x27;situacao&#x27;,&#x27;v0001&#x27;:&#x27;pop_malha&#x27;,&#x27;v0007&#x27;:&#x27;dpo_malha&#x27;})
+  221      geom[&#x27;setor_id&#x27;]=geom[&#x27;setor_id&#x27;].astype(str);ids=set(geom[&#x27;setor_id&#x27;])
+  222      p1=next(INPUT.glob(&#x27;*caracteristicas_domicilio1*.csv&#x27;));p2=next(INPUT.glob(&#x27;*caracteristicas_domicilio2*.csv&#x27;))
+  223      a=filtered_csv(p1,[&#x27;setor&#x27;,&#x27;V00001&#x27;],ids);b=filtered_csv(p2,[&#x27;setor&#x27;]+CODES,ids)
+  224      raw=a.merge(b,on=&#x27;setor&#x27;,how=&#x27;outer&#x27;,validate=&#x27;one_to_one&#x27;,indicator=True).rename(columns={&#x27;setor&#x27;:&#x27;setor_id&#x27;})
+  225      all_joined=bool((raw[&#x27;_merge&#x27;]==&#x27;both&#x27;).all())
+  226      raw=raw.drop(columns=&#x27;_merge&#x27;);original=raw.copy()
+  227      raw[&#x27;n_sigilo&#x27;]=raw[RAW].eq(&#x27;X&#x27;).sum(axis=1).astype(&#x27;int32&#x27;)
+  228      raw[&#x27;sig_vars&#x27;]=raw.apply(lambda r:&#x27;,&#x27;.join(c for c in RAW if pd.notna(r[c]) and r[c]==&#x27;X&#x27;),axis=1)
+  229      raw[&#x27;n_ausente&#x27;]=raw[RAW].apply(lambda s:pd.to_numeric(s,errors=&#x27;coerce&#x27;).isna() &amp; s.ne(&#x27;X&#x27;)).sum(axis=1).astype(&#x27;int32&#x27;)
+  230      for c in RAW:raw[c]=pd.to_numeric(raw[c],errors=&#x27;coerce&#x27;).astype(&#x27;float64&#x27;)
+  231      raw[&#x27;dom_set&#x27;]=raw[&#x27;V00001&#x27;];raw[&#x27;rede_set&#x27;]=raw[[&#x27;V00309&#x27;,&#x27;V00310&#x27;]].sum(axis=1,min_count=2)
+  232      raw[&#x27;nred_set&#x27;]=raw[&#x27;dom_set&#x27;]-raw[&#x27;rede_set&#x27;]
+  233      denominator=raw[&#x27;dom_set&#x27;].where(raw[&#x27;dom_set&#x27;]&gt;0)
+  234      raw[&#x27;pct_rede&#x27;]=100*raw[&#x27;rede_set&#x27;]/denominator;raw[&#x27;pct_nrede&#x27;]=100*raw[&#x27;nred_set&#x27;]/denominator
+  235      raw[&#x27;pct_rdir&#x27;]=100*raw[&#x27;V00309&#x27;]/denominator;raw[&#x27;pct_fossa&#x27;]=100*raw[&#x27;V00311&#x27;]/denominator
+  236      raw[&#x27;pct_vrio&#x27;]=100*raw[[&#x27;V00313&#x27;,&#x27;V00314&#x27;]].sum(axis=1,min_count=2)/denominator
+  237      raw[&#x27;soma8&#x27;]=raw[CODES].sum(axis=1,min_count=8);raw[&#x27;dif_soma&#x27;]=raw[&#x27;soma8&#x27;]-raw[&#x27;dom_set&#x27;]
+  238      raw[&#x27;qual_dado&#x27;]=&#x27;parcial&#x27;;raw.loc[raw[&#x27;pct_rede&#x27;].notna(),&#x27;qual_dado&#x27;]=&#x27;rede_disp&#x27;
+  239      raw.loc[raw[&#x27;dif_soma&#x27;].eq(0),&#x27;qual_dado&#x27;]=&#x27;completo&#x27;;raw.loc[raw[&#x27;dom_set&#x27;].eq(0),&#x27;qual_dado&#x27;]=&#x27;sem_dom&#x27;
+  240      bad=(raw[&#x27;dif_soma&#x27;].notna() &amp; raw[&#x27;dif_soma&#x27;].abs().gt(0)) | raw[&#x27;rede_set&#x27;].gt(raw[&#x27;dom_set&#x27;]) | raw[&#x27;nred_set&#x27;].lt(0)
+  241      raw.loc[bad,&#x27;qual_dado&#x27;]=&#x27;revisar&#x27;
+  242      assert not bad.any(),raw.loc[bad].to_json(orient=&#x27;records&#x27;)
+  243      geo=geom.merge(raw,on=&#x27;setor_id&#x27;,how=&#x27;left&#x27;,validate=&#x27;one_to_one&#x27;)
+  244      geo.loc[geo[&#x27;qual_dado&#x27;].isna(),&#x27;qual_dado&#x27;]=&#x27;sem_agreg&#x27;;geo[&#x27;ano&#x27;]=2022;geo[&#x27;set_km2&#x27;]=geo.area/1e6
+  245      geo[&#x27;tot_origem&#x27;]=np.where(geo[&#x27;V00001&#x27;].notna(),&#x27;tabela_p1&#x27;,&#x27;sem_valor&#x27;)
+  246      verified_zero=geo[&#x27;qual_dado&#x27;].eq(&#x27;sem_agreg&#x27;) &amp; geo[&#x27;dpo_malha&#x27;].eq(0) &amp; geo[&#x27;pop_malha&#x27;].eq(0)
+  247      geo.loc[verified_zero,[&#x27;dom_set&#x27;,&#x27;rede_set&#x27;,&#x27;nred_set&#x27;]]=0
+  248      geo.loc[verified_zero,&#x27;qual_dado&#x27;]=&#x27;sem_dom&#x27;;geo.loc[verified_zero,&#x27;tot_origem&#x27;]=&#x27;malha_DPO0&#x27;
+  249      geo[&#x27;n_sigilo&#x27;]=geo[&#x27;n_sigilo&#x27;].fillna(0).astype(&#x27;int32&#x27;);geo[&#x27;n_ausente&#x27;]=geo[&#x27;n_ausente&#x27;].fillna(len(RAW)).astype(&#x27;int32&#x27;);geo[&#x27;sig_vars&#x27;]=geo[&#x27;sig_vars&#x27;].fillna(&#x27;&#x27;)
+  250      assert geo[&#x27;setor_id&#x27;].is_unique
+  251      clip=gpd.overlay(geo,bas,how=&#x27;intersection&#x27;,keep_geom_type=True)
+  252      clip=clip[clip.area&gt;0.01].copy();clip[&#x27;rec_km2&#x27;]=clip.area/1e6;clip[&#x27;frac_area&#x27;]=clip[&#x27;rec_km2&#x27;]/clip[&#x27;set_km2&#x27;]
+  253      assert clip[&#x27;frac_area&#x27;].between(0,1+1e-8).all()
+  254      clip[&#x27;frac_area&#x27;]=clip[&#x27;frac_area&#x27;].clip(upper=1)
+  255      for out,source in [(&#x27;dom_a_est&#x27;,&#x27;dom_set&#x27;),(&#x27;red_a_est&#x27;,&#x27;rede_set&#x27;),(&#x27;nrd_a_est&#x27;,&#x27;nred_set&#x27;)]:clip[out]=clip[source]*clip[&#x27;frac_area&#x27;]
+  256      clip[&#x27;dir_a_est&#x27;]=clip[&#x27;V00309&#x27;]*clip[&#x27;frac_area&#x27;]
+  257      nbas=clip.groupby(&#x27;setor_id&#x27;)[&#x27;bas_id&#x27;].nunique();geo[&#x27;n_bacias&#x27;]=geo[&#x27;setor_id&#x27;].map(nbas).astype(&#x27;int32&#x27;)
+  258      clip[&#x27;n_bacias&#x27;]=clip[&#x27;setor_id&#x27;].map(nbas).astype(&#x27;int32&#x27;)
+  259      summaries=[];gaps=[]
+  260      for _,v in bas.iterrows():
+  261          c=clip[clip[&#x27;bas_id&#x27;]==v[&#x27;bas_id&#x27;]];eligible=c[&#x27;pct_rede&#x27;].notna();den=c.loc[eligible,&#x27;dom_a_est&#x27;].sum(min_count=1)
+  262          dom=c[&#x27;dom_a_est&#x27;].sum(min_count=1);red=c.loc[eligible,&#x27;red_a_est&#x27;].sum(min_count=1);nred=c.loc[eligible,&#x27;nrd_a_est&#x27;].sum(min_count=1)
+  263          direct=c[&#x27;pct_rdir&#x27;].notna();den_dir=c.loc[direct,&#x27;dom_a_est&#x27;].sum(min_count=1);dir_est=c.loc[direct,&#x27;dir_a_est&#x27;].sum(min_count=1)
+  264          covered=c.geometry.union_all();gap=v.geometry.difference(covered)
+  265          if gap.area&gt;.01:gaps.append(dict(bas_id=v[&#x27;bas_id&#x27;],gap_m2=gap.area,geometry=polygon(gap)))
+  266          summaries.append(dict(bas_id=v[&#x27;bas_id&#x27;],bas_nome=v[&#x27;bas_nome&#x27;],ano=2022,area_km2=v.geometry.area/1e6,n_setores=len(c),n_rede_av=int(eligible.sum()),n_dir_av=int(direct.sum()),n_sem_dom=int(c[&#x27;dom_set&#x27;].eq(0).sum()),n_parcial=int((~eligible &amp; ~c[&#x27;dom_set&#x27;].eq(0)).sum()),dom_a_est=dom,red_a_est=red,nrd_a_est=nred,den_a_av=den,pct_rede=100*red/den if den&gt;0 else None,pct_nrede=100*nred/den if den&gt;0 else None,cov_dom=100*den/dom if dom&gt;0 else None,dir_a_est=dir_est,den_dir=den_dir,pct_rdir=100*dir_est/den_dir if den_dir&gt;0 else None,cov_dir=100*den_dir/dom if dom&gt;0 else None,cov_geo=100*(1-gap.area/v.geometry.area),met_rateio=&#x27;area_uniforme&#x27;,geometry=v.geometry))
+  267      summary=gpd.GeoDataFrame(summaries,crs=CRS)
+  268  
+  269      fractions=clip.groupby(&#x27;setor_id&#x27;)[&#x27;frac_area&#x27;].sum()
+  270      assert fractions.le(1+1e-7).all(),fractions[fractions&gt;1+1e-7]
+  271      valid=clip[[&#x27;red_a_est&#x27;,&#x27;nrd_a_est&#x27;,&#x27;dom_a_est&#x27;]].notna().all(axis=1)
+  272      assert np.allclose(clip.loc[valid,&#x27;red_a_est&#x27;]+clip.loc[valid,&#x27;nrd_a_est&#x27;],clip.loc[valid,&#x27;dom_a_est&#x27;],atol=1e-7)
+  273      archive_existing()
+  274      outputs=[]
+  275      outputs.append(shapefile(geo,&#x27;setores_saneamento_inteiros&#x27;,&#x27;Esgotamento 2022 — setores inteiros&#x27;))
+  276      outputs.append(shapefile(clip,&#x27;setores_saneamento_bacias&#x27;,&#x27;Esgotamento 2022 — recorte nas bacias&#x27;))
+  277      outputs.append(shapefile(summary,&#x27;resumo_saneamento_bacias&#x27;,&#x27;Esgotamento 2022 — resumo por bacia, rateio de área&#x27;))
+  278      gpkg=OUT/&#x27;saneamento_teco.gpkg&#x27;
+  279      for data,name in [(geo,&#x27;setores_inteiros&#x27;),(clip,&#x27;setores_recortados&#x27;),(summary,&#x27;resumo_bacias&#x27;)]:data.to_file(gpkg,layer=name,driver=&#x27;GPKG&#x27;,index=False)
+  280      if gaps:
+  281          gap_gdf=gpd.GeoDataFrame(gaps,crs=CRS);gap_gdf.to_file(gpkg,layer=&#x27;lacunas_malha&#x27;,driver=&#x27;GPKG&#x27;,index=False)
+  282      original.to_csv(OUT/&#x27;valores_originais_selecionados.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+  283      clip.drop(columns=&#x27;geometry&#x27;).to_csv(OUT/&#x27;atributos_setores_bacias.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+  284      summary.drop(columns=&#x27;geometry&#x27;).to_csv(OUT/&#x27;resumo_bacias.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+  285      clip.groupby([&#x27;bas_id&#x27;,&#x27;mun_cod&#x27;,&#x27;mun_nome&#x27;],as_index=False).agg(rec_km2=(&#x27;rec_km2&#x27;,&#x27;sum&#x27;),dom_a_est=(&#x27;dom_a_est&#x27;,&#x27;sum&#x27;),n_setores=(&#x27;setor_id&#x27;,&#x27;nunique&#x27;)).to_csv(OUT/&#x27;municipios_interceptados.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+  286      used=list(dict.fromkeys([c for a in [geo,clip,summary] for c in a.columns if c!=&#x27;geometry&#x27;]))
+  287      assert all(c in DESC for c in used),[c for c in used if c not in DESC]
+  288      pd.DataFrame([dict(campo=c,descricao=DESC[c]) for c in used]).to_csv(OUT/&#x27;dicionario_campos.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+  289      sources=[p1,p2,INPUT/&#x27;dicionario_de_dados_agregados_por_setores_censitarios_20260520.xlsx&#x27;,MESH,BASIN]
+  290      audit=dict(reference_year=2022,created_at=dt.datetime.now().isoformat(),crs=CRS,basin_file=str(BASIN),basin_overlap_m2=overlap,invalid_mesh_geometries_in_bbox=invalid,sector_count=len(geo),intersection_count=len(clip),joined_tables=all_joined,missing_aggregates=geo.loc[geo[&#x27;qual_dado&#x27;]==&#x27;sem_agreg&#x27;,&#x27;setor_id&#x27;].tolist(),absent_topic_records_verified_zero_households=geo.loc[verified_zero,&#x27;setor_id&#x27;].tolist(),municipalities=geo[[&#x27;mun_cod&#x27;,&#x27;mun_nome&#x27;]].drop_duplicates().to_dict(orient=&#x27;records&#x27;),qualities=geo[&#x27;qual_dado&#x27;].value_counts().to_dict(),direct_network_indicator_sectors=int(geo[&#x27;pct_rdir&#x27;].notna().sum()),combined_network_indicator_sectors=int(geo[&#x27;pct_rede&#x27;].notna().sum()),suppressed_raw_cells=int(geo[&#x27;n_sigilo&#x27;].sum()),raw_symbols_kept=True,missing_numeric_values_are_null=True,all_complete_category_sums_match=True,allocation_method=&#x27;Uniform areal weighting of complete sector statistics; exploratory, not a household inventory or dasymetric estimate&#x27;,landcover_2025_used=False,mesh_gaps_m2={x[&#x27;bas_id&#x27;]:x[&#x27;gap_m2&#x27;] for x in gaps},sources=[dict(path=str(p),bytes=p.stat().st_size,sha256=sha(p)) for p in sources],summary=summary.drop(columns=&#x27;geometry&#x27;).replace({np.nan:None}).to_dict(orient=&#x27;records&#x27;),shapefile_paths=[str(p) for p in outputs],checks=[&#x27;Spatial overlaps &lt;= 1 m2&#x27;,&#x27;No duplicated census sector identifier&#x27;,&#x27;Tables joined by identical 15-digit sector IDs&#x27;,&#x27;All fully available sanitation category sums equal household total&#x27;,&#x27;X retained in raw CSV and null in numeric GIS fields&#x27;,&#x27;Percentages within 0-100, or null&#x27;,&#x27;Areal fractions per sector &lt;= 1&#x27;,&#x27;Estimated connected + not-connected households equals eligible denominator&#x27;,&#x27;Shapefile readback: feature counts, CRS, IDs, null masks and numeric values&#x27;])
+  291      for field in [&#x27;pct_rede&#x27;,&#x27;pct_nrede&#x27;,&#x27;pct_rdir&#x27;,&#x27;pct_fossa&#x27;,&#x27;pct_vrio&#x27;]:
+  292          v=geo[field].dropna();assert v.between(-1e-8,100+1e-8).all(),field
+  293      (OUT/&#x27;auditoria_saneamento.json&#x27;).write_text(json.dumps(audit,ensure_ascii=False,indent=2,allow_nan=False),encoding=&#x27;utf8&#x27;)
+  294      write_readme(audit)
+  295      preview(clip,bas,summary)
+  296      with zipfile.ZipFile(OUT/&#x27;Shapefiles_saneamento_TECO.zip&#x27;,&#x27;w&#x27;,zipfile.ZIP_DEFLATED) as z:
+  297          for p in SHP.iterdir():z.write(p,&#x27;shapefiles/&#x27;+p.name)
+  298          for name in [&#x27;LEIA_PRIMEIRO.md&#x27;,&#x27;dicionario_campos.csv&#x27;,&#x27;resumo_bacias.csv&#x27;,&#x27;auditoria_saneamento.json&#x27;]:z.write(OUT/name,name)
+  299      print(json.dumps(dict(sectors=len(geo),intersections=len(clip),quality=audit[&#x27;qualities&#x27;],summary=audit[&#x27;summary&#x27;]),ensure_ascii=True),flush=True)
+  300  
+  301  # Write readme
+  302  def write_readme(a):
+  303      s=[&#x27;# Saneamento censitário nas bacias TECO&#x27;,&#x27;&#x27;,f&quot;Referência: Censo 2022. Processamento: {a[&#x27;created_at&#x27;]}. Sistema: SIRGAS 2000 / UTM 23S, EPSG:31983.&quot;,&#x27;&#x27;,
+  304      &#x27;## Arquivos para abrir no QGIS&#x27;,&#x27;&#x27;,
+  305      &#x27;- shapefiles/setores_saneamento_bacias.shp: camada principal; setores recortados nas três bacias, com percentuais e categorias de esgotamento.&#x27;,
+  306      &#x27;- shapefiles/setores_saneamento_inteiros.shp: setores completos que interceptam as áreas de trabalho; mantém a unidade estatística original.&#x27;,
+  307      &#x27;- shapefiles/resumo_saneamento_bacias.shp: três bacias com totais estimados por rateio de área e cobertura do indicador.&#x27;,
+  308      &#x27;- saneamento_teco.gpkg: mesmas camadas, com suporte mais completo a campos nulos. Se houver lacunas geométricas, a camada lacunas_malha as identifica.&#x27;,
+  309      _cp_adaptar(&#x27;- Saneamento_TECO.qgz: projeto adicional gerado pela conferência no QGIS, com a camada recortada visível e as duas camadas de apoio disponíveis. O projeto original E:/teco/projeto_teco.qgz permanece intacto.&#x27;),
+  310      &#x27;- Os arquivos QML junto aos SHP trazem simbologia de pct_rdir (destinação direta à rede geral/pluvial) e nomes explicativos dos campos. A modalidade direta tem maior cobertura de divulgação; pct_rede e pct_nrede continuam disponíveis como indicadores compostos. Copie todos os arquivos de cada shapefile, não apenas o .shp.&#x27;,
+  311      &#x27;- Shapefiles_saneamento_TECO.zip contém os shapefiles completos e a documentação.&#x27;,
+  312      &#x27;&#x27;, &#x27;## O que os campos representam&#x27;,&#x27;&#x27;,
+  313      &#x27;V00001 e V00309–V00316 são as contagens oficiais do SETOR INTEIRO. Essas contagens não se tornam contagens observadas da bacia quando a geometria é cortada. dom_set, rede_set e nred_set também se referem ao setor inteiro. NÃO somar esses campos no recorte: um setor pode participar de mais de uma bacia.&#x27;,
+  314      &#x27;rede_set = V00309 + V00310, somente se ambas forem divulgadas. nred_set = V00001 - rede_set. Esse complemento calcula a modalidade agregada sem alterar os X das categorias individuais. pct_rede e pct_nrede utilizam V00001 &gt; 0. V00309 permanece separado em pct_rdir para não confundir destinação direta à rede com fossa ligada.&#x27;,
+  315      &#x27;Os percentuais são os do setor censitário e ficam constantes dentro de cada setor. Não descrevem a situação de cada endereço ou célula de mapa. dom_a_est, red_a_est e nrd_a_est são ESTIMATIVAS proporcionais à fração da área do setor dentro da bacia. Valores fracionários são esperados e não são arredondados antes da soma.&#x27;,
+  316      &#x27;No resumo por bacia, pct_rede e pct_nrede são razões das contagens estimadas, com o MESMO denominador elegível den_a_av. pct_rdir utiliza dir_a_est/den_dir, com denominador próprio para a modalidade direta. Não são médias simples dos percentuais dos setores. cov_dom e cov_dir mostram as respectivas coberturas sobre o total estimado dos setores com total conhecido. Totais X continuam fora desse denominador e não estão implicitamente tratados como zero.&#x27;,
+  317      &#x27;&#x27;, &#x27;## Interpretação para o TECO&#x27;,&#x27;&#x27;,
+  318      &#x27;Rede geral ou pluvial é a categoria publicada pelo IBGE. Ela não comprova rede sanitária separadora, ligação contratual ativa, encaminhamento à ETE ou tratamento. Fossa séptica não ligada à rede não equivale automaticamente a destinação inadequada. Os campos são atributos de infraestrutura/destinação declarada, não medidas de carga de microrganismos, antibióticos ou resistência antimicrobiana.&#x27;,
+  319      &#x27;pct_nrede pode apoiar a comparação de infraestrutura sanitária no cenário inicial. A associação com pressão sobre o reservatório exige considerar o encaminhamento do esgoto, os lançamentos, a drenagem e o tratamento. Não foi criado índice de RAM, pesos, k-means ou Moran nesta etapa.&#x27;,
+  320      &#x27;&#x27;, &#x27;## Limitações e verificações&#x27;,&#x27;&#x27;,
+  321      &#x27;X e outros símbolos não numéricos permanecem nulos nos campos numéricos do GIS. Os símbolos originais constam em valores_originais_selecionados.csv. n_sigilo, sig_vars, n_ausente e qual_dado permitem rastrear a disponibilidade. Zero domicílios produz percentual nulo, não 0% de atendimento. Nulos da legenda não devem ser interpretados como ausência de rede.&#x27;,
+  322      &#x27;Nos 19 setores sem registro temático, a malha oficial informa zero pessoas (v0001) e zero domicílios particulares ocupados (v0007). Apenas nesses casos, dom_set foi identificado como zero, com tot_origem=malha_DPO0 e qual_dado=sem_dom. Os campos RAW não foram preenchidos. Isso distingue ausência confirmada de domicílios de informação censitária protegida. A malha também intercepta parcelas de municípios além dos cinco iniciais; nenhuma parcela foi descartada apenas por município. municipios_interceptados.csv mostra as áreas e estimativas de cada interseção. Essas parcelas de borda devem ser verificadas com a delimitação hidrológica e os limites municipais de diferentes anos antes de interpretar sua contribuição.&#x27;,
+  323      &#x27;O rateio de área pressupõe distribuição uniforme de domicílios no setor e é apenas exploratório. Pode distorcer os totais em setores parcialmente recortados e de ocupação concentrada. Uma alocação dasimétrica com áreas residenciais e ano compatível deve substituí-lo quando houver base validada. O raster de uso do solo de 2025 foi consultado, mas não usado para localizar residências do Censo 2022.&#x27;,
+  324      &#x27;As bacias são exatamente as delimitadas no projeto, em sub_bacia/shapefiles_v6_20261109_141015/sub_bacias_exclusivas.shp. Não foram refeitas nem modificadas. O script de origem declara exutórios automáticos e delimitação preliminar; a regularização cartográfica não substitui validação hidrológica. Referenciar essa versão ao interpretar os totais.&#x27;,
+  325      f&quot;Foram selecionados {a[&#x27;sector_count&#x27;]} setores únicos e {a[&#x27;intersection_count&#x27;]} interseções setor × bacia. As duas tabelas nacionais foram conciliadas pelo código do setor; os totais das oito categorias fecharam em todos os registros com informação completa. A auditoria registra disponibilidade, malha, fontes, hashes e cobertura geométrica.&quot;,
+  326      &#x27;&#x27;, &#x27;## Fontes e reprodução&#x27;,&#x27;&#x27;,
+  327      _cp_adaptar(&#x27;Tabelas e dicionário: arquivos fornecidos em E:/teco/saneamento_ibge. Datas dos nomes são revisões/publicações; o ano de referência continua 2022.&#x27;),
+  328      &#x27;Malha oficial IBGE: https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/setores/gpkg/UF/MG/MG_setores_CD2022.gpkg&#x27;,
+  329      _cp_adaptar(&#x27;Script: E:/teco/codigo/preparar_saneamento_ibge.py. Conferência e projeto QGIS adicional: E:/teco/codigo/conferir_e_abrir_saneamento_qgis.py, executado no Python do QGIS após o processamento. Execuções posteriores preservam saídas substituídas em E:/teco/descontinuado. Os insumos e o projeto QGIS original não são alterados.&#x27;),
+  330      &#x27;&#x27;, &#x27;## Resumo exploratório por bacia&#x27;,&#x27;&#x27;,
+  331      &#x27;| Bacia | Setores | Domicílios estimados por área* | Destinação direta à rede geral/pluvial (%) | Cobertura da modalidade direta sobre total conhecido (%) |&#x27;,&#x27;|---|---:|---:|---:|---:|&#x27;]
+  332      for x in a[&#x27;summary&#x27;]:s.append(f&quot;| {x[&#x27;bas_nome&#x27;]} | {x[&#x27;n_setores&#x27;]} | {x[&#x27;dom_a_est&#x27;]:.1f} | {x[&#x27;pct_rdir&#x27;]:.2f} | {x[&#x27;cov_dir&#x27;]:.2f} |&quot;)
+  333      s+=[&#x27;&#x27;,&#x27;*Não são contagens observadas dos domicílios dentro da bacia. Consultar as limitações do rateio e os setores com informações protegidas.&#x27;]
+  334      (OUT/&#x27;LEIA_PRIMEIRO.md&#x27;).write_text(&#x27;\n&#x27;.join(s),encoding=&#x27;utf8&#x27;)
+  335  
+  336  # Preview
+  337  def preview(clip,bas,summary):
+  338      import matplotlib
+  339      matplotlib.use(&#x27;Agg&#x27;)
+  340      import matplotlib.pyplot as plt
+  341      from matplotlib.colors import ListedColormap,BoundaryNorm
+  342      from matplotlib.patches import Patch
+  343      from matplotlib.ticker import FuncFormatter,MaxNLocator
+  344      cmap=ListedColormap([&#x27;#eef5f4&#x27;,&#x27;#c9e3dd&#x27;,&#x27;#98c8bf&#x27;,&#x27;#5b9e98&#x27;,&#x27;#246d70&#x27;]);norm=BoundaryNorm([0,20,40,60,80,100.00001],5)
+  345      plt.rcParams.update({&#x27;font.family&#x27;:&#x27;Arial&#x27;,&#x27;svg.fonttype&#x27;:&#x27;path&#x27;,&#x27;pdf.fonttype&#x27;:42})
+  346      fig,axs=plt.subplots(1,3,figsize=(14,6.6));geo=clip.to_crs(4674);bg=bas.to_crs(4674)
+  347      for ax,(_,b) in zip(axs,bg.iterrows()):
+  348          g=geo[geo[&#x27;bas_id&#x27;]==b[&#x27;bas_id&#x27;]]
+  349          occupied=g[~g[&#x27;dom_set&#x27;].eq(0)]
+  350          occupied.plot(ax=ax,column=&#x27;pct_rdir&#x27;,cmap=cmap,norm=norm,edgecolor=&#x27;#536064&#x27;,linewidth=.2,missing_kwds={&#x27;color&#x27;:&#x27;#d0d2d3&#x27;,&#x27;edgecolor&#x27;:&#x27;#899195&#x27;,&#x27;hatch&#x27;:&#x27;///&#x27;})
+  351          empty=g[g[&#x27;dom_set&#x27;].eq(0)]
+  352          if len(empty):empty.plot(ax=ax,color=&#x27;white&#x27;,edgecolor=&#x27;#899195&#x27;,linewidth=.2)
+  353          bg[bg[&#x27;bas_id&#x27;]==b[&#x27;bas_id&#x27;]].boundary.plot(ax=ax,color=&#x27;#143b4b&#x27;,linewidth=1.1)
+  354          x0,y0,x1,y1=b.geometry.bounds;pad=max(x1-x0,y1-y0)*.05
+  355          ax.set_xlim(x0-pad,x1+pad);ax.set_ylim(y0-pad,y1+pad);ax.set_aspect(1/np.cos(np.deg2rad((y0+y1)/2)))
+  356          ax.set_title({&#x27;vargem_flores&#x27;:&#x27;Vargem das Flores&#x27;,&#x27;pampulha&#x27;:&#x27;Lagoa da Pampulha&#x27;,&#x27;ibirite_regap&#x27;:&#x27;Ibirité / REGAP&#x27;}[b[&#x27;bas_id&#x27;]],fontsize=12,pad=8,fontweight=&#x27;bold&#x27;)
+  357          ax.xaxis.set_major_locator(MaxNLocator(3));ax.yaxis.set_major_locator(MaxNLocator(3));ax.xaxis.set_major_formatter(FuncFormatter(lambda v,p:f&#x27;{abs(v):.2f}°O&#x27;));ax.yaxis.set_major_formatter(FuncFormatter(lambda v,p:f&#x27;{abs(v):.2f}°S&#x27;));ax.tick_params(labelsize=8)
+  358          ax.text(.94,.93,&#x27;N&#x27;,transform=ax.transAxes,ha=&#x27;center&#x27;,fontsize=9,fontweight=&#x27;bold&#x27;);ax.annotate(&#x27;&#x27;,xy=(.94,.91),xytext=(.94,.82),xycoords=&#x27;axes fraction&#x27;,arrowprops={&#x27;arrowstyle&#x27;:&#x27;-|&gt;&#x27;,&#x27;color&#x27;:&#x27;#173e4f&#x27;})
+  359          ax.set_xlabel(&#x27;&#x27;);ax.set_ylabel(&#x27;&#x27;)
+  360      handles=[Patch(facecolor=c,edgecolor=&#x27;#536064&#x27;,linewidth=.4,label=l) for c,l in zip(cmap.colors,[&#x27;0–20%&#x27;,&#x27;&gt;20–40%&#x27;,&#x27;&gt;40–60%&#x27;,&#x27;&gt;60–80%&#x27;,&#x27;&gt;80–100%&#x27;])]+[Patch(facecolor=&#x27;#d0d2d3&#x27;,hatch=&#x27;///&#x27;,label=&#x27;Indisponível&#x27;),Patch(facecolor=&#x27;white&#x27;,edgecolor=&#x27;#899195&#x27;,label=&#x27;Sem domicílios ocupados&#x27;)]
+  361      fig.suptitle(&#x27;Domicílios com destinação à rede geral ou pluvial (%)&#x27;,fontsize=14,fontweight=&#x27;bold&#x27;,y=.97)
+  362      fig.legend(handles=handles,loc=&#x27;lower center&#x27;,bbox_to_anchor=(.5,.06),ncol=4,frameon=False,fontsize=9,columnspacing=2)
+  363      fig.text(.5,.015,&#x27;Censo 2022 · Percentuais do setor inteiro, recortados nas bacias fornecidas · Não comprova tratamento do esgoto · SIRGAS 2000&#x27;,ha=&#x27;center&#x27;,fontsize=8,color=&#x27;#4b626b&#x27;)
+  364      fig.subplots_adjust(left=.06,right=.98,bottom=.22,top=.86,wspace=.28)
+  365      fig.savefig(OUT/&#x27;Previa_saneamento_bacias.png&#x27;,dpi=200,facecolor=&#x27;white&#x27;);plt.close(fig)
+  366  
+  367  if __name__==&#x27;__main__&#x27;:main()</code></pre></article></html>

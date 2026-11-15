@@ -1,0 +1,102 @@
+{
+  "versao": 1,
+  "projeto": "teco",
+  "raiz_original": "E:/teco",
+  "raiz_projeto": "",
+  "modo_entrega": false,
+  "pastas": {
+    "0_ref": "0_ref",
+    "bacia_ana": "bacia_ana",
+    "cnes": "cnes",
+    "codigo": "codigo",
+    "config": "config",
+    "dados_publicos": "dados_publicos",
+    "encarte": "encarte",
+    "entrega_final": "entrega_final",
+    "esgoto_bh": "esgoto_bh",
+    "ete": "ete",
+    "hidrografia": "hidrografia",
+    "output": "output",
+    "pt_coleta": "pt_coleta",
+    "reservatorio": "reservatorio",
+    "saneamento_ibge": "saneamento_ibge",
+    "sub_bacia": "sub_bacia",
+    "teco_base": "teco_base",
+    "vias": "vias"
+  },
+  "arquivos": {},
+  "externos": {
+    "python_exe_9a6f757": {
+      "chave": "python_exe_9a6f757",
+      "original": "C:\\Users\\SEU_USUARIO\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+      "caminho": "",
+      "descricao": "Arquivo ou programa externo utilizado em codigo/atualizar_internacoes_residencia.ps1"
+    },
+    "fonts_2a6cc8f": {
+      "chave": "fonts_2a6cc8f",
+      "original": "C:/Windows/Fonts",
+      "caminho": "C:/Windows/Fonts",
+      "descricao": "Arquivo ou programa externo utilizado em codigo/conferir_qgis_grade_teco.py"
+    },
+    "arial_ttf_41a7a4d": {
+      "chave": "arial_ttf_41a7a4d",
+      "original": "C:/Windows/Fonts/arial.ttf",
+      "caminho": "C:/Windows/Fonts/arial.ttf",
+      "descricao": "Arquivo ou programa externo utilizado em codigo/conferir_qgis_grade_teco.py"
+    },
+    "python_exe_059becd": {
+      "chave": "python_exe_059becd",
+      "original": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1110-973-0_26.1110.973.0_x64__3k8sg7r9htsxt\\dependencies\\python\\python.exe",
+      "caminho": "",
+      "descricao": "Arquivo ou programa externo utilizado em codigo/executar_grade_teco.ps1"
+    },
+    "node_exe_50000f2": {
+      "chave": "node_exe_50000f2",
+      "original": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1110-973-0_26.1110.973.0_x64__3k8sg7r9htsxt\\dependencies\\node\\bin\\node.exe",
+      "caminho": "",
+      "descricao": "Arquivo ou programa externo utilizado em codigo/executar_grade_teco.ps1"
+    },
+    "python_qgis_ltr_bat_920ca46": {
+      "chave": "python_qgis_ltr_bat_920ca46",
+      "original": "C:\\Program Files\\QGIS 3.44.15\\bin\\python-qgis-ltr.bat",
+      "caminho": "C:\\Program Files\\QGIS 3.44.15\\bin\\python-qgis-ltr.bat",
+      "descricao": "Arquivo ou programa externo utilizado em codigo/executar_grade_teco.ps1"
+    },
+    "python_exe_0334ed7": {
+      "chave": "python_exe_0334ed7",
+      "original": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1112-737-0_26.1112.737.0_x64__3k8sg7r9htsxt\\dependencies\\python\\python.exe",
+      "caminho": "",
+      "descricao": "Arquivo ou programa externo utilizado em codigo/exportar_relatorio_word_teco.ps1"
+    },
+    "arialbd_ttf_7dff968": {
+      "chave": "arialbd_ttf_7dff968",
+      "original": "C:/Windows/Fonts/arialbd.ttf",
+      "caminho": "C:/Windows/Fonts/arialbd.ttf",
+      "descricao": "Arquivo ou programa externo utilizado em codigo/guia_entrega_final.py"
+    },
+    "fonts_4d9cd6a": {
+      "chave": "fonts_4d9cd6a",
+      "original": "C:/Windows/Fonts/",
+      "caminho": "C:/Windows/Fonts/",
+      "descricao": "Arquivo ou programa externo utilizado em codigo/qgis_consolidacao_auditada_teco.py"
+    },
+    "cnes_mg_csv_510331d": {
+      "chave": "cnes_mg_csv_510331d",
+      "original": "C:/Users/SEU_USUARIO/Downloads/CNES_MG.csv",
+      "caminho": "",
+      "descricao": "Arquivo ou programa externo utilizado em codigo/revisar_cnes_sih_mg_teco.py"
+    },
+    "sih_cnv_qimg100921200_198_31_2_csv_7af2046": {
+      "chave": "sih_cnv_qimg100921200_198_31_2_csv_7af2046",
+      "original": "C:/Users/SEU_USUARIO/Downloads/sih_cnv_qimg100921200_198_31_2.csv",
+      "caminho": "",
+      "descricao": "Arquivo ou programa externo utilizado em codigo/revisar_cnes_sih_mg_teco.py"
+    }
+  },
+  "ambiente": {
+    "python": "python",
+    "node": "node",
+    "python_documentos": "",
+    "node_modules": ""
+  }
+}

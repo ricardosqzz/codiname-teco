@@ -1,0 +1,252 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/grade_500m_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/grade_500m_teco.py</h2>
+<p>Constrói vizinhanças circulares de 500 m, agrega dados nativos, calcula as três entradas principais, S0-S4, perfis k-means e Moran no suporte hexagonal. Os hexágonos são a apresentação sem sobreposição; os círculos são a unidade de cálculo.</p>
+<p><strong>Papel.</strong> Processamento ou módulo de apoio. <strong>Fonte inspecionada.</strong> E:\teco\codigo\grade_500m_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>analise_espacial_teco</td><td>Módulo autoral local; sua ficha está neste relatório.</td></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>datetime</td><td>Calendários, datas e duração dos períodos avaliados.</td></tr><tr><td>geopandas</td><td>Camadas vetoriais com referência espacial, reprojeção, recorte e interseção de geometrias.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>math</td><td>Funções matemáticas escalares.</td></tr><tr><td>multivariada_teco</td><td>Módulo autoral local; sua ficha está neste relatório.</td></tr><tr><td>numpy</td><td>Matrizes numéricas, máscaras de validade, transformações, percentis e estatísticas vetorizadas.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>rasterio</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>rasterio.features</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>rasterio.windows</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>scipy.spatial</td><td>Agrupamento, matrizes esparsas, distâncias, interpolação e estatísticas; conferir as chamadas na ficha.</td></tr><tr><td>scipy.stats</td><td>Agrupamento, matrizes esparsas, distâncias, interpolação e estatísticas; conferir as chamadas na ficha.</td></tr><tr><td>shapely.geometry</td><td>Operações geométricas usadas nas áreas, distâncias, limites e relações espaciais.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>{path} — chamada rasterio.open, linha 87.</li>
+<li>E:/teco/output/02_avaliacao_espacial/teco_avaliacao.gpkg [camada &#x27;hidrografia_bacias&#x27;] — chamada gpd.read_file, linha 131.</li>
+<li>E:/teco/output/03_multivariada/teco_multivariada.gpkg [camada &#x27;unidades_ajuste&#x27;] — chamada gpd.read_file, linha 104.</li>
+<li>E:/teco/reservatorio/{k}.shp — chamada gpd.read_file, linha 109.</li>
+<li>E:/teco/output/05_auditoria_saude/RD_MG_todos_estabelecimentos_2016_2025.csv — chamada pd.read_csv, linha 114.</li>
+<li>E:/teco/output/02_avaliacao_espacial/tabelas/sih_bacias_2016_2025.csv — chamada pd.read_csv, linha 115.</li>
+<li>E:/teco/output/04_grade_500m/tabelas/sih_cid10_mensal.csv — chamada pd.read_csv, linha 117.</li>
+<li>E:/teco/output/04_grade_500m/filtro_cid10.csv — chamada pd.read_csv, linha 119.</li>
+<li>E:/teco/vias/malha_viaria.shp — chamada gpd.read_file, linha 131.</li>
+<p><strong>Saídas.</strong></p>
+<li>E:/teco/output/04_grade_500m/tabelas/{n} — chamada .to_csv, linha 80.</li>
+<li>E:/teco/output/04_grade_500m/teco_grade_500m.gpkg [camada n] — chamada f.to_file, linha 83.</li>
+<li>E:/teco/output/04_grade_500m/auditoria/metodo_grade.json — chamada .write_text, linha 173.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>b: geometry, id.</li>
+<li>c: DOM_DENS, ESG_EST, SEM_ANALIT, dens_pop, dom_set, geometry, pct_rede, set_km2, setor_id.</li>
+<li>aux: ESG_EST, sem_rede.</li>
+<li>circles: AIH_LOCAL, AREA_KM2, BACIA, DOM, DOM_EST, DOM_OBS, GRID_ID, I_S0, POP, POP_DENS, SAUDE_N, SEM, SEM_OBS, SEM_REDE, geometry.</li>
+<li>health: AIH_ANO, CNES, GRUPO, QA_MUN, geometry.</li>
+<li>prod.loc: CNES.</li>
+<li>prod: AIH.</li>
+<li>filt.loc: CID10.</li>
+<li>filt: incluir.</li>
+<li>rr: CID10.</li>
+<li>source: geometry.</li>
+<li>a: cenario, silhouette.</li>
+<li>models: S0.</li>
+<li>circles.loc: I_S0.</li>
+<li>rec: cenario.</li>
+<li>local: cluster, q.</li>
+<li>meta: centros, unidades_bacia.</li>
+<p><strong>Campos e chaves gerados.</strong></p>
+<li>circles: AIH_ORIG, AREA_KM2, COB_ESG, ESTABILIDADE, EST_ESG, ORIG_STATUS, POP_DENS, QUINTIL, SEM_OBS_P, SEM_REDE, VALIDO.</li>
+<li>c: DOM_DENS, ESG_EST, SEM_ANALIT.</li>
+<li>z: AREA, DOM, DOM_EST, DOM_OBS, POP, SEM, SEM_OBS.</li>
+<li>health: AIH_ANO.</li>
+<li>inter: L.</li>
+<li>rec: ARI, k_comum, mesmo_grupo_pct, rho_indice.</li>
+<li>hexclip: MORAN.</li>
+<li>profiles: n.</li>
+<li>meta: CID_selecionados, mapas_entrada, status.</li>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>csv(f, n)</td><td>80-80</td><td>grava produtos</td></tr><tr><td>gp(f, n)</td><td>83-83</td><td>grava produtos</td></tr><tr><td>rasterstats(path, geom)</td><td>86-90</td><td>Chamadas efetivas: rasterio.open, .intersection, d.read, geometry_mask, Window, np.array, d.window_transform, np.asarray Retorno: v[np.isfinite(v)], np.array([]).</td></tr><tr><td>main()</td><td>93-173</td><td>lê dados; grava produtos; Calcula ln(1+x), reduzindo assimetria e preservando zero. O resultado transformado não mantém a unidade física original.; Associação por postos. Mede ordenação conjunta, não igualdade de magnitude nem desempenho frente a observações ausentes.</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/grade_500m_teco.py, linhas 93-99.</p>
+<pre><code>def main():
+ b=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;bacias_estudo&#x27;);union=b.geometry.union_all();xmin,ymin,xmax,ymax=union.bounds;r=500.;dx=1.5*r;dy=np.sqrt(3)*r;pts=[];cells=[];rows=[]
+ for ix in range(math.floor((xmin-r)/dx),math.ceil((xmax+r)/dx)+1):
+  for iy in range(math.floor((ymin-r)/dy)-1,math.ceil((ymax+r)/dy)+1):
+   x=ix*dx;y=iy*dy+(ix%2)*dy/2;hex=Polygon([(x+r*np.cos(np.pi*j/3),y+r*np.sin(np.pi*j/3)) for j in range(6)])
+   if not hex.intersects(union):continue
+   gid=f&#x27;G{len(rows)+1:04d}&#x27;;p=Point(x,y);rows.append({&#x27;GRID_ID&#x27;:gid,&#x27;E&#x27;:x,&#x27;N&#x27;:y,&#x27;RAIO_M&#x27;:500,&#x27;CENTRO_INT&#x27;:int(union.covers(p))});pts.append(p);cells.append(hex)</code></pre>
+<p>Raiz quadrada. No ajuste ponderado do k-means, multiplicar a coluna por √peso faz o peso entrar uma única vez na distância ao quadrado.</p>
+<p>Trecho de codigo/grade_500m_teco.py, linhas 135-141.</p>
+<pre><code>
+ feats=[&#x27;POP_DENS&#x27;,&#x27;SEM_REDE&#x27;,&#x27;AIH_LOCAL&#x27;];x=np.c_[np.log1p(circles.POP_DENS),circles.SEM_REDE,np.log1p(circles.AIH_LOCAL)];valid=np.isfinite(x).all(1);lo=np.nanmin(x[valid],0);hi=np.nanmax(x[valid],0);norm=(x-lo)/np.where(hi&gt;lo,hi-lo,1)
+ circles[&#x27;VALIDO&#x27;]=valid
+ for j,f in enumerate(feats):circles[&#x27;N_&#x27;+f]=norm[:,j]
+ for f in [&#x27;URB_PCT&#x27;,&#x27;HIPS_M&#x27;,&#x27;DECL_PCT&#x27;,&#x27;DIST_KM&#x27;,&#x27;VIAS_KM&#x27;,&#x27;HIDRO_KM&#x27;]:
+  v=circles[f];circles[&#x27;N_&#x27;+f]=(v-v.min())/(v.max()-v.min()) if v.max()&gt;v.min() else 0
+</code></pre>
+<p>Calcula ln(1+x), reduzindo assimetria e preservando zero. O resultado transformado não mantém a unidade física original.</p>
+<p><strong>Cálculos a observar nesta rotina.</strong></p>
+<li>sqrt: Raiz quadrada. No ajuste ponderado do k-means, multiplicar a coluna por √peso faz o peso entrar uma única vez na distância ao quadrado.</li>
+<li>sum: Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</li>
+<li>mean: Média no eixo explicitado. Não representa automaticamente média anual ou diária sem a seleção temporal correspondente.</li>
+<li>log1p: Calcula ln(1+x), reduzindo assimetria e preservando zero. O resultado transformado não mantém a unidade física original.</li>
+<li>bincount: Conta ocorrências ou soma pesos por identificador inteiro. O vetor weights define se há contagem ou acumulação ponderada.</li>
+<li>spearmanr: Associação por postos. Mede ordenação conjunta, não igualdade de magnitude nem desempenho frente a observações ausentes.</li>
+<li>std: Desvio-padrão. Na padronização z, coloca colunas em escala comparável; conferir ddof no trecho.</li>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: {path} | rasterio.open.
+    5  # Entrada: E:/teco/output/02_avaliacao_espacial/teco_avaliacao.gpkg | gpd.read_file | camada=&#x27;hidrografia_bacias&#x27;.
+    6  # Entrada: E:/teco/output/03_multivariada/teco_multivariada.gpkg | gpd.read_file | camada=&#x27;unidades_ajuste&#x27;.
+    7  # Entrada: E:/teco/reservatorio/{k}.shp | gpd.read_file.
+    8  # Entrada: E:/teco/output/05_auditoria_saude/RD_MG_todos_estabelecimentos_2016_2025.csv | pd.read_csv.
+    9  # Entrada: E:/teco/output/02_avaliacao_espacial/tabelas/sih_bacias_2016_2025.csv | pd.read_csv.
+   10  # Entrada: E:/teco/output/04_grade_500m/tabelas/sih_cid10_mensal.csv | pd.read_csv.
+   11  # Entrada: E:/teco/output/04_grade_500m/filtro_cid10.csv | pd.read_csv.
+   12  # Entrada: E:/teco/vias/malha_viaria.shp | gpd.read_file.
+   13  # Campos/chaves em b: geometry, id.
+   14  # Campos/chaves em c: DOM_DENS, ESG_EST, SEM_ANALIT, dens_pop, dom_set, geometry, pct_rede, set_km2, setor_id.
+   15  # Campos/chaves em aux: ESG_EST, sem_rede.
+   16  # Campos/chaves em circles: AIH_LOCAL, AREA_KM2, BACIA, DOM, DOM_EST, DOM_OBS, GRID_ID, I_S0, POP, POP_DENS, SAUDE_N, SEM, SEM_OBS, SEM_REDE, geometry.
+   17  # Campos/chaves em health: AIH_ANO, CNES, GRUPO, QA_MUN, geometry.
+   18  # Campos/chaves em prod.loc: CNES.
+   19  # Campos/chaves em prod: AIH.
+   20  # Campos/chaves em filt.loc: CID10.
+   21  # Campos/chaves em filt: incluir.
+   22  # Campos/chaves em rr: CID10.
+   23  # Campos/chaves em source: geometry.
+   24  # Campos/chaves em a: cenario, silhouette.
+   25  # Campos/chaves em models: S0.
+   26  # Campos/chaves em circles.loc: I_S0.
+   27  # Campos/chaves em rec: cenario.
+   28  # Campos/chaves em local: cluster, q.
+   29  # Campos/chaves em meta: centros, unidades_bacia.
+   30  # Saída: E:/teco/output/04_grade_500m/tabelas/{n} | .to_csv.
+   31  # Saída: E:/teco/output/04_grade_500m/teco_grade_500m.gpkg | f.to_file.
+   32  # Saída: E:/teco/output/04_grade_500m/auditoria/metodo_grade.json | .write_text.
+   33  # Campos/chaves gerados em circles: AIH_ORIG, AREA_KM2, COB_ESG, ESTABILIDADE, EST_ESG, ORIG_STATUS, POP_DENS, QUINTIL, SEM_OBS_P, SEM_REDE, VALIDO.
+   34  # Campos/chaves gerados em c: DOM_DENS, ESG_EST, SEM_ANALIT.
+   35  # Campos/chaves gerados em z: AREA, DOM, DOM_EST, DOM_OBS, POP, SEM, SEM_OBS.
+   36  # Campos/chaves gerados em health: AIH_ANO.
+   37  # Campos/chaves gerados em inter: L.
+   38  # Campos/chaves gerados em rec: ARI, k_comum, mesmo_grupo_pct, rho_indice.
+   39  # Campos/chaves gerados em hexclip: MORAN.
+   40  # Campos/chaves gerados em profiles: n.
+   41  # Campos/chaves gerados em meta: CID_selecionados, mapas_entrada, status.
+   42  # POP_DENS: habitantes/km².
+   43  # SEM_REDE: % de domicílios sem rede de esgoto.
+   44  # AIH_LOCAL: média anual de internações no estabelecimento local.
+   45  # COB_ESG: % do suporte com saneamento publicado.
+   46  # I_S0: índice de pressão com pesos iguais, 0-100.
+   47  # CNES: identificador do estabelecimento de saúde.
+   48  # CID10: código de diagnóstico.
+   49  # GRID_ID: identificador do centro da grade.
+   50  # BACIA: identificador da bacia.
+   51  # Novas variáveis: config/analise_extensivel.json; definir origem, campo, agregação, transformação e peso.
+   52  # CÓDIGO DO PROCESSAMENTO
+   53  
+   54  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   55  import sys as _cp_sys
+   56  from pathlib import Path as _cp_Path
+   57  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   58  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   59      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   60      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   61          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   62          break
+   63  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   64  # FIM DOS CAMINHOS PORTÁTEIS
+   65  
+   66  from pathlib import Path
+   67  import json,math,datetime
+   68  import numpy as np,pandas as pd,geopandas as gpd,rasterio
+   69  from rasterio.features import geometry_mask
+   70  from rasterio.windows import from_bounds,Window
+   71  from shapely.geometry import Point,Polygon
+   72  from scipy.spatial import distance
+   73  from scipy.stats import spearmanr
+   74  from analise_espacial_teco import fitkm,silhouette,ari
+   75  from multivariada_teco import moran_w,queen,align
+   76  R=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));B=R/&#x27;output/02_avaliacao_espacial&#x27;;P=R/&#x27;output/03_multivariada&#x27;;O=R/&#x27;output/04_grade_500m&#x27;;G=O/&#x27;teco_grade_500m.gpkg&#x27;;SEED=20261112
+   77  for d in [&#x27;figuras&#x27;,&#x27;tabelas&#x27;,&#x27;auditoria&#x27;,&#x27;layouts_qgis&#x27;]:(O/d).mkdir(parents=True,exist_ok=True)
+   78  
+   79  # Csv
+   80  def csv(f,n):pd.DataFrame(f).to_csv(O/&#x27;tabelas&#x27;/n,index=False,sep=&#x27;;&#x27;,decimal=&#x27;,&#x27;,encoding=&#x27;utf-8-sig&#x27;)
+   81  
+   82  # Gp
+   83  def gp(f,n):f.to_file(G,layer=n,driver=&#x27;GPKG&#x27;)
+   84  
+   85  # Rasterstats
+   86  def rasterstats(path,geom):
+   87   with rasterio.open(path) as d:
+   88    win=from_bounds(*geom.bounds,d.transform).round_offsets().round_lengths().intersection(Window(0,0,d.width,d.height))
+   89    if win.width&lt;1 or win.height&lt;1:return np.array([])
+   90    a=d.read(1,window=win,masked=True);inside=geometry_mask([geom],a.shape,d.window_transform(win),invert=True);v=np.asarray(a)[inside&amp;~np.ma.getmaskarray(a)];return v[np.isfinite(v)]
+   91  
+   92  # Main
+   93  def main():
+   94   b=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;bacias_estudo&#x27;);union=b.geometry.union_all();xmin,ymin,xmax,ymax=union.bounds;r=500.;dx=1.5*r;dy=np.sqrt(3)*r;pts=[];cells=[];rows=[]
+   95   for ix in range(math.floor((xmin-r)/dx),math.ceil((xmax+r)/dx)+1):
+   96    for iy in range(math.floor((ymin-r)/dy)-1,math.ceil((ymax+r)/dy)+1):
+   97     x=ix*dx;y=iy*dy+(ix%2)*dy/2;hex=Polygon([(x+r*np.cos(np.pi*j/3),y+r*np.sin(np.pi*j/3)) for j in range(6)])
+   98     if not hex.intersects(union):continue
+   99     gid=f&#x27;G{len(rows)+1:04d}&#x27;;p=Point(x,y);rows.append({&#x27;GRID_ID&#x27;:gid,&#x27;E&#x27;:x,&#x27;N&#x27;:y,&#x27;RAIO_M&#x27;:500,&#x27;CENTRO_INT&#x27;:int(union.covers(p))});pts.append(p);cells.append(hex)
+  100   centers=gpd.GeoDataFrame(rows,geometry=pts,crs=31983);hexes=gpd.GeoDataFrame(rows,geometry=cells,crs=31983)
+  101   hexclip=gpd.overlay(hexes,b[[&#x27;id&#x27;,&#x27;geometry&#x27;]],how=&#x27;intersection&#x27;).rename(columns={&#x27;id&#x27;:&#x27;BACIA&#x27;});hexclip=hexclip[hexclip.area&gt;1].reset_index(drop=True)
+  102   circles=centers.copy();circles.geometry=circles.buffer(500,resolution=32);circles=gpd.overlay(circles,b[[&#x27;id&#x27;,&#x27;geometry&#x27;]],how=&#x27;intersection&#x27;).rename(columns={&#x27;id&#x27;:&#x27;BACIA&#x27;});circles=circles[circles.area&gt;1].reset_index(drop=True);circles[&#x27;AREA_KM2&#x27;]=circles.area/1e6
+  103  
+  104   c=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;analise_setores&#x27;);u=gpd.read_file(P/&#x27;teco_multivariada.gpkg&#x27;,layer=&#x27;unidades_ajuste&#x27;);aux=u.set_index(&#x27;setor_id&#x27;)
+  105   c[&#x27;SEM_ANALIT&#x27;]=c.setor_id.map(aux.sem_rede);c[&#x27;ESG_EST&#x27;]=c.setor_id.map(aux.ESG_EST);c[&#x27;DOM_DENS&#x27;]=c.dom_set/c.set_km2
+  106   z=gpd.overlay(circles[[&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;,&#x27;geometry&#x27;]],c[[&#x27;setor_id&#x27;,&#x27;dens_pop&#x27;,&#x27;DOM_DENS&#x27;,&#x27;pct_rede&#x27;,&#x27;SEM_ANALIT&#x27;,&#x27;ESG_EST&#x27;,&#x27;geometry&#x27;]],how=&#x27;intersection&#x27;);z[&#x27;AREA&#x27;]=z.area/1e6;z[&#x27;POP&#x27;]=z.dens_pop*z.AREA;z[&#x27;DOM&#x27;]=z.DOM_DENS*z.AREA;z[&#x27;SEM&#x27;]=z.DOM*z.SEM_ANALIT/100;z[&#x27;DOM_OBS&#x27;]=z.DOM.where(z.pct_rede.notna(),0);z[&#x27;SEM_OBS&#x27;]=z.DOM*(1-z.pct_rede/100);z[&#x27;DOM_EST&#x27;]=z.DOM.where(z.ESG_EST,0)
+  107   sums=z.groupby([&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;])[[&#x27;AREA&#x27;,&#x27;POP&#x27;,&#x27;DOM&#x27;,&#x27;SEM&#x27;,&#x27;DOM_OBS&#x27;,&#x27;SEM_OBS&#x27;,&#x27;DOM_EST&#x27;]].sum(min_count=1)
+  108   circles=circles.merge(sums,on=[&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;],how=&#x27;left&#x27;);circles[&#x27;POP_DENS&#x27;]=circles.POP/circles.AREA_KM2;circles[&#x27;SEM_REDE&#x27;]=100*circles.SEM/circles.DOM.replace(0,np.nan);circles.loc[circles.DOM.eq(0),&#x27;SEM_REDE&#x27;]=0;circles[&#x27;SEM_OBS_P&#x27;]=100*circles.SEM_OBS/circles.DOM_OBS.replace(0,np.nan);circles[&#x27;COB_ESG&#x27;]=100*circles.DOM_OBS/circles.DOM.replace(0,np.nan);circles[&#x27;EST_ESG&#x27;]=100*circles.DOM_EST/circles.DOM.replace(0,np.nan)
+  109   water=gpd.GeoDataFrame(pd.concat([gpd.read_file(R/&#x27;reservatorio&#x27;/f&#x27;{k}.shp&#x27;).to_crs(31983) for k in b.id],ignore_index=True),crs=31983);wunion=water.geometry.union_all()
+  110  
+  111   health=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;saude_cnes_ativos&#x27;);health=health[(health.QA_MUN==1)&amp;health.GRUPO.isin([&#x27;Atenção básica&#x27;,&#x27;Hospital / hospital-dia&#x27;,&#x27;Urgência / pronto atendimento&#x27;,&#x27;Outros serviços assistenciais&#x27;])]
+  112   production=R/&#x27;output/05_auditoria_saude/RD_MG_todos_estabelecimentos_2016_2025.csv&#x27;
+  113   if production.exists():
+  114    prod=pd.read_csv(production,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str});health=health[health.CNES.isin(prod.loc[prod.AIH.gt(0),&#x27;CNES&#x27;])].copy()
+  115   rd=O/&#x27;tabelas/sih_cid10_mensal.csv&#x27;;base=pd.read_csv(B/&#x27;tabelas/sih_bacias_2016_2025.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str});activity=base.groupby(&#x27;CNES&#x27;).internacoes.sum()/10
+  116   if rd.exists():
+  117    rr=pd.read_csv(rd,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str,&#x27;CID10&#x27;:str});fp=O/&#x27;filtro_cid10.csv&#x27;;selected=[]
+  118    if fp.exists():
+  119     filt=pd.read_csv(fp,sep=&#x27;;&#x27;,dtype={&#x27;CID10&#x27;:str});selected=filt.loc[filt.incluir.astype(str).str.lower().isin([&#x27;true&#x27;,&#x27;1&#x27;,&#x27;sim&#x27;]),&#x27;CID10&#x27;].tolist()
+  120    if fp.exists():rr=rr[rr.CID10.isin(selected)]
+  121    activity=rr.groupby(&#x27;CNES&#x27;).internacoes.sum()/10
+  122   health[&#x27;AIH_ANO&#x27;]=health.CNES.map(activity).fillna(0)
+  123   hit=gpd.sjoin(health[[&#x27;CNES&#x27;,&#x27;AIH_ANO&#x27;,&#x27;geometry&#x27;]],circles[[&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;,&#x27;geometry&#x27;]],how=&#x27;inner&#x27;,predicate=&#x27;intersects&#x27;);hgrp=hit.groupby([&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;]).agg(SAUDE_N=(&#x27;CNES&#x27;,&#x27;nunique&#x27;),AIH_LOCAL=(&#x27;AIH_ANO&#x27;,&#x27;sum&#x27;))
+  124   circles=circles.merge(hgrp,on=[&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;],how=&#x27;left&#x27;);circles[[&#x27;SAUDE_N&#x27;,&#x27;AIH_LOCAL&#x27;]]=circles[[&#x27;SAUDE_N&#x27;,&#x27;AIH_LOCAL&#x27;]].fillna(0)
+  125  
+  126   vals=[]
+  127   for row in circles.itertuples():
+  128    use=rasterstats(R/&#x27;teco_base/uso_terra/uso_terra-reservatorio.tif&#x27;,row.geometry);elev=rasterstats(B/&#x27;rasters&#x27;/f&#x27;{row.BACIA}_hipsometria.tif&#x27;,row.geometry);slope=rasterstats(B/&#x27;rasters&#x27;/f&#x27;{row.BACIA}_declividade_pct.tif&#x27;,row.geometry);dist=rasterstats(B/&#x27;rasters&#x27;/f&#x27;{row.BACIA}_distancia_hidrologica_km.tif&#x27;,row.geometry)
+  129    vals.append({&#x27;URB_PCT&#x27;:100*np.mean(use==24) if len(use) else np.nan,&#x27;USO_N&#x27;:len(use),&#x27;HIPS_M&#x27;:np.mean(elev) if len(elev) else np.nan,&#x27;DECL_PCT&#x27;:np.mean(slope) if len(slope) else np.nan,&#x27;DIST_KM&#x27;:np.mean(dist) if len(dist) else np.nan,&#x27;TERRA_PCT&#x27;:100*row.geometry.difference(wunion).area/row.geometry.area})
+  130   circles=pd.concat([circles,pd.DataFrame(vals)],axis=1)
+  131   hyd=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;hidrografia_bacias&#x27;);roads=gpd.read_file(R/&#x27;vias/malha_viaria.shp&#x27;).to_crs(31983)
+  132   for source,col in [(hyd,&#x27;HIDRO_KM&#x27;),(roads,&#x27;VIAS_KM&#x27;)]:
+  133    inter=gpd.overlay(source[[&#x27;geometry&#x27;]],circles[[&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;,&#x27;geometry&#x27;]],how=&#x27;intersection&#x27;,keep_geom_type=True);inter[&#x27;L&#x27;]=inter.length/1000;tot=inter.groupby([&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;]).L.sum();circles[col]=[tot.get((a,b),0) for a,b in zip(circles.GRID_ID,circles.BACIA)]
+  134   circles[&#x27;AIH_ORIG&#x27;]=np.nan;circles[&#x27;ORIG_STATUS&#x27;]=&#x27;Pendente: geografia de CEP e causas selecionadas&#x27;
+  135  
+  136   feats=[&#x27;POP_DENS&#x27;,&#x27;SEM_REDE&#x27;,&#x27;AIH_LOCAL&#x27;];x=np.c_[np.log1p(circles.POP_DENS),circles.SEM_REDE,np.log1p(circles.AIH_LOCAL)];valid=np.isfinite(x).all(1);lo=np.nanmin(x[valid],0);hi=np.nanmax(x[valid],0);norm=(x-lo)/np.where(hi&gt;lo,hi-lo,1)
+  137   circles[&#x27;VALIDO&#x27;]=valid
+  138   for j,f in enumerate(feats):circles[&#x27;N_&#x27;+f]=norm[:,j]
+  139   for f in [&#x27;URB_PCT&#x27;,&#x27;HIPS_M&#x27;,&#x27;DECL_PCT&#x27;,&#x27;DIST_KM&#x27;,&#x27;VIAS_KM&#x27;,&#x27;HIDRO_KM&#x27;]:
+  140    v=circles[f];circles[&#x27;N_&#x27;+f]=(v-v.min())/(v.max()-v.min()) if v.max()&gt;v.min() else 0
+  141  
+  142   scen={&#x27;S0&#x27;:(&#x27;Referência local, pesos iguais&#x27;,[1,1,1]),&#x27;S1&#x27;:(&#x27;Ênfase em atividade hospitalar local&#x27;,[1,1,3]),&#x27;S2&#x27;:(&#x27;Ênfase em ausência de rede&#x27;,[1,3,1]),&#x27;S3&#x27;:(&#x27;Ênfase em adensamento&#x27;,[3,1,1]),&#x27;S4&#x27;:(&#x27;Sem proxy hospitalar local&#x27;,[1,1,0])};scrows=[];models={};krows=[]
+  143   for code,(label,weights) in scen.items():
+  144    w=np.array(weights,float);circles[&#x27;I_&#x27;+code]=100*(norm@w)/w.sum();circles[&#x27;F_&#x27;+code]=np.where(valid,np.minimum((circles[&#x27;I_&#x27;+code].fillna(0)/20).astype(int)+1,5),0)
+  145    for k in range(2,7):
+  146     loss,cent,l=fitkm(norm[valid]*np.sqrt(w),k,SEED+100*int(code[1:]),starts=15);sil=silhouette(norm[valid]*np.sqrt(w),l);models[code,k]=(cent,l);krows.append({&#x27;cenario&#x27;:code,&#x27;k&#x27;:k,&#x27;silhouette&#x27;:sil,&#x27;inercia&#x27;:loss,&#x27;menor_grupo&#x27;:int(np.bincount(l).min())})
+  147    scrows.append({&#x27;cenario&#x27;:code,&#x27;descricao&#x27;:label,&#x27;peso_populacao&#x27;:w[0],&#x27;peso_sem_rede&#x27;:w[1],&#x27;peso_aih_local&#x27;:w[2],&#x27;melhor_k&#x27;:max([a for a in krows if a[&#x27;cenario&#x27;]==code],key=lambda a:a[&#x27;silhouette&#x27;])[&#x27;k&#x27;]})
+  148   k0=scrows[0][&#x27;melhor_k&#x27;];base_labels=models[&#x27;S0&#x27;,k0][1];order=sorted(set(base_labels),key=lambda z:circles.loc[valid,&#x27;I_S0&#x27;].to_numpy()[base_labels==z].mean());mapping={n:i for i,n in enumerate(order)};base_labels=np.array([mapping[n] for n in base_labels]);labs=[]
+  149   for rec in scrows:
+  150    co=rec[&#x27;cenario&#x27;];lab=align(models[co,k0][1],base_labels);labs.append(lab);circles[&#x27;K_&#x27;+co]=0;circles.loc[valid,&#x27;K_&#x27;+co]=lab+1;rec[&#x27;k_comum&#x27;]=k0;rec[&#x27;ARI&#x27;]=ari(base_labels,lab);rec[&#x27;mesmo_grupo_pct&#x27;]=100*np.mean(base_labels==lab);rec[&#x27;rho_indice&#x27;]=spearmanr(circles.loc[valid,&#x27;I_S0&#x27;],circles.loc[valid,&#x27;I_&#x27;+co]).statistic
+  151   circles[&#x27;ESTABILIDADE&#x27;]=np.nan;circles.loc[valid,&#x27;ESTABILIDADE&#x27;]=100*np.mean(np.array(labs)==base_labels,axis=0)
+  152   circles[&#x27;QUINTIL&#x27;]=0
+  153   goodscore=circles.I_S0.notna()
+  154   circles.loc[goodscore,&#x27;QUINTIL&#x27;]=pd.qcut(circles.loc[goodscore,&#x27;I_S0&#x27;].rank(method=&#x27;average&#x27;),5,labels=False,duplicates=&#x27;drop&#x27;)+1
+  155  
+  156   hexclip=hexclip.merge(circles.drop(columns=[&#x27;geometry&#x27;,&#x27;E&#x27;,&#x27;N&#x27;,&#x27;RAIO_M&#x27;,&#x27;CENTRO_INT&#x27;]),on=[&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;],validate=&#x27;one_to_one&#x27;);hexclip[&#x27;MORAN&#x27;]=&#x27;ND&#x27;;mrows=[]
+  157   for key,g in hexclip[hexclip.VALIDO].groupby(&#x27;BACIA&#x27;):
+  158    g=g[g.COB_ESG.ge(95)];w=queen(g);rec,local,ii=moran_w(g.I_S0.to_numpy(),w,local=True);mrows.append({&#x27;bacia&#x27;:key,**rec})
+  159    if local is not None:hexclip.loc[g.index,&#x27;MORAN&#x27;]=&#x27;ISO&#x27;;hexclip.loc[g.index[ii],&#x27;MORAN&#x27;]=local[&#x27;cluster&#x27;];hexclip.loc[g.index[ii],&#x27;MORAN_Q&#x27;]=local[&#x27;q&#x27;]
+  160  
+  161   gp(centers,&#x27;centros_500m&#x27;);gp(circles,&#x27;influencia_500m&#x27;);gp(hexclip,&#x27;grade_resultados&#x27;);gp(b,&#x27;bacias_estudo&#x27;);gp(health,&#x27;saude_referencia&#x27;)
+  162   csv(circles.drop(columns=&#x27;geometry&#x27;),&#x27;indicadores_grade.csv&#x27;);csv(scrows,&#x27;cenarios_grade.csv&#x27;);csv(krows,&#x27;kmeans_grade.csv&#x27;);csv(mrows,&#x27;moran_grade.csv&#x27;);csv([{&#x27;variavel&#x27;:f,&#x27;transformacao&#x27;:&#x27;log1p&#x27; if j!=1 else &#x27;identidade&#x27;,&#x27;min&#x27;:lo[j],&#x27;max&#x27;:hi[j]} for j,f in enumerate(feats)],&#x27;normalizacao_grade.csv&#x27;)
+  163   profiles=circles.groupby(&#x27;K_S0&#x27;)[feats+[&#x27;URB_PCT&#x27;,&#x27;DECL_PCT&#x27;,&#x27;DIST_KM&#x27;]].median().reset_index();profiles[&#x27;n&#x27;]=circles.groupby(&#x27;K_S0&#x27;).size().values;csv(profiles,&#x27;perfis_grade.csv&#x27;)
+  164  
+  165   stats=[]
+  166   for key,g in circles.groupby(&#x27;BACIA&#x27;):
+  167    for col in [*feats,&#x27;POP&#x27;,&#x27;DOM&#x27;,&#x27;COB_ESG&#x27;,&#x27;EST_ESG&#x27;,&#x27;SAUDE_N&#x27;,&#x27;URB_PCT&#x27;,&#x27;HIPS_M&#x27;,&#x27;DECL_PCT&#x27;,&#x27;DIST_KM&#x27;,&#x27;VIAS_KM&#x27;,&#x27;HIDRO_KM&#x27;,*[c for c in circles if c.startswith(&#x27;N_&#x27;)]]:
+  168     a=g[col].dropna();stats.append({&#x27;bacia&#x27;:key,&#x27;variavel&#x27;:col,&#x27;n_validos&#x27;:len(a),&#x27;n_ausentes&#x27;:len(g)-len(a),&#x27;min&#x27;:a.min(),&#x27;mediana&#x27;:a.median(),&#x27;media&#x27;:a.mean(),&#x27;max&#x27;:a.max(),&#x27;desvio_padrao&#x27;:a.std()})
+  169   csv(stats,&#x27;estatisticas_camadas.csv&#x27;)
+  170   meta={&#x27;data&#x27;:datetime.datetime.now().astimezone().isoformat(),&#x27;raio_m&#x27;:500,&#x27;hexagono_raio_externo_m&#x27;:500,&#x27;distancia_centros_m&#x27;:float(np.sqrt(3)*500),&#x27;centros&#x27;:len(centers),&#x27;unidades_bacia&#x27;:len(circles),&#x27;k_base&#x27;:int(k0),&#x27;fontes_pressao&#x27;:feats,&#x27;cenarios&#x27;:scen,&#x27;normalizacao&#x27;:&#x27;log1p em densidade de população e AIH local; min-max fixo; sem percentil na análise principal.&#x27;,&#x27;status&#x27;:&#x27;Exploratório: todas as causas de atividade LOCAL. Não atribui internações aos domicílios; classificação de origem permanece pendente.&#x27;,&#x27;sobreposicao&#x27;:&#x27;Círculos são vizinhanças sobrepostas. Contagens não devem ser somadas entre círculos; hexágonos apenas para apresentação sem sobreposição.&#x27;,&#x27;Moran&#x27;:&#x27;Queen no suporte hexagonal; apenas COB_ESG&gt;=95%; 999 permutações e FDR5%. Vizinhanças de500m compartilham dados: associação parcialmente induzida pela suavização; não prova focos de genes.&#x27;,&#x27;origem_paciente&#x27;:&#x27;AIH_ORIG permanece nulo, sem simular área atendida. CEPs agregados serão usados somente após geocodificação verificável e seleção de causas.&#x27;}
+  171   if selected:meta[&#x27;status&#x27;]=&#x27;Exploratório local: causas selecionadas por CID-10. Não atribui internações à residência nem confirma RAM.&#x27;
+  172   meta[&#x27;CID_selecionados&#x27;]=len(selected);meta[&#x27;mapas_entrada&#x27;]=&#x27;Geometrias nativas; grade apenas para análises.&#x27;
+  173   (O/&#x27;auditoria/metodo_grade.json&#x27;).write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(&#x27;GRADE_CONCLUIDA&#x27;,meta[&#x27;centros&#x27;],meta[&#x27;unidades_bacia&#x27;],&#x27;K&#x27;,k0,flush=True)
+  174  if __name__==&#x27;__main__&#x27;:main()</code></pre></article></html>

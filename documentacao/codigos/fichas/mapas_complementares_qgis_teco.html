@@ -1,0 +1,93 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/mapas_complementares_qgis_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/mapas_complementares_qgis_teco.py</h2>
+<p>Mapas complementares qgis teco. Cartografia/apresentação. As instruções são executadas no corpo principal, na ordem do arquivo.</p>
+<p><strong>Papel.</strong> Cartografia/apresentação. <strong>Fonte inspecionada.</strong> E:\teco\codigo\mapas_complementares_qgis_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>geopandas</td><td>Camadas vetoriais com referência espacial, reprojeção, recorte e interseção de geometrias.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>mapas_grade_teco</td><td>Módulo autoral local; sua ficha está neste relatório.</td></tr><tr><td>matplotlib.colors</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.lines</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.patches</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.path</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>numpy</td><td>Matrizes numéricas, máscaras de validade, transformações, percentis e estatísticas vetorizadas.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>rasterio</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>shutil</td><td>Cópia e movimentação de arquivos, inclusive preservação de versões geradas.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:/teco/entrega_final/01_entradas/13_relevo/{r.id}_conexao_lago.tif — chamada rasterio.open, linha 42.</li>
+<li>E:/teco/entrega_final/01_entradas/11_pontos_coleta/pontos_coleta.shp — chamada gpd.read_file, linha 45.</li>
+<li>E:/teco/entrega_final/00_documentacao/manifesto.json — chamada .read_text, linha 53.</li>
+<p><strong>Saídas.</strong></p>
+<li>E:/teco/entrega_final/00_documentacao/manifesto.json — chamada .write_text, linha 60.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>points: BACIA, COLETA_ID, MICRO.</li>
+<li>x: slug.</li>
+<li>m: mapas.</li>
+<li>row: grupo, slug.</li>
+<p><strong>Campos e chaves gerados.</strong></p>
+<li>points: MICRO.</li>
+<li>m: mapas.</li>
+<p><strong>Sequência.</strong> A rotina executa no corpo principal. Os pontos de leitura/escrita acima e os trechos abaixo mostram a ordem de processamento. Não é uma função que possa ser importada sem considerar esses efeitos.</p>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/mapas_complementares_qgis_teco.py, linhas 41-49.</p>
+<pre><code>for ax,r in zip(axs,cart.b.itertuples()):
+ with rasterio.open(F/f&#x27;01_entradas/13_relevo/{r.id}_conexao_lago.tif&#x27;) as ds:
+  ax.imshow(ds.read(1,masked=True),extent=(ds.bounds.left,ds.bounds.right,ds.bounds.bottom,ds.bounds.top),cmap=ListedColormap([&#x27;#ddd7c6&#x27;,&#x27;#469e9d&#x27;]),norm=BoundaryNorm([.5,1.5,2.5],2),zorder=2)
+cart.finish(fig,axs,&#x27;surface_connection&#x27;,&#x27;Surface connection to the reservoir&#x27;,&#x27;Physical context&#x27;,handles=[Patch(color=&#x27;#ddd7c6&#x27;,label=&#x27;No surface path traced&#x27;),Patch(color=&#x27;#469e9d&#x27;,label=&#x27;Surface path to reservoir&#x27;)])
+points=gpd.read_file(F/&#x27;01_entradas/11_pontos_coleta/pontos_coleta.shp&#x27;);points[&#x27;MICRO&#x27;]=points.COLETA_ID.str.contains(&#x27;microcosm&#x27;,case=False,na=False)
+drop_vertices=np.array([(50,5),(50,5),(14,48),(14,72),(14,94),(30,112),(50,112),(70,112),(86,94),(86,72),(86,48),(50,5),(50,5),(50,5)],float);drop_vertices[:,0]=(drop_vertices[:,0]-50)/55;drop_vertices[:,1]=(60-drop_vertices[:,1])/55;drop=MarkerPath(drop_vertices,[MarkerPath.MOVETO]+[MarkerPath.CURVE4]*12+[MarkerPath.CLOSEPOLY])
+fig,axs=cart.start(&#x27;Sampling sites and in situ microcosms&#x27;,sectors=False)
+for ax,r in zip(axs,cart.b.itertuples()):
+ for micro,marker,color,size in [(False,drop,&#x27;#263d4c&#x27;,25),(True,&#x27;D&#x27;,&#x27;#a04f85&#x27;,33)]:</code></pre>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:/teco/entrega_final/01_entradas/13_relevo/{r.id}_conexao_lago.tif | rasterio.open.
+    5  # Entrada: E:/teco/entrega_final/01_entradas/11_pontos_coleta/pontos_coleta.shp | gpd.read_file.
+    6  # Entrada: E:/teco/entrega_final/00_documentacao/manifesto.json | .read_text.
+    7  # Campos/chaves em points: BACIA, COLETA_ID, MICRO.
+    8  # Campos/chaves em x: slug.
+    9  # Campos/chaves em m: mapas.
+   10  # Campos/chaves em row: grupo, slug.
+   11  # Saída: E:/teco/entrega_final/00_documentacao/manifesto.json | .write_text.
+   12  # Campos/chaves gerados em points: MICRO.
+   13  # Campos/chaves gerados em m: mapas.
+   14  # BACIA: identificador da bacia.
+   15  # CÓDIGO DO PROCESSAMENTO
+   16  
+   17  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   18  import sys as _cp_sys
+   19  from pathlib import Path as _cp_Path
+   20  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   21  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   22      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   23      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   24          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   25          break
+   26  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   27  # FIM DOS CAMINHOS PORTÁTEIS
+   28  
+   29  from pathlib import Path
+   30  import json,shutil
+   31  import numpy as np,geopandas as gpd,rasterio
+   32  from matplotlib.patches import Patch
+   33  from matplotlib.lines import Line2D
+   34  from matplotlib.colors import ListedColormap,BoundaryNorm
+   35  from matplotlib.path import Path as MarkerPath
+   36  import mapas_grade_teco as cart
+   37  R=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));F=R/&#x27;entrega_final&#x27;;D=F/&#x27;00_documentacao&#x27;;O=R/&#x27;output/04_grade_500m&#x27;
+   38  for field,title,slug in [(&#x27;N_POP_DENS&#x27;,&#x27;Normalised population density&#x27;,&#x27;normalised_population&#x27;),(&#x27;N_SEM_REDE&#x27;,&#x27;Normalised lack of sewer connection&#x27;,&#x27;normalised_no_sewer&#x27;),(&#x27;N_AIH_LOCAL&#x27;,&#x27;Normalised local hospital activity&#x27;,&#x27;normalised_hospital&#x27;)]:
+   39   cart.continuous(field,title,slug,&#x27;Normalised inputs&#x27;,&#x27;Normalised value (0–1)&#x27;,1)
+   40  fig,axs=cart.start(&#x27;Surface connection to the reservoir&#x27;,sectors=False)
+   41  for ax,r in zip(axs,cart.b.itertuples()):
+   42   with rasterio.open(F/f&#x27;01_entradas/13_relevo/{r.id}_conexao_lago.tif&#x27;) as ds:
+   43    ax.imshow(ds.read(1,masked=True),extent=(ds.bounds.left,ds.bounds.right,ds.bounds.bottom,ds.bounds.top),cmap=ListedColormap([&#x27;#ddd7c6&#x27;,&#x27;#469e9d&#x27;]),norm=BoundaryNorm([.5,1.5,2.5],2),zorder=2)
+   44  cart.finish(fig,axs,&#x27;surface_connection&#x27;,&#x27;Surface connection to the reservoir&#x27;,&#x27;Physical context&#x27;,handles=[Patch(color=&#x27;#ddd7c6&#x27;,label=&#x27;No surface path traced&#x27;),Patch(color=&#x27;#469e9d&#x27;,label=&#x27;Surface path to reservoir&#x27;)])
+   45  points=gpd.read_file(F/&#x27;01_entradas/11_pontos_coleta/pontos_coleta.shp&#x27;);points[&#x27;MICRO&#x27;]=points.COLETA_ID.str.contains(&#x27;microcosm&#x27;,case=False,na=False)
+   46  drop_vertices=np.array([(50,5),(50,5),(14,48),(14,72),(14,94),(30,112),(50,112),(70,112),(86,94),(86,72),(86,48),(50,5),(50,5),(50,5)],float);drop_vertices[:,0]=(drop_vertices[:,0]-50)/55;drop_vertices[:,1]=(60-drop_vertices[:,1])/55;drop=MarkerPath(drop_vertices,[MarkerPath.MOVETO]+[MarkerPath.CURVE4]*12+[MarkerPath.CLOSEPOLY])
+   47  fig,axs=cart.start(&#x27;Sampling sites and in situ microcosms&#x27;,sectors=False)
+   48  for ax,r in zip(axs,cart.b.itertuples()):
+   49   for micro,marker,color,size in [(False,drop,&#x27;#263d4c&#x27;,25),(True,&#x27;D&#x27;,&#x27;#a04f85&#x27;,33)]:
+   50    q=points[points.BACIA.eq(r.id)&amp;points.MICRO.eq(micro)]
+   51    if len(q):q.plot(ax=ax,marker=marker,color=color,edgecolor=&#x27;white&#x27;,linewidth=.5,markersize=size,zorder=20)
+   52  cart.finish(fig,axs,&#x27;sampling_sites&#x27;,&#x27;Sampling sites and in situ microcosms&#x27;,&#x27;Sampling&#x27;,handles=[Line2D([],[],marker=drop,ls=&#x27;&#x27;,color=&#x27;#263d4c&#x27;,label=&#x27;Sampling point&#x27;),Line2D([],[],marker=&#x27;D&#x27;,ls=&#x27;&#x27;,color=&#x27;#a04f85&#x27;,label=&#x27;In situ microcosm&#x27;)])
+   53  m=json.loads((D/&#x27;manifesto.json&#x27;).read_text(&#x27;utf8&#x27;));slugs={x[&#x27;slug&#x27;] for x in cart.gallery};m[&#x27;mapas&#x27;]=[x for x in m[&#x27;mapas&#x27;] if x[&#x27;slug&#x27;] not in slugs]
+   54  new=[]
+   55  for row in cart.gallery:
+   56   folder=&#x27;14_normalised&#x27; if row[&#x27;grupo&#x27;]==&#x27;Normalised inputs&#x27; else (&#x27;15_connection&#x27; if row[&#x27;slug&#x27;]==&#x27;surface_connection&#x27; else &#x27;16_sampling&#x27;);base=&#x27;03_mapas/&#x27;+folder+&#x27;/&#x27;+row[&#x27;slug&#x27;];record={**row,&#x27;arquivo&#x27;:base+&#x27;.png&#x27;,&#x27;vetorial&#x27;:base+&#x27;.svg&#x27;}
+   57   for key,ext in [(&#x27;arquivo&#x27;,&#x27;png&#x27;),(&#x27;vetorial&#x27;,&#x27;svg&#x27;)]:
+   58    path=F/record[key];path.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(O/&#x27;figuras&#x27;/f&quot;{row[&#x27;slug&#x27;]}.{ext}&quot;,path)
+   59   new.append(record)
+   60  m[&#x27;mapas&#x27;]+=new;(D/&#x27;manifesto.json&#x27;).write_text(json.dumps(m,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(&#x27;New maps&#x27;,len(new),&#x27;sampling&#x27;,points.MICRO.value_counts().to_dict(),flush=True)</code></pre></article></html>

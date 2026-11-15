@@ -1,0 +1,84 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/conectividade_grade_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/conectividade_grade_teco.py</h2>
+<p>Roteia pelo terreno D8 a área válida e o índice de pressão a montante. Produz área contribuinte e pressão média topográfica; não calcula vazão, concentração de genes nem transporte na rede de esgoto.</p>
+<p><strong>Papel.</strong> Processamento ou módulo de apoio. <strong>Fonte inspecionada.</strong> E:\teco\codigo\conectividade_grade_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>collections</td><td>Estruturas de contagem, agrupamento e coleções auxiliares.</td></tr><tr><td>geopandas</td><td>Camadas vetoriais com referência espacial, reprojeção, recorte e interseção de geometrias.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>numpy</td><td>Matrizes numéricas, máscaras de validade, transformações, percentis e estatísticas vetorizadas.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>rasterio</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>rasterio.features</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:/teco/output/04_grade_500m/teco_grade_500m.gpkg [camada &#x27;grade_resultados&#x27;] — chamada gpd.read_file, linha 34.</li>
+<li>E:/teco/sub_bacia/{key}/direcao_d8.tif — chamada rasterio.open, linha 36.</li>
+<li>E:/teco/reservatorio/{key}.shp — chamada gpd.read_file, linha 38.</li>
+<p><strong>Saídas.</strong></p>
+<li>E:/teco/output/04_grade_500m/rasters/{key}_{suffix}.tif — chamada rasterio.open, linha 51.</li>
+<li>E:/teco/output/04_grade_500m/tabelas/conectividade_montante.csv — chamada .to_csv, linha 53.</li>
+<li>E:/teco/output/04_grade_500m/auditoria/conectividade.json — chamada .write_text, linha 53.</li>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>main()</td><td>33-53</td><td>lê dados; grava produtos</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/conectividade_grade_teco.py, linhas 41-47.</p>
+<pre><code>   yy,xx=np.where((dr==code)&amp;domain&amp;~lm);ny=yy+dy;nx=xx+dx;ok=(ny&gt;=0)&amp;(ny&lt;h)&amp;(nx&gt;=0)&amp;(nx&lt;w);src=yy[ok]*w+xx[ok];dst=ny[ok]*w+nx[ok];ok2=domain.ravel()[dst];dest[src[ok2]]=dst[ok2]
+  area=np.where(valid&amp;~lm,abs(t.a*t.e)/1e6,0).ravel();weighted=np.where(valid&amp;~lm,lab,0).ravel()*area;indeg=np.bincount(dest[dest&gt;=0],minlength=n);queue=deque(np.flatnonzero(domain.ravel()&amp;(indeg==0)));processed=0
+  while queue:
+   j=queue.popleft();processed+=1;k=dest[j]
+   if k&gt;=0:
+    area[k]+=area[j];weighted[k]+=weighted[j];indeg[k]-=1
+    if indeg[k]==0:queue.append(k)</code></pre>
+<p>Conta ocorrências ou soma pesos por identificador inteiro. O vetor weights define se há contagem ou acumulação ponderada.</p>
+<p><strong>Cálculos a observar nesta rotina.</strong></p>
+<li>bincount: Conta ocorrências ou soma pesos por identificador inteiro. O vetor weights define se há contagem ou acumulação ponderada.</li>
+<li>sum: Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</li>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:/teco/output/04_grade_500m/teco_grade_500m.gpkg | gpd.read_file | camada=&#x27;grade_resultados&#x27;.
+    5  # Entrada: E:/teco/sub_bacia/{key}/direcao_d8.tif | rasterio.open.
+    6  # Entrada: E:/teco/reservatorio/{key}.shp | gpd.read_file.
+    7  # Saída: E:/teco/output/04_grade_500m/rasters/{key}_{suffix}.tif | rasterio.open.
+    8  # Saída: E:/teco/output/04_grade_500m/tabelas/conectividade_montante.csv | .to_csv.
+    9  # Saída: E:/teco/output/04_grade_500m/auditoria/conectividade.json | .write_text.
+   10  # CÓDIGO DO PROCESSAMENTO
+   11  
+   12  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   13  import sys as _cp_sys
+   14  from pathlib import Path as _cp_Path
+   15  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   16  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   17      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   18      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   19          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   20          break
+   21  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   22  # FIM DOS CAMINHOS PORTÁTEIS
+   23  
+   24  from pathlib import Path
+   25  from collections import deque
+   26  import json
+   27  import numpy as np,pandas as pd,geopandas as gpd,rasterio
+   28  from rasterio.features import rasterize
+   29  R=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));O=R/&#x27;output/04_grade_500m&#x27;;G=O/&#x27;teco_grade_500m.gpkg&#x27;
+   30  D8={1:(-1,1),2:(-1,0),3:(-1,-1),4:(0,-1),5:(1,-1),6:(1,0),7:(1,1),8:(0,1)}
+   31  
+   32  # Main
+   33  def main():
+   34   (O/&#x27;rasters&#x27;).mkdir(exist_ok=True);a=gpd.read_file(G,layer=&#x27;grade_resultados&#x27;);rows=[]
+   35   for key,g in a.groupby(&#x27;BACIA&#x27;):
+   36    with rasterio.open(R/&#x27;sub_bacia&#x27;/key/&#x27;direcao_d8.tif&#x27;) as d:dr=d.read(1);t=d.transform;profile=d.profile
+   37    h,w=dr.shape;n=h*w;lab=rasterize([(r.geometry,float(r.I_S0)) for r in g.itertuples() if np.isfinite(r.I_S0)],out_shape=(h,w),transform=t,fill=-9999,dtype=&#x27;float32&#x27;);valid=lab!=-9999
+   38    lake=gpd.read_file(R/&#x27;reservatorio&#x27;/f&#x27;{key}.shp&#x27;).to_crs(31983);lm=rasterize([(x,1) for x in lake.geometry],out_shape=(h,w),transform=t,dtype=&#x27;uint8&#x27;,all_touched=True).astype(bool)
+   39    domain=valid|lm;dest=np.full(n,-1,dtype=np.int64)
+   40    for code,(dy,dx) in D8.items():
+   41     yy,xx=np.where((dr==code)&amp;domain&amp;~lm);ny=yy+dy;nx=xx+dx;ok=(ny&gt;=0)&amp;(ny&lt;h)&amp;(nx&gt;=0)&amp;(nx&lt;w);src=yy[ok]*w+xx[ok];dst=ny[ok]*w+nx[ok];ok2=domain.ravel()[dst];dest[src[ok2]]=dst[ok2]
+   42    area=np.where(valid&amp;~lm,abs(t.a*t.e)/1e6,0).ravel();weighted=np.where(valid&amp;~lm,lab,0).ravel()*area;indeg=np.bincount(dest[dest&gt;=0],minlength=n);queue=deque(np.flatnonzero(domain.ravel()&amp;(indeg==0)));processed=0
+   43    while queue:
+   44     j=queue.popleft();processed+=1;k=dest[j]
+   45     if k&gt;=0:
+   46      area[k]+=area[j];weighted[k]+=weighted[j];indeg[k]-=1
+   47      if indeg[k]==0:queue.append(k)
+   48    mean=np.divide(weighted,area,out=np.full(n,np.nan),where=area&gt;0).reshape(h,w);mean=np.where(domain,mean,np.nan);area=np.where(domain,area.reshape(h,w),np.nan)
+   49    for suffix,x in [(&#x27;pressao_montante&#x27;,mean),(&#x27;area_montante_km2&#x27;,area)]:
+   50     p=profile.copy();p.update(driver=&#x27;GTiff&#x27;,dtype=&#x27;float32&#x27;,count=1,nodata=-9999,compress=&#x27;deflate&#x27;)
+   51     with rasterio.open(O/&#x27;rasters&#x27;/f&#x27;{key}_{suffix}.tif&#x27;,&#x27;w&#x27;,**p) as d:d.write(np.where(np.isfinite(x),x,-9999).astype(&#x27;float32&#x27;),1)
+   52    rows.append({&#x27;bacia&#x27;:key,&#x27;pixels_dominio&#x27;:int(domain.sum()),&#x27;pixels_processados&#x27;:processed,&#x27;pixels_ciclo&#x27;:int((domain.ravel()&amp;(indeg&gt;0)).sum()),&#x27;max_area_montante_km2&#x27;:float(np.nanmax(area))})
+   53   pd.DataFrame(rows).to_csv(O/&#x27;tabelas/conectividade_montante.csv&#x27;,index=False,sep=&#x27;;&#x27;,encoding=&#x27;utf-8-sig&#x27;);(O/&#x27;auditoria/conectividade.json&#x27;).write_text(json.dumps({&#x27;metodo&#x27;:&#x27;D8; soma de índice*área / soma de área válida a montante; células de água não geram pressão e encerram a trajetória. Não há atenuação ou vazão. Índice S0 LOCAL exploratório, não emissões.&#x27;,&#x27;verificacao&#x27;:rows},ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(&#x27;CONECTIVIDADE&#x27;,rows,flush=True)
+   54  if __name__==&#x27;__main__&#x27;:main()</code></pre></article></html>

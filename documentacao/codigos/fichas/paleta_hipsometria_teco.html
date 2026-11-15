@@ -1,0 +1,56 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/paleta_hipsometria_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/paleta_hipsometria_teco.py</h2>
+<p>Paleta hipsometria teco. Cartografia/apresentação. A organização passa por metadata, colormap.</p>
+<p><strong>Papel.</strong> Cartografia/apresentação. <strong>Fonte inspecionada.</strong> E:\teco\codigo\paleta_hipsometria_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>matplotlib.colors</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:\teco/config/paleta_hipsometria.json — chamada CONFIG.read_text, linha 27.</li>
+<p><strong>Saídas.</strong></p>
+<p>Interface por parâmetros, retorno de funções ou programas chamados; os caminhos literais e as funções estão no inventário e no código integral.</p>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>s: cor, posicao.</li>
+<li>d: paradas.</li>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>metadata()</td><td>27-27</td><td>lê dados Retorno: json.loads(CONFIG.read_text(&#x27;utf8&#x27;)).</td></tr><tr><td>colormap()</td><td>30-32</td><td>Chamadas efetivas: metadata, LinearSegmentedColormap.from_list Retorno: LinearSegmentedColormap.from_list(&#x27;QGIS_GMT_dem1&#x27;, [(s[&#x27;posicao&#x27;], s[&#x27;cor&#x27;]) for s in d[&#x27;paradas&#x27;]], N=1024).</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/paleta_hipsometria_teco.py, linhas 27-32.</p>
+<pre><code>def metadata():return json.loads(CONFIG.read_text(&#x27;utf8&#x27;))
+
+# Colormap
+def colormap():
+ from matplotlib.colors import LinearSegmentedColormap
+ d=metadata();return LinearSegmentedColormap.from_list(&#x27;QGIS_GMT_dem1&#x27;,[(s[&#x27;posicao&#x27;],s[&#x27;cor&#x27;]) for s in d[&#x27;paradas&#x27;]],N=1024)</code></pre>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:\teco/config/paleta_hipsometria.json | CONFIG.read_text.
+    5  # Campos/chaves em s: cor, posicao.
+    6  # Campos/chaves em d: paradas.
+    7  # Saídas: retorno de funções, verificações ou arquivos definidos pelo chamador.
+    8  # CÓDIGO DO PROCESSAMENTO
+    9  
+   10  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   11  import sys as _cp_sys
+   12  from pathlib import Path as _cp_Path
+   13  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   14  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   15      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   16      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   17          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   18          break
+   19  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   20  # FIM DOS CAMINHOS PORTÁTEIS
+   21  
+   22  from pathlib import Path
+   23  import json
+   24  CONFIG=Path(_cp_texto(&#x27;config/paleta_hipsometria.json&#x27;, &#x27;posix&#x27;))
+   25  
+   26  # Metadata
+   27  def metadata():return json.loads(CONFIG.read_text(&#x27;utf8&#x27;))
+   28  
+   29  # Colormap
+   30  def colormap():
+   31   from matplotlib.colors import LinearSegmentedColormap
+   32   d=metadata();return LinearSegmentedColormap.from_list(&#x27;QGIS_GMT_dem1&#x27;,[(s[&#x27;posicao&#x27;],s[&#x27;cor&#x27;]) for s in d[&#x27;paradas&#x27;]],N=1024)</code></pre></article></html>

@@ -1,0 +1,320 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/multivariada_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/multivariada_teco.py</h2>
+<p>Implementa normalização, preenchimento censitário identificado, cenários de pesos, alinhamento de grupos, estabilidade e Moran. O programa principal é a etapa setorial anterior, distinta da grade final.</p>
+<p><strong>Papel.</strong> Processamento ou módulo de apoio. <strong>Fonte inspecionada.</strong> E:\teco\codigo\multivariada_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>analise_espacial_teco</td><td>Módulo autoral local; sua ficha está neste relatório.</td></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>datetime</td><td>Calendários, datas e duração dos períodos avaliados.</td></tr><tr><td>geopandas</td><td>Camadas vetoriais com referência espacial, reprojeção, recorte e interseção de geometrias.</td></tr><tr><td>hashlib</td><td>Assinaturas SHA-256 para identificar alterações de arquivos; não é validação do conteúdo científico.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>math</td><td>Funções matemáticas escalares.</td></tr><tr><td>numpy</td><td>Matrizes numéricas, máscaras de validade, transformações, percentis e estatísticas vetorizadas.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>scipy.optimize</td><td>Agrupamento, matrizes esparsas, distâncias, interpolação e estatísticas; conferir as chamadas na ficha.</td></tr><tr><td>scipy.sparse</td><td>Agrupamento, matrizes esparsas, distâncias, interpolação e estatísticas; conferir as chamadas na ficha.</td></tr><tr><td>scipy.spatial</td><td>Agrupamento, matrizes esparsas, distâncias, interpolação e estatísticas; conferir as chamadas na ficha.</td></tr><tr><td>scipy.stats</td><td>Agrupamento, matrizes esparsas, distâncias, interpolação e estatísticas; conferir as chamadas na ficha.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr><tr><td>warnings</td><td>Controle de avisos de bibliotecas sem alterar a definição do estimador.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:/teco/output/02_avaliacao_espacial/teco_avaliacao.gpkg [camada &#x27;bacias_estudo&#x27;] — chamada gpd.read_file, linha 86.</li>
+<li>E:/teco/output/02_avaliacao_espacial/tabelas/sih_bacias_2016_2025.csv — chamada pd.read_csv, linha 96.</li>
+<p><strong>Saídas.</strong></p>
+<li>E:/teco/output/03_multivariada/tabelas/{n} — chamada df.to_csv, linha 72.</li>
+<li>E:/teco/output/03_multivariada/teco_multivariada.gpkg [camada n] — chamada g.to_file, linha 76.</li>
+<li>E:/teco/output/03_multivariada/shapefiles/{n}.shp — chamada g.to_file, linha 77.</li>
+<li>E:/teco/output/03_multivariada/auditoria/metodo_multivariada.json — chamada .write_text, linha 249.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>c: geometry, setor_id.</li>
+<li>h: CNES, GRUPO, QA_MUN, geometry.</li>
+<li>u: geometry, setor_id.</li>
+<li>hj: CNES, dias_ano, geometry.</li>
+<li>u.loc: setor_id.</li>
+<li>r: cenario, k, silhouette.</li>
+<li>best: grupos_menores_1pct, k, min_grupo, silhouette.</li>
+<li>z: cenario, melhor_k.</li>
+<li>models: S0.</li>
+<li>scores: S0.</li>
+<li>rec: cenario.</li>
+<li>a: ESG_EST, EST_BLOCOS, EST_PESOS, MK_S0, MQ_S0, MQ_S4, MQ_S8, bas_id, elegivel, geometry, setor_id.</li>
+<li>rr: cluster, q.</li>
+<p><strong>Campos e chaves gerados.</strong></p>
+<li>vals: urb_pct.</li>
+<li>u: ESG_EST, ESG_HI, ESG_LO, ESG_OBS, ESG_ORIG, EST_BLOCOS, EST_PESOS, PC1, PC2, elegivel, saude_dens, saude_n, sem_rede, sih_dens, sih_n, sih_reg.</li>
+<li>hj: dias_ano.</li>
+<li>meta: tratamento_lacunas.</li>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>csv(df, n)</td><td>72-72</td><td>grava produtos</td></tr><tr><td>gp(g, n, shp=False)</td><td>75-77</td><td>grava produtos</td></tr><tr><td>log(*x)</td><td>80-80</td><td>Chamadas efetivas: print</td></tr><tr><td>assemble()</td><td>83-122</td><td>lê dados Retorno: (u, c, b, h).</td></tr><tr><td>normalized(u)</td><td>125-133</td><td>Calcula ln(1+x), reduzindo assimetria e preservando zero. O resultado transformado não mantém a unidade física original. Retorno: (x, valid).</td></tr><tr><td>align(labels, reference)</td><td>136-138</td><td>Chamadas efetivas: .reshape, linear_sum_assignment, dict, np.array, max, zip, labels.max, reference.max Retorno: np.array([lookup[v] for v in labels]).</td></tr><tr><td>cluster(u, x, valid)</td><td>141-191</td><td>Associação por postos. Mede ordenação conjunta, não igualdade de magnitude nem desempenho frente a observações ausentes. Retorno: (u, k0, models, base, ev).</td></tr><tr><td>queen(g)</td><td>194-196</td><td>Chamadas efetivas: g.sindex.query, len, csr_matrix, w.maximum, w.setdiag, w.eliminate_zeros, np.ones Retorno: w.</td></tr><tr><td>moran_w(values, w, local=False, seed=SEED)</td><td>199-216</td><td>Chamadas efetivas: np.flatnonzero, .tocsr, len, float, np.random.default_rng, range, np.empty, bh Retorno: (rec, {&#x27;p&#x27;: p, &#x27;q&#x27;: q, &#x27;cluster&#x27;: cl, &#x27;Ii&#x27;: Ii}, original), ({&#x27;n&#x27;: n, &#x27;isolados&#x27;: int((~good).sum()), &#x27;I&#x27;: np.nan, &#x27;p&#x27;: np.nan}, None, original).</td></tr><tr><td>spatial(c, u)</td><td>219-242</td><td>Chamadas efetivas: c.merge, .groupby, csv, gp, .rename, pd.DataFrame, queen, moran_w Retorno: a.</td></tr><tr><td>main()</td><td>245-250</td><td>grava produtos</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/multivariada_teco.py, linhas 126-132.</p>
+<pre><code> valid=u.elegivel;raw=u.loc[valid,FEATURES].to_numpy(float);t=raw.copy()
+ for i in [0,3,4]:t[:,i]=np.log1p(t[:,i])
+ lo=t.min(0);hi=t.max(0);assert (hi&gt;lo).all()
+ x=(t-lo)/(hi-lo)
+ pars=[{&#x27;variavel&#x27;:f,&#x27;transformacao&#x27;:&#x27;log1p&#x27; if j in [0,3,4] else &#x27;identidade&#x27;,&#x27;min_transformado&#x27;:lo[j],&#x27;max_transformado&#x27;:hi[j],&#x27;peso_base&#x27;:1,&#x27;setores_nao_nulos&#x27;:int((raw[:,j]&gt;0).sum())} for j,f in enumerate(FEATURES)]
+ csv(pd.DataFrame(pars),&#x27;parametros_normalizacao.csv&#x27;)
+ csv(pd.DataFrame(x,columns=FEATURES).assign(setor_id=u.loc[valid,&#x27;setor_id&#x27;].values),&#x27;matriz_normalizada.csv&#x27;)</code></pre>
+<p>Calcula ln(1+x), reduzindo assimetria e preservando zero. O resultado transformado não mantém a unidade física original.</p>
+<p>Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</p>
+<p>Trecho de codigo/multivariada_teco.py, linhas 136-142.</p>
+<pre><code>def align(labels,reference):
+ k=max(labels.max(),reference.max())+1;tab=np.bincount(reference*k+labels,minlength=k*k).reshape(k,k)
+ rr,cc=linear_sum_assignment(-tab);lookup=dict(zip(cc,rr));return np.array([lookup[v] for v in labels])
+
+# Cluster
+def cluster(u,x,valid):
+ krows=[];scenario_rows=[];profiles=[];models={};predictions={};scores={};counts=[]</code></pre>
+<p>Conta ocorrências ou soma pesos por identificador inteiro. O vetor weights define se há contagem ou acumulação ponderada.</p>
+<p>Alinha rótulos de grupos pela maior correspondência; evita contar como mudança apenas a troca do número do grupo.</p>
+<p><strong>Cálculos a observar nesta rotina.</strong></p>
+<li>sum: Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</li>
+<li>log1p: Calcula ln(1+x), reduzindo assimetria e preservando zero. O resultado transformado não mantém a unidade física original.</li>
+<li>bincount: Conta ocorrências ou soma pesos por identificador inteiro. O vetor weights define se há contagem ou acumulação ponderada.</li>
+<li>linear_sum_assignment: Alinha rótulos de grupos pela maior correspondência; evita contar como mudança apenas a troca do número do grupo.</li>
+<li>sqrt: Raiz quadrada. No ajuste ponderado do k-means, multiplicar a coluna por √peso faz o peso entrar uma única vez na distância ao quadrado.</li>
+<li>log: Logaritmo natural. Na função de risco, β=ln(RR)/10 converte um risco relativo por 10 µg/m³ para a escala de 1 µg/m³.</li>
+<li>mean: Média no eixo explicitado. Não representa automaticamente média anual ou diária sem a seleção temporal correspondente.</li>
+<li>spearmanr: Associação por postos. Mede ordenação conjunta, não igualdade de magnitude nem desempenho frente a observações ausentes.</li>
+<li>cdist: Matriz de distâncias entre observações. É usada no agrupamento, na silhouette ou na comparação entre centroides.</li>
+<li>svd: Decomposição em valores singulares. Na PCA, a matriz centrada é decomposta em U, s e V; a proporção de variância é s²/Σs². É uma descrição da variação, não teste causal.</li>
+<li>std: Desvio-padrão. Na padronização z, coloca colunas em escala comparável; conferir ddof no trecho.</li>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:/teco/output/02_avaliacao_espacial/teco_avaliacao.gpkg | gpd.read_file | camada=&#x27;bacias_estudo&#x27;.
+    5  # Entrada: E:/teco/output/02_avaliacao_espacial/tabelas/sih_bacias_2016_2025.csv | pd.read_csv.
+    6  # Campos/chaves em c: geometry, setor_id.
+    7  # Campos/chaves em h: CNES, GRUPO, QA_MUN, geometry.
+    8  # Campos/chaves em u: geometry, setor_id.
+    9  # Campos/chaves em hj: CNES, dias_ano, geometry.
+   10  # Campos/chaves em u.loc: setor_id.
+   11  # Campos/chaves em r: cenario, k, silhouette.
+   12  # Campos/chaves em best: grupos_menores_1pct, k, min_grupo, silhouette.
+   13  # Campos/chaves em z: cenario, melhor_k.
+   14  # Campos/chaves em models: S0.
+   15  # Campos/chaves em scores: S0.
+   16  # Campos/chaves em rec: cenario.
+   17  # Campos/chaves em a: ESG_EST, EST_BLOCOS, EST_PESOS, MK_S0, MQ_S0, MQ_S4, MQ_S8, bas_id, elegivel, geometry, setor_id.
+   18  # Campos/chaves em rr: cluster, q.
+   19  # Saída: E:/teco/output/03_multivariada/tabelas/{n} | df.to_csv.
+   20  # Saída: E:/teco/output/03_multivariada/teco_multivariada.gpkg | g.to_file.
+   21  # Saída: E:/teco/output/03_multivariada/shapefiles/{n}.shp | g.to_file.
+   22  # Saída: E:/teco/output/03_multivariada/auditoria/metodo_multivariada.json | .write_text.
+   23  # Campos/chaves gerados em vals: urb_pct.
+   24  # Campos/chaves gerados em u: ESG_EST, ESG_HI, ESG_LO, ESG_OBS, ESG_ORIG, EST_BLOCOS, EST_PESOS, PC1, PC2, elegivel, saude_dens, saude_n, sem_rede, sih_dens, sih_n, sih_reg.
+   25  # Campos/chaves gerados em hj: dias_ano.
+   26  # Campos/chaves gerados em meta: tratamento_lacunas.
+   27  # CNES: identificador do estabelecimento de saúde.
+   28  # Novas variáveis: config/analise_extensivel.json; definir origem, campo, agregação, transformação e peso.
+   29  # CÓDIGO DO PROCESSAMENTO
+   30  
+   31  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   32  import sys as _cp_sys
+   33  from pathlib import Path as _cp_Path
+   34  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   35  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   36      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   37      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   38          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   39          break
+   40  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   41  # FIM DOS CAMINHOS PORTÁTEIS
+   42  
+   43  from pathlib import Path
+   44  import json,math,datetime,hashlib,warnings
+   45  import numpy as np
+   46  import pandas as pd
+   47  import geopandas as gpd
+   48  from scipy.spatial import distance,cKDTree
+   49  from scipy.optimize import linear_sum_assignment
+   50  from scipy.sparse import csr_matrix
+   51  from scipy.stats import spearmanr
+   52  from analise_espacial_teco import fitkm,silhouette,ari,bh,weights,quint
+   53  R=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));BASE=R/&#x27;output/02_avaliacao_espacial&#x27;;O=R/&#x27;output/03_multivariada&#x27;
+   54  for folder in [&#x27;figuras&#x27;,&#x27;tabelas&#x27;,&#x27;shapefiles&#x27;,&#x27;auditoria&#x27;]:(O/folder).mkdir(parents=True,exist_ok=True)
+   55  G=O/&#x27;teco_multivariada.gpkg&#x27;;SEED=20261112;PERM=999
+   56  FEATURES=[&#x27;pop_dens&#x27;,&#x27;sem_rede&#x27;,&#x27;urb_pct&#x27;,&#x27;saude_dens&#x27;,&#x27;sih_dens&#x27;]
+   57  LABELS=[&#x27;Adensamento&#x27;,&#x27;Sem rede&#x27;,&#x27;Urbanização&#x27;,&#x27;Serviços de saúde&#x27;,&#x27;Atividade SIH registrada&#x27;]
+   58  SCENARIOS={
+   59   &#x27;S0&#x27;:(&#x27;Base · todos os pesos 1&#x27;,[1,1,1,1,1]),
+   60   &#x27;S1&#x27;:(&#x27;Ênfase em esgotamento&#x27;,[1,2,1,1,1]),
+   61   &#x27;S2&#x27;:(&#x27;Ênfase assistencial&#x27;,[1,1,1,2,2]),
+   62   &#x27;S3&#x27;:(&#x27;Ênfase em ocupação&#x27;,[2,1,2,1,1]),
+   63   &#x27;S4&#x27;:(&#x27;Sem atividade SIH registrada&#x27;,[1,1,1,1,0]),
+   64   &#x27;S5&#x27;:(&#x27;Sem área urbanizada&#x27;,[1,1,0,1,1]),
+   65   &#x27;S6&#x27;:(&#x27;Sem densidade assistencial&#x27;,[1,1,1,0,1]),
+   66   &#x27;S7&#x27;:(&#x27;Sem adensamento&#x27;,[0,1,1,1,1]),
+   67   &#x27;S8&#x27;:(&#x27;Sem ausência de rede&#x27;,[1,0,1,1,1]),
+   68   &#x27;S9&#x27;:(&#x27;Lacunas de esgoto · limite inferior&#x27;,[1,1,1,1,1]),
+   69   &#x27;S10&#x27;:(&#x27;Lacunas de esgoto · limite superior&#x27;,[1,1,1,1,1])}
+   70  
+   71  # Csv
+   72  def csv(df,n):df.to_csv(O/&#x27;tabelas&#x27;/n,index=False,sep=&#x27;;&#x27;,decimal=&#x27;,&#x27;,encoding=&#x27;utf-8-sig&#x27;)
+   73  
+   74  # Gp
+   75  def gp(g,n,shp=False):
+   76   g.to_file(G,layer=n,driver=&#x27;GPKG&#x27;)
+   77   if shp:g.to_file(O/&#x27;shapefiles&#x27;/f&#x27;{n}.shp&#x27;,driver=&#x27;ESRI Shapefile&#x27;,encoding=&#x27;UTF-8&#x27;)
+   78  
+   79  # Log
+   80  def log(*x):print(*x,flush=True)
+   81  
+   82  # Assemble
+   83  def assemble():
+   84   c=gpd.read_file(BASE/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;analise_setores&#x27;)
+   85   h=gpd.read_file(BASE/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;saude_cnes_ativos&#x27;)
+   86   b=gpd.read_file(BASE/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;bacias_estudo&#x27;)
+   87  
+   88   u=c[[&#x27;setor_id&#x27;,&#x27;geometry&#x27;]].dissolve(by=&#x27;setor_id&#x27;).reset_index()
+   89   vals=c.groupby(&#x27;setor_id&#x27;).agg(pop_dens=(&#x27;dens_pop&#x27;,&#x27;first&#x27;),sem_rede=(&#x27;def_rede&#x27;,&#x27;first&#x27;),area_km2=(&#x27;rec_km2&#x27;,&#x27;sum&#x27;),urb_km2=(&#x27;urb_km2&#x27;,&#x27;sum&#x27;),uso_km2=(&#x27;uso_km2&#x27;,&#x27;sum&#x27;),dom_set=(&#x27;dom_set&#x27;,&#x27;first&#x27;),municipio=(&#x27;mun_cod&#x27;,&#x27;first&#x27;),situacao=(&#x27;situacao&#x27;,&#x27;first&#x27;),pct_direta=(&#x27;pct_rdir&#x27;,&#x27;first&#x27;),dpo_malha=(&#x27;dpo_malha&#x27;,&#x27;first&#x27;),pop_total=(&#x27;pop_2022&#x27;,&#x27;first&#x27;))
+   90   vals[&#x27;urb_pct&#x27;]=100*vals.urb_km2/vals.uso_km2
+   91   u=u.merge(vals,on=&#x27;setor_id&#x27;,validate=&#x27;one_to_one&#x27;)
+   92   clinical=[&#x27;Atenção básica&#x27;,&#x27;Hospital / hospital-dia&#x27;,&#x27;Urgência / pronto atendimento&#x27;,&#x27;Outros serviços assistenciais&#x27;]
+   93   h=h[(h.QA_MUN==1)&amp;h.GRUPO.isin(clinical)]
+   94   joined=gpd.sjoin(h[[&#x27;CNES&#x27;,&#x27;geometry&#x27;]],u[[&#x27;setor_id&#x27;,&#x27;geometry&#x27;]],predicate=&#x27;intersects&#x27;).sort_values([&#x27;CNES&#x27;,&#x27;setor_id&#x27;]).drop_duplicates(&#x27;CNES&#x27;)
+   95   counts=joined.groupby(&#x27;setor_id&#x27;).size();u[&#x27;saude_n&#x27;]=u.setor_id.map(counts).fillna(0).astype(int);u[&#x27;saude_dens&#x27;]=u.saude_n/u.area_km2
+   96   hist=pd.read_csv(BASE/&#x27;tabelas/sih_bacias_2016_2025.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str})
+   97   days=hist.groupby(&#x27;CNES&#x27;).dias_permanencia.sum(min_count=1)/10
+   98   hj=h[h.CNES.isin(days.index)].copy();hj[&#x27;dias_ano&#x27;]=hj.CNES.map(days)
+   99   hs=gpd.sjoin(hj[[&#x27;CNES&#x27;,&#x27;dias_ano&#x27;,&#x27;geometry&#x27;]],u[[&#x27;setor_id&#x27;,&#x27;geometry&#x27;]],predicate=&#x27;intersects&#x27;).sort_values([&#x27;CNES&#x27;,&#x27;setor_id&#x27;]).drop_duplicates(&#x27;CNES&#x27;)
+  100   reg=hs.groupby(&#x27;setor_id&#x27;).dias_ano.sum(min_count=1);u[&#x27;sih_reg&#x27;]=u.setor_id.map(reg).fillna(0.)
+  101  
+  102   u[&#x27;sih_n&#x27;]=u.setor_id.map(hs.groupby(&#x27;setor_id&#x27;).size()).fillna(0).astype(int);u[&#x27;sih_dens&#x27;]=u.sih_reg/u.area_km2
+  103   u[&#x27;ESG_ORIG&#x27;]=u.sem_rede;u[&#x27;ESG_OBS&#x27;]=u.sem_rede.notna()
+  104  
+  105   empty=(u.dpo_malha==0)&amp;(u.pop_total==0);u.loc[empty,&#x27;sem_rede&#x27;]=0
+  106   u[&#x27;ESG_EST&#x27;]=~u.ESG_OBS&amp;~empty
+  107  
+  108   med=u.groupby([&#x27;municipio&#x27;,&#x27;situacao&#x27;]).ESG_ORIG.transform(&#x27;median&#x27;)
+  109   fallback=u.groupby(&#x27;municipio&#x27;).ESG_ORIG.transform(&#x27;median&#x27;).fillna(u.ESG_ORIG.median())
+  110   u.loc[u.ESG_EST,&#x27;sem_rede&#x27;]=med.fillna(fallback)[u.ESG_EST]
+  111  
+  112   upper=(100-u.pct_direta).fillna(100).clip(0,100)
+  113   u[&#x27;ESG_LO&#x27;]=u.ESG_ORIG.where(u.ESG_OBS,0);u[&#x27;ESG_HI&#x27;]=u.ESG_ORIG.where(u.ESG_OBS,upper)
+  114   u.loc[empty,[&#x27;ESG_LO&#x27;,&#x27;ESG_HI&#x27;]]=0
+  115   u[&#x27;sem_rede&#x27;]=np.minimum(u.sem_rede,u.ESG_HI)
+  116   u[&#x27;elegivel&#x27;]=np.isfinite(u[FEATURES]).all(axis=1)&amp;(u.uso_km2&gt;0)
+  117   assert u.setor_id.is_unique and len(u)==1838
+  118   csv(pd.DataFrame(u.drop(columns=&#x27;geometry&#x27;)),&#x27;entradas_por_setor.csv&#x27;)
+  119   csv(pd.DataFrame(hs.drop(columns=&#x27;geometry&#x27;)),&#x27;alocacao_sih_setores.csv&#x27;)
+  120   rules=[(&#x27;pop_dens&#x27;,&#x27;pessoas/km²&#x27;,&#x27;População estimada por área / área do recorte; equivale à densidade do setor original.&#x27;),(&#x27;sem_rede&#x27;,&#x27;% de domicílios&#x27;,&#x27;100 - percentual com rede geral/pluvial ou fossa conectada; não comprova esgoto sem tratamento.&#x27;),(&#x27;urb_pct&#x27;,&#x27;% de área mapeada&#x27;,&#x27;Área urbanizada / área com uso do solo válido, somadas nos recortes do mesmo setor.&#x27;),(&#x27;saude_dens&#x27;,&#x27;estabelecimentos/km²&#x27;,&#x27;CNES ativo, município compatível; apenas serviços assistenciais fixos; exclui farmácia, administrativo e móvel.&#x27;),(&#x27;sih_dens&#x27;,&#x27;dias de permanência registrados/ano/km²&#x27;,&#x27;Soma SIH 2016-2025 dos três estabelecimentos localizados / 10 anos / área; ausência na coorte não significa atividade real nula.&#x27;)]
+  121   csv(pd.DataFrame(rules,columns=[&#x27;variavel&#x27;,&#x27;unidade&#x27;,&#x27;definicao&#x27;]),&#x27;dicionario_multivariada.csv&#x27;)
+  122   return u,c,b,h
+  123  
+  124  # Normalized
+  125  def normalized(u):
+  126   valid=u.elegivel;raw=u.loc[valid,FEATURES].to_numpy(float);t=raw.copy()
+  127   for i in [0,3,4]:t[:,i]=np.log1p(t[:,i])
+  128   lo=t.min(0);hi=t.max(0);assert (hi&gt;lo).all()
+  129   x=(t-lo)/(hi-lo)
+  130   pars=[{&#x27;variavel&#x27;:f,&#x27;transformacao&#x27;:&#x27;log1p&#x27; if j in [0,3,4] else &#x27;identidade&#x27;,&#x27;min_transformado&#x27;:lo[j],&#x27;max_transformado&#x27;:hi[j],&#x27;peso_base&#x27;:1,&#x27;setores_nao_nulos&#x27;:int((raw[:,j]&gt;0).sum())} for j,f in enumerate(FEATURES)]
+  131   csv(pd.DataFrame(pars),&#x27;parametros_normalizacao.csv&#x27;)
+  132   csv(pd.DataFrame(x,columns=FEATURES).assign(setor_id=u.loc[valid,&#x27;setor_id&#x27;].values),&#x27;matriz_normalizada.csv&#x27;)
+  133   return x,valid
+  134  
+  135  # Align
+  136  def align(labels,reference):
+  137   k=max(labels.max(),reference.max())+1;tab=np.bincount(reference*k+labels,minlength=k*k).reshape(k,k)
+  138   rr,cc=linear_sum_assignment(-tab);lookup=dict(zip(cc,rr));return np.array([lookup[v] for v in labels])
+  139  
+  140  # Cluster
+  141  def cluster(u,x,valid):
+  142   krows=[];scenario_rows=[];profiles=[];models={};predictions={};scores={};counts=[]
+  143   idx=u.index[valid];n=len(idx);minimum=max(5,math.ceil(.01*n))
+  144  
+  145   for code,(title,ww) in SCENARIOS.items():
+  146    w=np.asarray(ww,float);xx=x.copy()
+  147    if code in [&#x27;S9&#x27;,&#x27;S10&#x27;]:
+  148     field=&#x27;ESG_LO&#x27; if code==&#x27;S9&#x27; else &#x27;ESG_HI&#x27;;xx[:,1]=u.loc[valid,field].to_numpy()/100
+  149    wx=xx*np.sqrt(w);scores[code]=100*(xx@w)/w.sum();local=[]
+  150    for k in range(2,7):
+  151     loss,cent,l=fitkm(wx,k,SEED+100*int(code[1:]),starts=15)
+  152     sc=silhouette(wx,l);sizes=np.bincount(l,minlength=k)
+  153     row={&#x27;cenario&#x27;:code,&#x27;k&#x27;:k,&#x27;silhouette&#x27;:sc,&#x27;min_grupo&#x27;:int(sizes.min()),&#x27;max_grupo&#x27;:int(sizes.max()),&#x27;grupos_menores_1pct&#x27;:int((sizes&lt;minimum).sum()),&#x27;inercia&#x27;:loss}
+  154     krows.append(row);local.append(row);models[code,k]=(cent,l)
+  155    best=max(local,key=lambda r:r[&#x27;silhouette&#x27;]);predictions[code,&#x27;best&#x27;]=models[code,best[&#x27;k&#x27;]][1]
+  156    scenario_rows.append({&#x27;cenario&#x27;:code,&#x27;nome&#x27;:title,**dict(zip(FEATURES,ww)),&#x27;melhor_k&#x27;:best[&#x27;k&#x27;],&#x27;silhouette_melhor&#x27;:best[&#x27;silhouette&#x27;],&#x27;min_grupo_melhor&#x27;:best[&#x27;min_grupo&#x27;],&#x27;alerta_grupo_pequeno&#x27;:best[&#x27;grupos_menores_1pct&#x27;]&gt;0})
+  157    log(&#x27;CENARIO&#x27;,code,best)
+  158   k0=next(z[&#x27;melhor_k&#x27;] for z in scenario_rows if z[&#x27;cenario&#x27;]==&#x27;S0&#x27;)
+  159   base=models[&#x27;S0&#x27;,k0][1]
+  160  
+  161   order=sorted(np.unique(base),key=lambda z:scores[&#x27;S0&#x27;][base==z].mean());mp={l:i for i,l in enumerate(order)};base=np.array([mp[z] for z in base])
+  162   base_scores=scores[&#x27;S0&#x27;];stacks=[]
+  163   for rec in scenario_rows:
+  164    co=rec[&#x27;cenario&#x27;];lab=align(models[co,k0][1],base);predictions[co,&#x27;fixed&#x27;]=lab;stacks.append(lab)
+  165    rec.update(k_comum=k0,ARI_base=ari(base,lab),mesmo_perfil_pct=100*np.mean(base==lab),rho_escore=spearmanr(base_scores,scores[co]).statistic,silhouette_k_comum=next(r[&#x27;silhouette&#x27;] for r in krows if r[&#x27;cenario&#x27;]==co and r[&#x27;k&#x27;]==k0))
+  166    u[f&#x27;I_{co}&#x27;]=np.nan;u.loc[idx,f&#x27;I_{co}&#x27;]=scores[co]
+  167    u[f&#x27;K_{co}&#x27;]=0;u.loc[idx,f&#x27;K_{co}&#x27;]=lab+1
+  168    for cl in np.unique(lab):
+  169     rows=u.loc[idx[lab==cl]];profiles.append({&#x27;cenario&#x27;:co,&#x27;cluster&#x27;:int(cl+1),&#x27;n&#x27;:len(rows),**{f:rows[f].median() for f in FEATURES}})
+  170    counts +=[{&#x27;cenario&#x27;:co,&#x27;cluster&#x27;:int(cl+1),&#x27;n&#x27;:int((lab==cl).sum())} for cl in np.unique(lab)]
+  171   for k in range(2,7):
+  172    raw=models[&#x27;S0&#x27;,k][1];order=sorted(np.unique(raw),key=lambda z:base_scores[raw==z].mean());mp={l:i+1 for i,l in enumerate(order)}
+  173    u[f&#x27;BASE_K{k}&#x27;]=0;u.loc[idx,f&#x27;BASE_K{k}&#x27;]=[mp[z] for z in raw]
+  174   u[&#x27;EST_PESOS&#x27;]=np.nan;u.loc[idx,&#x27;EST_PESOS&#x27;]=100*np.mean(np.array(stacks)==base,axis=0)
+  175  
+  176   xy=np.c_[u.loc[idx].geometry.representative_point().x,u.loc[idx].geometry.representative_point().y]
+  177   block=np.floor(xy/2000).astype(int);_,block=np.unique(block,axis=0,return_inverse=True);blocks=np.unique(block);rng=np.random.default_rng(SEED)
+  178   sims=[];boot=[]
+  179   for it in range(30):
+  180    chosen=rng.choice(blocks,size=max(2,int(.8*len(blocks))),replace=False);take=np.isin(block,chosen)
+  181    cent,lab=fitkm(x[take],k0,SEED+500+it,starts=5)[1:]
+  182    pred=distance.cdist(x,cent).argmin(1);pred=align(pred,base);boot.append(pred);sims.append({&#x27;replica&#x27;:it+1,&#x27;blocos_mantidos&#x27;:len(chosen),&#x27;setores_treino&#x27;:int(take.sum()),&#x27;ARI&#x27;:ari(base,pred),&#x27;mesmo_perfil_pct&#x27;:100*np.mean(base==pred)})
+  183   u[&#x27;EST_BLOCOS&#x27;]=np.nan;u.loc[idx,&#x27;EST_BLOCOS&#x27;]=100*np.mean(np.array(boot)==base,axis=0)
+  184  
+  185   xc=x-x.mean(0);U,s,V=np.linalg.svd(xc,full_matrices=False);ev=s*s/(s*s).sum();pc=U[:,:2]*s[:2]
+  186   if np.corrcoef(pc[:,0],base_scores)[0,1]&lt;0:pc[:,0]*=-1;V[0]*=-1
+  187   u[&#x27;PC1&#x27;]=np.nan;u[&#x27;PC2&#x27;]=np.nan;u.loc[idx,&#x27;PC1&#x27;]=pc[:,0];u.loc[idx,&#x27;PC2&#x27;]=pc[:,1]
+  188   csv(pd.DataFrame({&#x27;variavel&#x27;:FEATURES,&#x27;PC1&#x27;:V[0],&#x27;PC2&#x27;:V[1]}),&#x27;pca_cargas.csv&#x27;)
+  189   csv(pd.DataFrame({&#x27;componente&#x27;:range(1,6),&#x27;variancia_explicada&#x27;:ev}),&#x27;pca_variancia.csv&#x27;)
+  190   csv(pd.DataFrame(krows),&#x27;kmeans_todos_k.csv&#x27;);csv(pd.DataFrame(scenario_rows),&#x27;cenarios_sensibilidade.csv&#x27;);csv(pd.DataFrame(profiles),&#x27;perfis_cenarios.csv&#x27;);csv(pd.DataFrame(sims),&#x27;estabilidade_blocos.csv&#x27;)
+  191   log(&#x27;K_COMUM&#x27;,k0);return u,k0,models,base,ev
+  192  
+  193  # Queen
+  194  def queen(g):
+  195   pairs=g.sindex.query(g.geometry,predicate=&#x27;touches&#x27;);n=len(g)
+  196   w=csr_matrix((np.ones(pairs.shape[1]),(pairs[0],pairs[1])),shape=(n,n));w=w.maximum(w.T);w.setdiag(0);w.eliminate_zeros();return w
+  197  
+  198  # Moran w
+  199  def moran_w(values,w,local=False,seed=SEED):
+  200   good=np.asarray(w.sum(1)).ravel()&gt;0;original=np.flatnonzero(good);w=w[good][:,good].tocsr();v=np.asarray(values)[good];n=len(v)
+  201   if n&lt;4 or v.std()==0:return {&#x27;n&#x27;:n,&#x27;isolados&#x27;:int((~good).sum()),&#x27;I&#x27;:np.nan,&#x27;p&#x27;:np.nan},None,original
+  202   w=w.multiply(1/np.asarray(w.sum(1))).tocsr();z=(v-v.mean())/v.std();lag=w@z;I=float(z@lag/(z@z));expected=-1/(n-1);rng=np.random.default_rng(seed)
+  203   ss=[]
+  204   for _ in range(PERM):zp=rng.permutation(z);ss.append(zp@(w@zp)/(zp@zp))
+  205   pv=(1+(np.abs(np.array(ss)-expected)&gt;=abs(I-expected)).sum())/(PERM+1)
+  206   rec={&#x27;n&#x27;:n,&#x27;isolados&#x27;:int((~good).sum()),&#x27;I&#x27;:I,&#x27;p&#x27;:pv,&#x27;permutacoes&#x27;:PERM}
+  207   if not local:return rec,None,original
+  208   Ii=z*lag;p=np.empty(n)
+  209   for i in range(n):
+  210    start,end=w.indptr[i:i+2];ww=w.data[start:end];m=len(ww);draws=rng.integers(0,n-1,size=(PERM,m))
+  211    for col in range(1,m):
+  212     bad=(draws[:,col,None]==draws[:,:col]).any(1)
+  213     while bad.any():draws[bad,col]=rng.integers(0,n-1,size=bad.sum());bad=(draws[:,col,None]==draws[:,:col]).any(1)
+  214    draws+=draws&gt;=i;sim=z[i]*(z[draws]@ww);ex=-z[i]*z[i]/(n-1);p[i]=(1+(np.abs(sim-ex)&gt;=abs(Ii[i]-ex)).sum())/(PERM+1)
+  215   q=bh(p);cl=np.where((z&gt;=0)&amp;(lag&gt;=0),&#x27;HH&#x27;,np.where((z&lt;0)&amp;(lag&lt;0),&#x27;LL&#x27;,np.where(z&gt;=0,&#x27;HL&#x27;,&#x27;LH&#x27;)));cl=np.where(q&lt;=.05,cl,&#x27;NS&#x27;)
+  216   return rec,{&#x27;p&#x27;:p,&#x27;q&#x27;:q,&#x27;cluster&#x27;:cl,&#x27;Ii&#x27;:Ii},original
+  217  
+  218  # Spatial
+  219  def spatial(c,u):
+  220   extra=[x for x in u.columns if x not in c.columns and x!=&#x27;geometry&#x27;]
+  221  
+  222   a=c.merge(u[[&#x27;setor_id&#x27;,*extra]],on=&#x27;setor_id&#x27;,validate=&#x27;many_to_one&#x27;)
+  223   rows=[];qcounts=[]
+  224   for col in [&#x27;MQ_S0&#x27;,&#x27;MK_S0&#x27;,&#x27;MQ_S4&#x27;,&#x27;MQ_S8&#x27;]:a[col]=&#x27;ND&#x27;
+  225   for basin,allg in a[a.elegivel].groupby(&#x27;bas_id&#x27;):
+  226    for var in [&#x27;I_S0&#x27;,&#x27;I_S1&#x27;,&#x27;I_S2&#x27;,&#x27;I_S3&#x27;,&#x27;I_S4&#x27;,&#x27;I_S5&#x27;,&#x27;I_S8&#x27;,*FEATURES]:
+  227  
+  228     strict=var.startswith(&#x27;I_&#x27;) and var!=&#x27;I_S8&#x27; or var==&#x27;sem_rede&#x27;
+  229     g=allg[allg.ESG_OBS] if strict else allg
+  230     xy=np.c_[g.geometry.representative_point().x,g.geometry.representative_point().y];qw=queen(g)
+  231     for wname,ww in [(&#x27;queen&#x27;,qw),(&#x27;knn8&#x27;,weights(xy,8))] if var==&#x27;I_S0&#x27; else [(&#x27;queen&#x27;,qw)]:
+  232      loc=(var==&#x27;I_S0&#x27;) or (var in [&#x27;I_S4&#x27;,&#x27;I_S8&#x27;] and wname==&#x27;queen&#x27;);rec,rr,ids=moran_w(g[var].to_numpy(),ww,local=loc);rows.append({&#x27;bacia&#x27;:basin,&#x27;variavel&#x27;:var,&#x27;vizinhos&#x27;:wname,&#x27;exclui_esgoto_estimado&#x27;:strict,**rec})
+  233      if rr is not None:
+  234       field={&#x27;I_S4&#x27;:&#x27;MQ_S4&#x27;,&#x27;I_S8&#x27;:&#x27;MQ_S8&#x27;}.get(var,&#x27;MQ_S0&#x27; if wname==&#x27;queen&#x27; else &#x27;MK_S0&#x27;);a.loc[g.index,field]=&#x27;ISO&#x27;;a.loc[g.index[ids],field]=rr[&#x27;cluster&#x27;];a.loc[g.index[ids],field+&#x27;_Q&#x27;]=rr[&#x27;q&#x27;]
+  235       qcounts +=[{&#x27;bacia&#x27;:basin,&#x27;mapa&#x27;:field,&#x27;classe&#x27;:cl,&#x27;n&#x27;:int((a.loc[g.index,field]==cl).sum())} for cl in [&#x27;HH&#x27;,&#x27;LL&#x27;,&#x27;HL&#x27;,&#x27;LH&#x27;,&#x27;NS&#x27;,&#x27;ISO&#x27;]]
+  236    for k in [4,12]:
+  237     g=allg[allg.ESG_OBS];xy=np.c_[g.geometry.representative_point().x,g.geometry.representative_point().y]
+  238     rec,_,_=moran_w(g.I_S0.to_numpy(),weights(xy,k));rows.append({&#x27;bacia&#x27;:basin,&#x27;variavel&#x27;:&#x27;I_S0&#x27;,&#x27;vizinhos&#x27;:f&#x27;knn{k}&#x27;,**rec})
+  239   csv(pd.DataFrame(rows),&#x27;moran_cenarios.csv&#x27;);csv(pd.DataFrame(qcounts),&#x27;moran_classes.csv&#x27;)
+  240   gp(a,&#x27;setores_multivariada&#x27;);gp(u,&#x27;unidades_ajuste&#x27;)
+  241   slim=a[[&#x27;setor_id&#x27;,&#x27;bas_id&#x27;,*[f&#x27;I_S{i}&#x27; for i in range(11)],*[f&#x27;K_S{i}&#x27; for i in range(11)],&#x27;EST_PESOS&#x27;,&#x27;EST_BLOCOS&#x27;,&#x27;ESG_EST&#x27;,&#x27;MQ_S0&#x27;,&#x27;MK_S0&#x27;,&#x27;MQ_S4&#x27;,&#x27;MQ_S8&#x27;,&#x27;geometry&#x27;]].rename(columns={&#x27;setor_id&#x27;:&#x27;CD_SETOR&#x27;,&#x27;bas_id&#x27;:&#x27;BACIA&#x27;})
+  242   gp(slim,&#x27;cenarios_setores&#x27;,True);csv(pd.DataFrame(a.drop(columns=&#x27;geometry&#x27;)),&#x27;resultados_cenarios_setores.csv&#x27;);return a
+  243  
+  244  # Main
+  245  def main():
+  246   u,c,b,h=assemble();x,valid=normalized(u);u,k0,models,base,ev=cluster(u,x,valid);a=spatial(c,u)
+  247   meta={&#x27;gerado&#x27;:datetime.datetime.now().astimezone().isoformat(),&#x27;semente&#x27;:SEED,&#x27;inputs&#x27;:FEATURES,&#x27;cenarios&#x27;:SCENARIOS,&#x27;unidades&#x27;:len(u),&#x27;elegiveis&#x27;:int(valid.sum()),&#x27;k_base&#x27;:k0,&#x27;bibliotecas&#x27;:{&#x27;numpy&#x27;:np.__version__,&#x27;pandas&#x27;:pd.__version__,&#x27;geopandas&#x27;:gpd.__version__,&#x27;scipy&#x27;:__import__(&#x27;scipy&#x27;).__version__},&#x27;normalizacao&#x27;:&#x27;log1p nas densidades; min-max fixo nos setores completos; sem percentis na análise principal&#x27;,&#x27;distancia_kmeans&#x27;:&#x27;Euclidiana em X * sqrt(peso), peso 1 em cada variável no S0&#x27;,&#x27;pca_variancia&#x27;:ev.tolist(),&#x27;moran&#x27;:&#x27;queen e kNN simetrizado; 999 permutações; local condicional; BH/FDR 5% por bacia; ilhas explícitas&#x27;,&#x27;sih&#x27;:&#x27;zeros representam ausência de atividade alocada da coorte registrada, não internação real nula; S4 retira essa variável&#x27;,&#x27;hidrologia&#x27;:&#x27;relevo, vias e D8 são condicionantes/contexto, não indicadores de fonte somados ao índice&#x27;}
+  248   meta[&#x27;tratamento_lacunas&#x27;]={&#x27;esgoto_publicado&#x27;:int(u.ESG_OBS.sum()),&#x27;esgoto_estimado_matriz&#x27;:int(u.ESG_EST.sum()),&#x27;setores_sem_uso_solo_valido&#x27;:int((~valid).sum()),&#x27;regra&#x27;:&#x27;Mediana do município e situação censitária; fallback municipal; limitada pelo percentual de rede direta publicado. Zero de pressão residencial somente com população e domicílios oficialmente nulos. Shapefiles censitários originais preservados.&#x27;,&#x27;sensibilidade&#x27;:&#x27;S9/S10 usam limites inferior e superior; não são intervalos probabilísticos.&#x27;,&#x27;moran&#x27;:&#x27;Índices com esgoto e componente sem_rede usam apenas esgoto publicado (ESG_OBS).&#x27;}
+  249   (O/&#x27;auditoria/metodo_multivariada.json&#x27;).write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;)
+  250   log(&#x27;CONCLUIDO_MULTIVARIADA&#x27;,O)
+  251  if __name__==&#x27;__main__&#x27;:main()</code></pre></article></html>

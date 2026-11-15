@@ -1,0 +1,453 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/integrar_populacao_uso_rede.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/integrar_populacao_uso_rede.py</h2>
+<p>Integrar populacao uso rede. Processamento ou módulo de apoio. A organização passa por archive_outputs, pop_table, lines, network_layers, add_network, etes, export_vector, main, readme, preview.</p>
+<p><strong>Papel.</strong> Processamento ou módulo de apoio. <strong>Fonte inspecionada.</strong> E:\teco\codigo\integrar_populacao_uso_rede.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>datetime</td><td>Calendários, datas e duração dos períodos avaliados.</td></tr><tr><td>gc</td><td>Dependência importada; conferir as chamadas efetivas abaixo e a instalação do ambiente correspondente.</td></tr><tr><td>geopandas</td><td>Camadas vetoriais com referência espacial, reprojeção, recorte e interseção de geometrias.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>math</td><td>Funções matemáticas escalares.</td></tr><tr><td>matplotlib</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.colors</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.patches</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.pyplot</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.ticker</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>numpy</td><td>Matrizes numéricas, máscaras de validade, transformações, percentis e estatísticas vetorizadas.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>preparar_saneamento_ibge</td><td>Módulo autoral local; sua ficha está neste relatório.</td></tr><tr><td>rasterio</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>rasterio.features</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>rasterio.windows</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>shapely</td><td>Operações geométricas usadas nas áreas, distâncias, limites e relações espaciais.</td></tr><tr><td>shapely.ops</td><td>Operações geométricas usadas nas áreas, distâncias, limites e relações espaciais.</td></tr><tr><td>shutil</td><td>Cópia e movimentação de arquivos, inclusive preservação de versões geradas.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr><tr><td>zipfile</td><td>Leitura/empacotamento de arquivos ZIP e estruturas internas de documentos.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:/teco/saneamento_ibge/populacao_basico/Agregados_por_setores_basico_BR.csv — chamada pd.read_csv, linha 152.</li>
+<li>E:/teco/teco_base/uso_terra/uso_terra-reservatorio.tif — chamada rasterio.open, linha 163.</li>
+<li>E:/teco/esgoto_bh/REDE_ESGOTO.shp — chamada gpd.read_file, linha 207.</li>
+<li>E:/teco/ete/ide_0603_mg_ete_pto.shp — chamada gpd.read_file, linha 247.</li>
+<li>E:/teco/output/01_integracao_territorial/shapefiles/{name}.shp — chamada gpd.read_file, linha 266.</li>
+<li>E:/teco/sub_bacia/shapefiles_v6_20261109_141015/sub_bacias_exclusivas.shp — chamada gpd.read_file, linha 277.</li>
+<li>E:/teco/saneamento_ibge/resultados/saneamento_teco.gpkg [camada &#x27;resumo_bacias&#x27;] — chamada gpd.read_file, linha 297.</li>
+<li>E:/teco/saneamento_ibge/MG_setores_CD2022.shp — chamada gpd.read_file, linha 279.</li>
+<p><strong>Saídas.</strong></p>
+<li>E:/teco/descontinuado/dt.datetime.now().strftime(&#x27;%Y%m%d_%H%M%S_integracao_territorial&#x27;)/manifesto.json — chamada .write_text, linha 146.</li>
+<li>E:/teco/output/01_integracao_territorial/uso_ocupacao_bacias.tif — chamada rasterio.open, linha 195.</li>
+<li>{gpkg} [camada layer] — chamada g.to_file, linha 264.</li>
+<li>E:/teco/output/01_integracao_territorial/shapefiles/{name}.shp — chamada g.to_file, linha 266.</li>
+<li>E:/teco/output/01_integracao_territorial/integracao_territorial_teco.gpkg [camada &#x27;rede_bh_registros_origem&#x27;] — chamada rawnet.to_file, linha 308.</li>
+<li>E:/teco/output/01_integracao_territorial/uso_ocupacao_por_classe.csv — chamada .to_csv, linha 311.</li>
+<li>E:/teco/output/01_integracao_territorial/atributos_integrados_bacias.csv — chamada .to_csv, linha 312.</li>
+<li>E:/teco/output/01_integracao_territorial/resumo_bacias.csv — chamada .to_csv, linha 313.</li>
+<li>E:/teco/output/01_integracao_territorial/rede_bh_registros_origem.csv — chamada .to_csv, linha 314.</li>
+<li>E:/teco/output/01_integracao_territorial/dicionario_campos.csv — chamada .to_csv, linha 316.</li>
+<li>E:/teco/output/01_integracao_territorial/auditoria_integracao.json — chamada .write_text, linha 320.</li>
+<li>E:/teco/output/01_integracao_territorial/LEIA_PRIMEIRO.md — chamada .write_text, linha 359.</li>
+<li>E:/teco/output/01_integracao_territorial/Previa_{field}.png — chamada fig.savefig, linha 379.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>p: setor_id.</li>
+<li>unions: N, NI, S.</li>
+<li>bas: bas_id, bas_nome, geometry.</li>
+<li>net: bas_id, comp_m.</li>
+<li>r: DATA, ID_BASE_TR, ID_RDESG, LADO_RDESG, bas_nome, dens_pop, geometry, pct_urb, pop_a_est, sit_rede, uso_cov.</li>
+<li>raw: data_apur.</li>
+<li>clean: C, NI.</li>
+<li>g: area_bh.</li>
+<li>row: area_bh.</li>
+<li>values: N, S.</li>
+<li>e: ete_id, fase_lic, geometry, mun_nome, situ_lic.</li>
+<li>old: setor_id.</li>
+<li>c.loc: pop_a_est.</li>
+<li>summary.at: pop_u_est.</li>
+<li>net.loc: comp_m.</li>
+<li>audit: summary.</li>
+<li>a: summary.</li>
+<p><strong>Campos e chaves gerados.</strong></p>
+<li>DESC: out_km2, pct_out.</li>
+<li>g: area_bh, bh_pct, out_km2, pct_out, rede_qual, uso_ano, uso_cov, uso_dom, uso_km2, uso_npix, uso_valid.</li>
+<li>source: sit_rede.</li>
+<li>net: comp_m.</li>
+<li>raw: comp_m, data_apur.</li>
+<li>geo: cens_urb, dens_dom, dens_pop.</li>
+<li>clip: frac_area, rec_km2.</li>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>archive_outputs()</td><td>141-147</td><td>grava produtos</td></tr><tr><td>pop_table(ids)</td><td>150-158</td><td>lê dados Retorno: p.</td></tr><tr><td>RasterStats()</td><td>161-196</td><td>Chamadas efetivas: rasterio.open, from_bounds, Window, self.ds.window_transform, self.ds.read, abs, np.unique, print Retorno: (g, rows).</td></tr><tr><td>lines(g)</td><td>199-203</td><td>Chamadas efetivas: hasattr, lines Retorno: [], [].</td></tr><tr><td>network_layers(bas, bh_domain)</td><td>206-225</td><td>lê dados; grava produtos Retorno: (net, raw, audit).</td></tr><tr><td>add_network(g, net, bh_domain)</td><td>228-243</td><td>Chamadas efetivas: g.copy, g.iterrows, list, row.geometry.intersection, net.sindex.query, len, statuscols.items, sum Retorno: g.</td></tr><tr><td>etes(bas)</td><td>246-255</td><td>lê dados Retorno: e, s.</td></tr><tr><td>export_vector(g, name, gpkg, layer)</td><td>258-273</td><td>lê dados; grava produtos</td></tr><tr><td>main()</td><td>276-322</td><td>lê dados; grava produtos</td></tr><tr><td>readme(a)</td><td>325-359</td><td>grava produtos</td></tr><tr><td>preview(clip, bas)</td><td>362-379</td><td>grava produtos</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/integrar_populacao_uso_rede.py, linhas 170-176.</p>
+<pre><code>        n=len(g);lab=rasterize([(p,i+1) for i,p in enumerate(g.geometry)],out_shape=self.a.shape,transform=self.transform,fill=0,all_touched=False,dtype=&#x27;int32&#x27;)
+        total=np.bincount(lab.ravel(),minlength=n+1)[1:]
+        hist={int(c):np.bincount(lab[self.a==c],minlength=n+1)[1:] for c in self.codes}
+        valid=sum(hist.values());g=g.copy();g[&#x27;uso_ano&#x27;]=2025;g[&#x27;uso_npix&#x27;]=total;g[&#x27;uso_valid&#x27;]=valid
+        g[&#x27;uso_cov&#x27;]=np.divide(100*valid,total,out=np.full(n,np.nan),where=total&gt;0);g[&#x27;uso_km2&#x27;]=valid*self.cell_area/1e6
+        assigned=np.zeros(n,dtype=np.int64);stack=[];labels=[]
+        for prefix,(codes,label) in GROUPS.items():</code></pre>
+<p>Conta ocorrências ou soma pesos por identificador inteiro. O vetor weights define se há contagem ou acumulação ponderada.</p>
+<p>Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</p>
+<p><strong>Cálculos a observar nesta rotina.</strong></p>
+<li>bincount: Conta ocorrências ou soma pesos por identificador inteiro. O vetor weights define se há contagem ou acumulação ponderada.</li>
+<li>sum: Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</li>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:/teco/saneamento_ibge/populacao_basico/Agregados_por_setores_basico_BR.csv | pd.read_csv.
+    5  # Entrada: E:/teco/teco_base/uso_terra/uso_terra-reservatorio.tif | rasterio.open.
+    6  # Entrada: E:/teco/esgoto_bh/REDE_ESGOTO.shp | gpd.read_file.
+    7  # Entrada: E:/teco/ete/ide_0603_mg_ete_pto.shp | gpd.read_file.
+    8  # Entrada: E:/teco/output/01_integracao_territorial/shapefiles/{name}.shp | gpd.read_file.
+    9  # Entrada: E:/teco/sub_bacia/shapefiles_v6_20261109_141015/sub_bacias_exclusivas.shp | gpd.read_file.
+   10  # Entrada: E:/teco/saneamento_ibge/resultados/saneamento_teco.gpkg | gpd.read_file | camada=&#x27;resumo_bacias&#x27;.
+   11  # Entrada: E:/teco/saneamento_ibge/MG_setores_CD2022.shp | gpd.read_file.
+   12  # Campos/chaves em p: setor_id.
+   13  # Campos/chaves em unions: N, NI, S.
+   14  # Campos/chaves em bas: bas_id, bas_nome, geometry.
+   15  # Campos/chaves em net: bas_id, comp_m.
+   16  # Campos/chaves em r: DATA, ID_BASE_TR, ID_RDESG, LADO_RDESG, bas_nome, dens_pop, geometry, pct_urb, pop_a_est, sit_rede, uso_cov.
+   17  # Campos/chaves em raw: data_apur.
+   18  # Campos/chaves em clean: C, NI.
+   19  # Campos/chaves em g: area_bh.
+   20  # Campos/chaves em row: area_bh.
+   21  # Campos/chaves em values: N, S.
+   22  # Campos/chaves em e: ete_id, fase_lic, geometry, mun_nome, situ_lic.
+   23  # Campos/chaves em old: setor_id.
+   24  # Campos/chaves em c.loc: pop_a_est.
+   25  # Campos/chaves em summary.at: pop_u_est.
+   26  # Campos/chaves em net.loc: comp_m.
+   27  # Campos/chaves em audit: summary.
+   28  # Campos/chaves em a: summary.
+   29  # Saída: E:/teco/descontinuado/dt.datetime.now().strftime(&#x27;%Y%m%d_%H%M%S_integracao_territorial&#x27;)/manifesto.json | .write_text.
+   30  # Saída: E:/teco/output/01_integracao_territorial/uso_ocupacao_bacias.tif | rasterio.open.
+   31  # Saída: {gpkg} | g.to_file.
+   32  # Saída: E:/teco/output/01_integracao_territorial/shapefiles/{name}.shp | g.to_file.
+   33  # Saída: E:/teco/output/01_integracao_territorial/integracao_territorial_teco.gpkg | rawnet.to_file.
+   34  # Saída: E:/teco/output/01_integracao_territorial/uso_ocupacao_por_classe.csv | .to_csv.
+   35  # Saída: E:/teco/output/01_integracao_territorial/atributos_integrados_bacias.csv | .to_csv.
+   36  # Saída: E:/teco/output/01_integracao_territorial/resumo_bacias.csv | .to_csv.
+   37  # Saída: E:/teco/output/01_integracao_territorial/rede_bh_registros_origem.csv | .to_csv.
+   38  # Saída: E:/teco/output/01_integracao_territorial/dicionario_campos.csv | .to_csv.
+   39  # Saída: E:/teco/output/01_integracao_territorial/auditoria_integracao.json | .write_text.
+   40  # Saída: E:/teco/output/01_integracao_territorial/LEIA_PRIMEIRO.md | .write_text.
+   41  # Saída: E:/teco/output/01_integracao_territorial/Previa_{field}.png | fig.savefig.
+   42  # Campos/chaves gerados em DESC: out_km2, pct_out.
+   43  # Campos/chaves gerados em g: area_bh, bh_pct, out_km2, pct_out, rede_qual, uso_ano, uso_cov, uso_dom, uso_km2, uso_npix, uso_valid.
+   44  # Campos/chaves gerados em source: sit_rede.
+   45  # Campos/chaves gerados em net: comp_m.
+   46  # Campos/chaves gerados em raw: comp_m, data_apur.
+   47  # Campos/chaves gerados em geo: cens_urb, dens_dom, dens_pop.
+   48  # Campos/chaves gerados em clip: frac_area, rec_km2.
+   49  # CÓDIGO DO PROCESSAMENTO
+   50  
+   51  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   52  import sys as _cp_sys
+   53  from pathlib import Path as _cp_Path
+   54  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   55  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   56      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   57      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   58          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   59          break
+   60  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   61  # FIM DOS CAMINHOS PORTÁTEIS
+   62  
+   63  from pathlib import Path
+   64  import sys,json,math,datetime as dt,shutil,zipfile,gc
+   65  import numpy as np
+   66  import pandas as pd
+   67  import geopandas as gpd
+   68  import rasterio
+   69  from rasterio.features import rasterize
+   70  from rasterio.windows import Window,from_bounds
+   71  from shapely import intersection,length
+   72  from shapely.ops import unary_union
+   73  
+   74  ROOT=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));OUT=ROOT/&#x27;output/01_integracao_territorial&#x27;;SHP=OUT/&#x27;shapefiles&#x27;
+   75  CRS=31983
+   76  MESH=ROOT/&#x27;saneamento_ibge/MG_setores_CD2022.shp&#x27;
+   77  BASE=ROOT/&#x27;saneamento_ibge/resultados/saneamento_teco.gpkg&#x27;
+   78  BASIN=ROOT/&#x27;sub_bacia/shapefiles_v6_20261109_141015/sub_bacias_exclusivas.shp&#x27;
+   79  POP=ROOT/&#x27;saneamento_ibge/populacao_basico/Agregados_por_setores_basico_BR.csv&#x27;
+   80  LULC=ROOT/&#x27;teco_base/uso_terra/uso_terra-reservatorio.tif&#x27;
+   81  NETWORK=ROOT/&#x27;esgoto_bh/REDE_ESGOTO.shp&#x27;
+   82  ETE=ROOT/&#x27;ete/ide_0603_mg_ete_pto.shp&#x27;
+   83  sys.path.insert(0,str(ROOT/&#x27;codigo&#x27;))
+   84  from preparar_saneamento_ibge import polygon,sha,DESC as SAN_DESC
+   85  
+   86  CLASS={1:&#x27;Floresta (classe agregada)&#x27;,3:&#x27;Formação florestal&#x27;,4:&#x27;Formação savânica&#x27;,9:&#x27;Silvicultura&#x27;,11:&#x27;Campo alagado e área pantanosa&#x27;,12:&#x27;Formação campestre&#x27;,15:&#x27;Pastagem&#x27;,19:&#x27;Lavoura temporária&#x27;,21:&#x27;Mosaico de usos&#x27;,24:&#x27;Área urbanizada&#x27;,25:&#x27;Outras áreas não vegetadas&#x27;,29:&#x27;Afloramento rochoso&#x27;,30:&#x27;Mineração&#x27;,31:&#x27;Aquicultura&#x27;,33:&#x27;Rio, lago e oceano&#x27;,36:&#x27;Lavoura perene&#x27;}
+   87  GROUPS={
+   88   &#x27;urb&#x27;:([24],&#x27;Área urbanizada&#x27;),
+   89   &#x27;veg&#x27;:([1,3,4,5,6,7,10,11,12,13,32,49,50,77,84],&#x27;Vegetação natural&#x27;),
+   90   &#x27;agro&#x27;:([9,14,15,18,19,20,21,35,36,39,40,41,46,47,48,62],&#x27;Agropecuária e silvicultura&#x27;),
+   91   &#x27;min&#x27;:([30],&#x27;Mineração&#x27;),
+   92   &#x27;agua&#x27;:([26,31,33],&#x27;Corpos de água e aquicultura&#x27;),
+   93   &#x27;nveg&#x27;:([22,23,25,29,75,91],&#x27;Outras superfícies não vegetadas&#x27;),
+   94  }
+   95  DESC=dict(SAN_DESC,**{
+   96   &#x27;pop_2022&#x27;:&#x27;Total de pessoas do setor inteiro, v0001 do Agregado Básico Censo 2022 (revisão 20/05/2026)&#x27;,
+   97   &#x27;dom_ocup&#x27;:&#x27;Domicílios particulares ocupados do setor inteiro, v0007 do Agregado Básico, permanentes e improvisados&#x27;,
+   98   &#x27;dens_pop&#x27;:&#x27;População do setor inteiro / área do setor inteiro, habitantes por km²; não é densidade por pixel&#x27;,
+   99   &#x27;dens_dom&#x27;:&#x27;Domicílios particulares ocupados / área do setor inteiro, domicílios por km²&#x27;,
+  100   &#x27;pop_a_est&#x27;:&#x27;População estimada no recorte: pop_2022 × frac_area; alocação uniforme, não contagem de residentes na bacia&#x27;,
+  101   &#x27;cens_urb&#x27;:&#x27;Situação censitária: 1 urbana, 0 rural, -1 não informada; difere da classe Área Urbanizada do uso do solo&#x27;,
+  102   &#x27;pop_u_est&#x27;:&#x27;População estimada nos recortes de setores de situação urbana do IBGE; não população localizada na mancha urbanizada&#x27;,
+  103   &#x27;pop_r_est&#x27;:&#x27;População estimada nos recortes de setores rurais do IBGE&#x27;,
+  104   &#x27;pct_pop_u&#x27;:&#x27;Percentual da população estimada da bacia em setores de situação urbana do IBGE&#x27;,
+  105   &#x27;uso_ano&#x27;:&#x27;Ano do uso do solo informado no projeto: 2025; não comprovado nos metadados internos do GeoTIFF&#x27;,
+  106   &#x27;uso_cov&#x27;:&#x27;Percentual de centros de pixels com classe válida entre os centros de pixels da geometria; inclui NoData fora da extensão&#x27;,
+  107   &#x27;uso_npix&#x27;:&#x27;Número de centros de pixels do raster dentro da geometria&#x27;,
+  108   &#x27;uso_valid&#x27;:&#x27;Número de centros de pixels com classe válida (código &gt; 0)&#x27;,
+  109   &#x27;uso_km2&#x27;:&#x27;Área aproximada mapeada, pixels válidos × área de pixel, km²&#x27;,
+  110   &#x27;uso_dom&#x27;:&#x27;Grupo de uso do solo com mais pixels na geometria; categorias cartográficas, não risco&#x27;,
+  111   &#x27;area_bh&#x27;:&#x27;Área da geometria situada nos setores do município de BH, km², domínio desta base de rede&#x27;,
+  112   &#x27;bh_pct&#x27;:&#x27;Percentual da área no domínio municipal BH; não representa cobertura pelo serviço&#x27;,
+  113   &#x27;rede_s_km&#x27;:&#x27;Traçados cadastrados S, em km, excluindo sobreposições S/N. Não é medida de tubulação ou ligações. Por setor, não aditivo nas divisas&#x27;,
+  114   &#x27;rede_n_km&#x27;:&#x27;Traçados cadastrados N, em km, excluindo sobreposições S/N. Por setor, não aditivo nas divisas&#x27;,
+  115   &#x27;rede_i_km&#x27;:&#x27;Traçados sem informação, em km, retirando sobreposições com registros S ou N&#x27;,
+  116   &#x27;rede_c_km&#x27;:&#x27;Traçados com sobreposição geométrica de registros S e N, em km; pendentes de conciliação cadastral&#x27;,
+  117   &#x27;rede_t_km&#x27;:&#x27;Comprimento único dos traçados cadastrados na geometria. Valores de setores podem compartilhar trechos na divisa&#x27;,
+  118   &#x27;pct_t_s&#x27;:&#x27;100 × rede_s_km / rede_t_km: proporção do comprimento cadastrado marcado S; não percentual de casas ou pessoas atendidas&#x27;,
+  119   &#x27;cad_comp&#x27;:&#x27;100 × (rede_s_km + rede_n_km) / rede_t_km: completude do indicador sobre o traçado cadastrado&#x27;,
+  120   &#x27;dens_rede&#x27;:&#x27;rede_s_km / area_bh, km de traçado S por km² no domínio BH; não densidade de tubulação comprovada&#x27;,
+  121   &#x27;rede_qual&#x27;:&#x27;fora_BH: base não cobre o local; sem_tr: BH sem traçado neste recorte; cadastro: há registros. Não extrapolar N fora de BH&#x27;,
+  122   &#x27;sit_rede&#x27;:&#x27;Situação consolidada do traçado: S sim; N não; NI sem informação; C conflito geométrico S/N&#x27;,
+  123   &#x27;sit_nome&#x27;:&#x27;Descrição da situação de disponibilidade cadastrada&#x27;,
+  124   &#x27;comp_m&#x27;:&#x27;Comprimento da parte de traçado consolidado, metros&#x27;,
+  125   &#x27;id_trecho&#x27;:&#x27;ID_BASE_TR original da PBH, identifica trecho de referência&#x27;,
+  126   &#x27;id_cad&#x27;:&#x27;ID_RDESG original da PBH, identifica registro cadastral&#x27;,
+  127   &#x27;lado&#x27;:&#x27;LADO_RDESG original: A ambos, E esquerdo, D direito, no sentido de digitalização&#x27;,
+  128   &#x27;data_apur&#x27;:&#x27;DATA original de apuração da informação; não é data de instalação&#x27;,
+  129   &#x27;ete_id&#x27;:&#x27;Identificador original do cadastro de ETE recebido&#x27;,
+  130   &#x27;fase_lic&#x27;:&#x27;Fase declarada no cadastro de licenciamento; não comprova operação atual ou eficiência&#x27;,
+  131   &#x27;situ_lic&#x27;:&#x27;Situação declarada de licenciamento da ETE, conforme base recebida&#x27;,
+  132   &#x27;n_ete&#x27;:&#x27;Quantidade de pontos de ETE no cadastro recebido dentro da bacia; não confirma população atendida&#x27;,
+  133  })
+  134  for p,(_,label) in GROUPS.items():
+  135      DESC[f&#x27;{p}_km2&#x27;]=f&#x27;Área aproximada de {label.lower()}, pela contagem de pixels, km²&#x27;
+  136      DESC[f&#x27;pct_{p}&#x27;]=f&#x27;Percentual de {label.lower()} sobre os pixels válidos da geometria; consultar uso_cov&#x27;
+  137  DESC[&#x27;out_km2&#x27;]=&#x27;Área aproximada de códigos não abrangidos pelos grupos previstos, km²&#x27;
+  138  DESC[&#x27;pct_out&#x27;]=&#x27;Percentual de códigos fora dos grupos previstos sobre pixels válidos&#x27;
+  139  
+  140  # Archive outputs
+  141  def archive_outputs():
+  142      if OUT.exists() and any(OUT.iterdir()):
+  143          dest=ROOT/&#x27;descontinuado&#x27;/dt.datetime.now().strftime(&#x27;%Y%m%d_%H%M%S_integracao_territorial&#x27;)
+  144          assert OUT.resolve().is_relative_to(ROOT) and dest.resolve().is_relative_to(ROOT)
+  145          dest.parent.mkdir(parents=True,exist_ok=True);shutil.move(str(OUT),str(dest))
+  146          (dest/&#x27;manifesto.json&#x27;).write_text(json.dumps(dict(source=str(OUT),archived=str(dest),reason=&#x27;Saída gerada substituída; insumos preservados&#x27;),ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;)
+  147      SHP.mkdir(parents=True,exist_ok=True)
+  148  
+  149  # Pop table
+  150  def pop_table(ids):
+  151      rows=[]
+  152      for a in pd.read_csv(POP,sep=&#x27;;&#x27;,encoding=&#x27;latin1&#x27;,dtype=&#x27;string&#x27;,usecols=[&#x27;CD_SETOR&#x27;,&#x27;v0001&#x27;,&#x27;v0007&#x27;],chunksize=20000,keep_default_na=False):
+  153          a=a[a.CD_SETOR.isin(ids)]
+  154          if len(a):rows.append(a)
+  155      p=pd.concat(rows,ignore_index=True).rename(columns={&#x27;CD_SETOR&#x27;:&#x27;setor_id&#x27;,&#x27;v0001&#x27;:&#x27;pop_2022&#x27;,&#x27;v0007&#x27;:&#x27;dom_ocup&#x27;})
+  156      assert p[&#x27;setor_id&#x27;].is_unique
+  157      for c in [&#x27;pop_2022&#x27;,&#x27;dom_ocup&#x27;]:p[c]=pd.to_numeric(p[c],errors=&#x27;coerce&#x27;).astype(float)
+  158      return p
+  159  
+  160  # Rasterstats
+  161  class RasterStats:
+  162      def __init__(self,extent):
+  163          self.ds=rasterio.open(LULC);assert self.ds.crs.to_epsg()==CRS and self.ds.count==1
+  164          w=from_bounds(*extent,transform=self.ds.transform);c=math.floor(w.col_off)-1;r=math.floor(w.row_off)-1
+  165          w=Window(c,r,math.ceil(w.col_off+w.width)-c+1,math.ceil(w.row_off+w.height)-r+1)
+  166          self.window=w;self.transform=self.ds.window_transform(w);self.a=self.ds.read(1,window=w,boundless=True,fill_value=0)
+  167          self.cell_area=abs(self.transform.a*self.transform.e);self.codes=np.unique(self.a);self.codes=self.codes[self.codes&gt;0]
+  168          print(&#x27;Raster de análise&#x27;,self.a.shape,&#x27;classes&#x27;,self.codes.tolist(),flush=True)
+  169      def add(self,g,level):
+  170          n=len(g);lab=rasterize([(p,i+1) for i,p in enumerate(g.geometry)],out_shape=self.a.shape,transform=self.transform,fill=0,all_touched=False,dtype=&#x27;int32&#x27;)
+  171          total=np.bincount(lab.ravel(),minlength=n+1)[1:]
+  172          hist={int(c):np.bincount(lab[self.a==c],minlength=n+1)[1:] for c in self.codes}
+  173          valid=sum(hist.values());g=g.copy();g[&#x27;uso_ano&#x27;]=2025;g[&#x27;uso_npix&#x27;]=total;g[&#x27;uso_valid&#x27;]=valid
+  174          g[&#x27;uso_cov&#x27;]=np.divide(100*valid,total,out=np.full(n,np.nan),where=total&gt;0);g[&#x27;uso_km2&#x27;]=valid*self.cell_area/1e6
+  175          assigned=np.zeros(n,dtype=np.int64);stack=[];labels=[]
+  176          for prefix,(codes,label) in GROUPS.items():
+  177              count=sum((hist.get(c,np.zeros(n,dtype=np.int64)) for c in codes));assigned+=count
+  178              g[f&#x27;{prefix}_km2&#x27;]=count*self.cell_area/1e6;g[f&#x27;pct_{prefix}&#x27;]=np.divide(100*count,valid,out=np.full(n,np.nan),where=valid&gt;0)
+  179              stack.append(count);labels.append(label)
+  180          other=valid-assigned;assert (other&gt;=0).all()
+  181          g[&#x27;out_km2&#x27;]=other*self.cell_area/1e6;g[&#x27;pct_out&#x27;]=np.divide(100*other,valid,out=np.full(n,np.nan),where=valid&gt;0)
+  182          stack.append(other);labels.append(&#x27;Outros códigos&#x27;);top=np.argmax(np.stack(stack),axis=0)
+  183          g[&#x27;uso_dom&#x27;]=[labels[i] if v&gt;0 else &#x27;Sem dado de uso&#x27; for i,v in zip(top,valid)]
+  184          rows=[]
+  185          for i,(_,row) in enumerate(g.iterrows()):
+  186              for code,counts in hist.items():
+  187                  if counts[i]&gt;0:rows.append(dict(escala=level,setor_id=row.get(&#x27;setor_id&#x27;,&#x27;&#x27;),bas_id=row.get(&#x27;bas_id&#x27;,&#x27;&#x27;),codigo=code,classe=CLASS.get(code,f&#x27;Classe {code}&#x27;),n_pixels=int(counts[i]),area_km2=float(counts[i]*self.cell_area/1e6),pct_valid=float(100*counts[i]/valid[i])))
+  188          assert np.allclose(g[[f&#x27;pct_{p}&#x27; for p in GROUPS]+[&#x27;pct_out&#x27;]].sum(axis=1)[valid&gt;0],100)
+  189          del lab;gc.collect();return g,rows
+  190      def write_clip(self,bas):
+  191          mask=rasterize([(g,1) for g in bas.geometry],out_shape=self.a.shape,transform=self.transform,fill=0,dtype=&#x27;uint8&#x27;)
+  192          out=np.where(mask,self.a,0)
+  193          rows,cols=np.where(mask&gt;0);r0,r1=rows.min(),rows.max()+1;c0,c1=cols.min(),cols.max()+1
+  194          profile=self.ds.profile.copy();profile.update(height=r1-r0,width=c1-c0,transform=self.transform*rasterio.Affine.translation(c0,r0),nodata=0,count=1,compress=&#x27;LZW&#x27;,driver=&#x27;GTiff&#x27;)
+  195          with rasterio.open(OUT/&#x27;uso_ocupacao_bacias.tif&#x27;,&#x27;w&#x27;,**profile) as d:
+  196              d.write(out[r0:r1,c0:c1],1);d.update_tags(ANO_INFORMADO_PROJETO=&#x27;2025&#x27;,ANO_CONFIRMADO_METADADOS=&#x27;NAO&#x27;,RECORTE=&#x27;Bacias TECO; regra centro de pixel; sem reamostragem&#x27;,SOURCE=str(LULC))
+  197  
+  198  # Lines
+  199  def lines(g):
+  200      if g is None or g.is_empty:return []
+  201      if g.geom_type in [&#x27;LineString&#x27;,&#x27;LinearRing&#x27;]:return [g] if g.length&gt;1e-7 else []
+  202      if hasattr(g,&#x27;geoms&#x27;):return [p for a in g.geoms for p in lines(a)]
+  203      return []
+  204  
+  205  # Network layers
+  206  def network_layers(bas,bh_domain):
+  207      source=gpd.read_file(NETWORK).to_crs(CRS);source[&#x27;sit_rede&#x27;]=source.IND_RDESG.fillna(&#x27;NI&#x27;).replace({&#x27;&#x27;:&#x27;NI&#x27;})
+  208      assert set(source.sit_rede.unique())&lt;=set([&#x27;S&#x27;,&#x27;N&#x27;,&#x27;NI&#x27;])
+  209      target=bas.geometry.union_all().intersection(bh_domain)
+  210      take=source.sindex.query(target,predicate=&#x27;intersects&#x27;);r=source.iloc[take].copy();r.geometry=r.geometry.intersection(target);r=r[r.length&gt;1e-7].copy()
+  211      unions={k:unary_union(r.loc[r.sit_rede==k].geometry.tolist()) for k in [&#x27;S&#x27;,&#x27;N&#x27;,&#x27;NI&#x27;]}
+  212      conflict=unions[&#x27;S&#x27;].intersection(unions[&#x27;N&#x27;]);clean={&#x27;S&#x27;:unions[&#x27;S&#x27;].difference(unions[&#x27;N&#x27;]),&#x27;N&#x27;:unions[&#x27;N&#x27;].difference(unions[&#x27;S&#x27;]),&#x27;NI&#x27;:unions[&#x27;NI&#x27;].difference(unions[&#x27;S&#x27;].union(unions[&#x27;N&#x27;])),&#x27;C&#x27;:conflict}
+  213      parts=[];names={&#x27;S&#x27;:&#x27;Com rede cadastrada&#x27;,&#x27;N&#x27;:&#x27;Sem rede cadastrada&#x27;,&#x27;NI&#x27;:&#x27;Sem informação&#x27;,&#x27;C&#x27;:&#x27;Conflito S/N na origem&#x27;}
+  214      for key,g in clean.items():
+  215          for p in lines(g):parts.append(dict(sit_rede=key,sit_nome=names[key],geometry=p))
+  216      net=gpd.GeoDataFrame(parts,crs=CRS);net=gpd.overlay(net,bas[[&#x27;bas_id&#x27;,&#x27;bas_nome&#x27;,&#x27;geometry&#x27;]],how=&#x27;intersection&#x27;,keep_geom_type=True)
+  217      net=net.explode(index_parts=False,ignore_index=True);net=net[net.length&gt;1e-7].copy();net[&#x27;comp_m&#x27;]=net.length
+  218      unique=unary_union(r.geometry.tolist()).length
+  219      assert abs(net[&#x27;comp_m&#x27;].sum()-unique)&lt;max(.01,unique*1e-8),(net.comp_m.sum(),unique)
+  220      raw=gpd.overlay(r[[&#x27;ID_BASE_TR&#x27;,&#x27;ID_RDESG&#x27;,&#x27;LADO_RDESG&#x27;,&#x27;DATA&#x27;,&#x27;sit_rede&#x27;,&#x27;geometry&#x27;]],bas[[&#x27;bas_id&#x27;,&#x27;bas_nome&#x27;,&#x27;geometry&#x27;]],how=&#x27;intersection&#x27;,keep_geom_type=True)
+  221      raw=raw.rename(columns={&#x27;ID_BASE_TR&#x27;:&#x27;id_trecho&#x27;,&#x27;ID_RDESG&#x27;:&#x27;id_cad&#x27;,&#x27;LADO_RDESG&#x27;:&#x27;lado&#x27;,&#x27;DATA&#x27;:&#x27;data_apur&#x27;})
+  222      raw[&#x27;data_apur&#x27;]=raw[&#x27;data_apur&#x27;].map(lambda t:None if pd.isna(t) else pd.Timestamp(t).strftime(&#x27;%Y-%m-%d&#x27;));raw[&#x27;comp_m&#x27;]=raw.length
+  223      audit=dict(source_features=len(source),source_flags=source.sit_rede.value_counts().to_dict(),source_duplicates_wkb=int(source.geometry.to_wkb().duplicated().sum()),raw_features_in_work_area=len(raw),consolidated_parts=len(net),unique_length_km=unique/1000,conflict_length_km=clean[&#x27;C&#x27;].length/1000,unknown_overlap_known_removed_km=(unions[&#x27;NI&#x27;].length-clean[&#x27;NI&#x27;].length)/1000,rule=&#x27;Unique geometrical linework; S/N coincident portions flagged C, not assigned automatically; known status overrides NI only on exact overlap&#x27;,dictionary_url=&#x27;https://ckan.pbh.gov.br/dataset/cb4df0e5-0849-4d1f-9f19-32a189824a7a/resource/329ad4ec-5912-457d-b13a-134747a2e55a/download/trecho_rede_esgoto.pdf&#x27;)
+  224      print(&#x27;Cadastro PBH consolidado&#x27;,json.dumps(audit,ensure_ascii=True),flush=True)
+  225      return net,raw,audit
+  226  
+  227  # Add network
+  228  def add_network(g,net,bh_domain):
+  229      g=g.copy();statuscols={&#x27;S&#x27;:&#x27;rede_s_km&#x27;,&#x27;N&#x27;:&#x27;rede_n_km&#x27;,&#x27;NI&#x27;:&#x27;rede_i_km&#x27;,&#x27;C&#x27;:&#x27;rede_c_km&#x27;}
+  230      fields=list(statuscols.values())+[&#x27;rede_t_km&#x27;,&#x27;pct_t_s&#x27;,&#x27;cad_comp&#x27;,&#x27;dens_rede&#x27;]
+  231      for c in fields:g[c]=np.nan
+  232      g[&#x27;area_bh&#x27;]=g.geometry.intersection(bh_domain).area/1e6;g[&#x27;bh_pct&#x27;]=100*g[&#x27;area_bh&#x27;]/(g.area/1e6);g[&#x27;rede_qual&#x27;]=&#x27;fora_BH&#x27;
+  233      for idx,row in g.iterrows():
+  234          if row[&#x27;area_bh&#x27;]&lt;=1e-10:continue
+  235          geom=row.geometry.intersection(bh_domain);ids=net.sindex.query(geom,predicate=&#x27;intersects&#x27;)
+  236          values={k:0. for k in statuscols}
+  237          if len(ids):
+  238              candidate=net.iloc[ids];lengths=length(intersection(candidate.geometry.to_numpy(),geom))/1000
+  239              for key in values:values[key]=float(np.asarray(lengths)[candidate.sit_rede.to_numpy()==key].sum())
+  240          for key,col in statuscols.items():g.at[idx,col]=values[key]
+  241          total=sum(values.values());g.at[idx,&#x27;rede_t_km&#x27;]=total;g.at[idx,&#x27;dens_rede&#x27;]=values[&#x27;S&#x27;]/row[&#x27;area_bh&#x27;];g.at[idx,&#x27;rede_qual&#x27;]=&#x27;cadastro&#x27; if total&gt;0 else &#x27;sem_tr&#x27;
+  242          if total&gt;0:g.at[idx,&#x27;pct_t_s&#x27;]=100*values[&#x27;S&#x27;]/total;g.at[idx,&#x27;cad_comp&#x27;]=100*(values[&#x27;S&#x27;]+values[&#x27;N&#x27;])/total
+  243      return g
+  244  
+  245  # Etes
+  246  def etes(bas):
+  247      e=gpd.read_file(ETE).to_crs(CRS);e=e.rename(columns={&#x27;id&#x27;:&#x27;ete_id&#x27;,&#x27;municipios&#x27;:&#x27;mun_nome&#x27;})
+  248      for c in [&#x27;mun_nome&#x27;,&#x27;fase_lic&#x27;,&#x27;situ_lic&#x27;]:
+  249          def fix(s):
+  250              if not isinstance(s,str):return s
+  251              try:return s.encode(&#x27;latin1&#x27;).decode(&#x27;utf8&#x27;) if &#x27;Ã&#x27; in s or &#x27;Â&#x27; in s else s
+  252              except UnicodeError:return s
+  253          e[c]=e[c].map(fix)
+  254      e=gpd.sjoin(e[[&#x27;ete_id&#x27;,&#x27;mun_nome&#x27;,&#x27;fase_lic&#x27;,&#x27;situ_lic&#x27;,&#x27;geometry&#x27;]],bas[[&#x27;bas_id&#x27;,&#x27;bas_nome&#x27;,&#x27;geometry&#x27;]],how=&#x27;inner&#x27;,predicate=&#x27;within&#x27;).drop(columns=&#x27;index_right&#x27;)
+  255      return e
+  256  
+  257  # Export vector
+  258  def export_vector(g,name,gpkg,layer):
+  259      assert g.crs.to_epsg()==CRS and g.is_valid.all() and g.geometry.notna().all()
+  260      cols=[c for c in g.columns if c!=&#x27;geometry&#x27;];assert all(len(c)&lt;=10 for c in cols),[c for c in cols if len(c)&gt;10]
+  261      g=g.copy()
+  262      for c in cols:
+  263          if isinstance(g[c].dtype,pd.StringDtype):g[c]=g[c].astype(object).where(g[c].notna(),None)
+  264      g.to_file(gpkg,layer=layer,driver=&#x27;GPKG&#x27;,index=False)
+  265      if name:
+  266          p=SHP/(name+&#x27;.shp&#x27;);g.to_file(p,driver=&#x27;ESRI Shapefile&#x27;,encoding=&#x27;UTF-8&#x27;,index=False);back=gpd.read_file(p)
+  267          assert len(back)==len(g) and back.crs.to_epsg()==CRS
+  268          for c in [&#x27;setor_id&#x27;,&#x27;bas_id&#x27;,&#x27;sit_rede&#x27;]:
+  269              if c in g:assert back[c].tolist()==g[c].tolist(),(name,c)
+  270          for c in [&#x27;pop_2022&#x27;,&#x27;pop_a_est&#x27;,&#x27;pct_urb&#x27;,&#x27;rede_s_km&#x27;]:
+  271              if c in g:
+  272                  assert np.array_equal(back[c].isna(),g[c].isna()),(name,c,&#x27;NULL&#x27;)
+  273                  assert np.allclose(back[c].fillna(0),g[c].fillna(0),atol=1e-7,rtol=1e-9),(name,c)
+  274  
+  275  # Main
+  276  def main():
+  277      bas=gpd.read_file(BASIN).to_crs(CRS)[[&#x27;id&#x27;,&#x27;reserv&#x27;,&#x27;geometry&#x27;]].rename(columns={&#x27;id&#x27;:&#x27;bas_id&#x27;,&#x27;reserv&#x27;:&#x27;bas_nome&#x27;});bas.geometry=bas.geometry.map(polygon)
+  278      old=gpd.read_file(BASE,layer=&#x27;setores_inteiros&#x27;);bb=tuple(bas.to_crs(4674).total_bounds)
+  279      mesh=gpd.read_file(MESH,bbox=bb,columns=[&#x27;CD_SETOR&#x27;,&#x27;geometry&#x27;]).to_crs(CRS);mesh.geometry=mesh.geometry.map(polygon)
+  280      mesh=mesh[mesh.geometry.intersection(bas.geometry.union_all()).area&gt;.01].copy().rename(columns={&#x27;CD_SETOR&#x27;:&#x27;setor_id&#x27;})
+  281      assert set(mesh.setor_id)==set(old.setor_id)
+  282      dif=old.set_index(&#x27;setor_id&#x27;).geometry.to_frame(&#x27;old&#x27;).join(mesh.set_index(&#x27;setor_id&#x27;).geometry.to_frame(&#x27;new&#x27;))
+  283      maxdiff=max(a.symmetric_difference(b).area for a,b in zip(dif.old,dif.new));assert maxdiff&lt;1e-5
+  284      geo=mesh.merge(old.drop(columns=&#x27;geometry&#x27;),on=&#x27;setor_id&#x27;,validate=&#x27;one_to_one&#x27;).merge(pop_table(set(mesh.setor_id)),on=&#x27;setor_id&#x27;,how=&#x27;left&#x27;,validate=&#x27;one_to_one&#x27;)
+  285      assert len(geo)==1838 and geo.pop_2022.notna().all(),(&#x27;População ausente&#x27;,geo[geo.pop_2022.isna()].setor_id.tolist())
+  286      assert (geo.pop_2022&gt;=0).all();assert np.allclose(geo.pop_2022,geo.pop_malha)
+  287      geo[&#x27;dens_pop&#x27;]=geo.pop_2022/geo.set_km2;geo[&#x27;dens_dom&#x27;]=geo.dom_ocup/geo.set_km2
+  288      geo[&#x27;cens_urb&#x27;]=np.select([geo.situacao.fillna(&#x27;&#x27;).str.lower().eq(&#x27;urbana&#x27;),geo.situacao.fillna(&#x27;&#x27;).str.lower().eq(&#x27;rural&#x27;)],[1,0],default=-1)
+  289      clip=gpd.overlay(geo,bas,how=&#x27;intersection&#x27;,keep_geom_type=True);clip=clip[clip.area&gt;.01].copy();clip[&#x27;rec_km2&#x27;]=clip.area/1e6;clip[&#x27;frac_area&#x27;]=clip.rec_km2/clip.set_km2
+  290      for out,src in [(&#x27;pop_a_est&#x27;,&#x27;pop_2022&#x27;),(&#x27;dom_a_est&#x27;,&#x27;dom_set&#x27;),(&#x27;red_a_est&#x27;,&#x27;rede_set&#x27;),(&#x27;nrd_a_est&#x27;,&#x27;nred_set&#x27;),(&#x27;dir_a_est&#x27;,&#x27;V00309&#x27;)]:clip[out]=clip[src]*clip.frac_area
+  291      fractions=clip.groupby(&#x27;setor_id&#x27;).frac_area.sum();assert fractions.le(1+1e-7).all()
+  292      ras=RasterStats(tuple(geo.total_bounds));geo,cfull=ras.add(geo,&#x27;setor_inteiro&#x27;);clip,cclip=ras.add(clip,&#x27;recorte_bacia&#x27;);bas,cbase=ras.add(bas,&#x27;bacia&#x27;)
+  293      bh=geo.loc[geo.mun_cod==&#x27;3106200&#x27;].geometry.union_all();net,rawnet,netaudit=network_layers(bas,bh)
+  294      geo=add_network(geo,net,bh);print(&#x27;Rede nos setores inteiros concluída&#x27;,flush=True)
+  295      clip=add_network(clip,net,bh);summary=add_network(bas,net,bh)
+  296      e=etes(bas)
+  297      oldsummary=gpd.read_file(BASE,layer=&#x27;resumo_bacias&#x27;).drop(columns=&#x27;geometry&#x27;)
+  298      summary=summary.merge(oldsummary,on=[&#x27;bas_id&#x27;,&#x27;bas_nome&#x27;],how=&#x27;left&#x27;,validate=&#x27;one_to_one&#x27;)
+  299      for idx,b in summary.iterrows():
+  300          c=clip[clip.bas_id==b.bas_id];p=c.pop_a_est.sum();summary.at[idx,&#x27;pop_a_est&#x27;]=p;summary.at[idx,&#x27;dens_pop&#x27;]=p/b.geometry.area*1e6
+  301          summary.at[idx,&#x27;pop_u_est&#x27;]=c.loc[c.cens_urb==1,&#x27;pop_a_est&#x27;].sum();summary.at[idx,&#x27;pop_r_est&#x27;]=c.loc[c.cens_urb==0,&#x27;pop_a_est&#x27;].sum();summary.at[idx,&#x27;pct_pop_u&#x27;]=100*summary.at[idx,&#x27;pop_u_est&#x27;]/p if p&gt;0 else np.nan
+  302          summary.at[idx,&#x27;n_ete&#x27;]=int((e.bas_id==b.bas_id).sum())
+  303          assert abs(c.uso_npix.sum()-b.uso_npix)&lt;=2,(b.bas_id,&#x27;contagem de pixels&#x27;)
+  304          assert abs(c.uso_valid.sum()-b.uso_valid)&lt;=2,(b.bas_id,&#x27;pixels válidos&#x27;)
+  305          if b.area_bh&gt;0:assert np.allclose(sum(net.loc[net.bas_id==b.bas_id,&#x27;comp_m&#x27;])/1000,b.rede_t_km,rtol=1e-8,atol=1e-6)
+  306      archive_outputs();gpkg=OUT/&#x27;integracao_territorial_teco.gpkg&#x27;
+  307      for g,n,l in [(geo,&#x27;setores_integrados_inteiros&#x27;,&#x27;setores_inteiros&#x27;),(clip,&#x27;setores_integrados_bacias&#x27;,&#x27;setores_bacias&#x27;),(summary,&#x27;resumo_integrado_bacias&#x27;,&#x27;resumo_bacias&#x27;),(net,&#x27;rede_bh_bacias&#x27;,&#x27;rede_bh_consolidada&#x27;)]:export_vector(g,n,gpkg,l)
+  308      rawnet.to_file(gpkg,layer=&#x27;rede_bh_registros_origem&#x27;,driver=&#x27;GPKG&#x27;,index=False)
+  309      if len(e):export_vector(e,&#x27;ete_bacias&#x27;,gpkg,&#x27;ete_cadastro&#x27;)
+  310      ras.write_clip(bas)
+  311      pd.DataFrame(cfull+cclip+cbase).to_csv(OUT/&#x27;uso_ocupacao_por_classe.csv&#x27;,sep=&#x27;;&#x27;,encoding=&#x27;utf-8-sig&#x27;,index=False)
+  312      clip.drop(columns=&#x27;geometry&#x27;).to_csv(OUT/&#x27;atributos_integrados_bacias.csv&#x27;,sep=&#x27;;&#x27;,encoding=&#x27;utf-8-sig&#x27;,index=False)
+  313      summary.drop(columns=&#x27;geometry&#x27;).to_csv(OUT/&#x27;resumo_bacias.csv&#x27;,sep=&#x27;;&#x27;,encoding=&#x27;utf-8-sig&#x27;,index=False)
+  314      rawnet.drop(columns=&#x27;geometry&#x27;).to_csv(OUT/&#x27;rede_bh_registros_origem.csv&#x27;,sep=&#x27;;&#x27;,encoding=&#x27;utf-8-sig&#x27;,index=False)
+  315      fields=list(dict.fromkeys(c for a in [geo,clip,summary,net,e] for c in a.columns if c!=&#x27;geometry&#x27;));assert all(c in DESC for c in fields),[c for c in fields if c not in DESC]
+  316      pd.DataFrame([dict(campo=c,descricao=DESC[c]) for c in fields]).to_csv(OUT/&#x27;dicionario_campos.csv&#x27;,sep=&#x27;;&#x27;,encoding=&#x27;utf-8-sig&#x27;,index=False)
+  317      inputs=[POP,LULC,BASE]
+  318      for p in [MESH,NETWORK,BASIN,ETE]:inputs.extend(p.with_suffix(ext) for ext in [&#x27;.shp&#x27;,&#x27;.dbf&#x27;,&#x27;.shx&#x27;,&#x27;.prj&#x27;,&#x27;.cpg&#x27;,&#x27;.cst&#x27;] if p.with_suffix(ext).exists())
+  319      audit=dict(created=dt.datetime.now().isoformat(),crs=&#x27;EPSG:31983&#x27;,population_year=2022,population_revision=&#x27;2026-05-20&#x27;,landuse_declared_year=2025,landuse_year_internal_metadata_confirmed=False,population_reference_not_updated_to_landuse_year=True,mesh_difference_from_previous_m2=maxdiff,sector_count=len(geo),intersection_count=len(clip),pop_missing=int(geo.pop_2022.isna().sum()),zero_population_sectors=int(geo.pop_2022.eq(0).sum()),landuse_pixel_area_m2=ras.cell_area,landuse_zonal_rule=&#x27;Native aligned pixels, centre-in-polygon, no resampling; percentages over valid pixels; outside raster remains NoData&#x27;,population_allocation=&#x27;Uniform area weighting only for clipped counts. No assignment to urban pixels or buildings.&#x27;,population_by_landuse_pixels_calculated=False,network=netaudit,network_outside_bh_is_null=True,sector_network_lengths_non_additive_on_shared_boundaries=True,basin_network_lengths_unique=True,ete_count=len(e),ete_operation_or_efficiency_verified=False,summary=summary.drop(columns=&#x27;geometry&#x27;).replace({np.nan:None}).to_dict(orient=&#x27;records&#x27;),inputs=[dict(path=str(p),bytes=p.stat().st_size,sha256=sha(p)) for p in inputs],checks=[&#x27;Provided sector geometry matches previous census extraction&#x27;,&#x27;All selected sectors have official 2022 population&#x27;,&#x27;Area fractions per sector sum to at most one&#x27;,&#x27;Land-cover groups partition all valid pixels&#x27;,&#x27;Recut sector pixel counts sum to basin pixel counts&#x27;,&#x27;Network S/N geometric overlap is isolated as conflict&#x27;,&#x27;Unique linework lengths conserved at basin scale&#x27;,&#x27;No zero substituted for missing BH coverage outside BH&#x27;,&#x27;SHP readback validates IDs, CRS, null masks and numerical fields&#x27;])
+  320      (OUT/&#x27;auditoria_integracao.json&#x27;).write_text(json.dumps(audit,ensure_ascii=False,indent=2,allow_nan=False),encoding=&#x27;utf8&#x27;)
+  321      readme(audit);preview(clip,bas)
+  322      print(json.dumps(dict(sectors=len(geo),intersections=len(clip),summary=[{k:r[k] for k in [&#x27;bas_nome&#x27;,&#x27;pop_a_est&#x27;,&#x27;dens_pop&#x27;,&#x27;pct_urb&#x27;,&#x27;uso_cov&#x27;,&#x27;area_bh&#x27;,&#x27;rede_s_km&#x27;,&#x27;rede_c_km&#x27;,&#x27;n_ete&#x27;]} for r in audit[&#x27;summary&#x27;]]),ensure_ascii=True),flush=True)
+  323  
+  324  # Readme
+  325  def readme(a):
+  326      p=[&#x27;# TECO: população, uso do solo e cadastro de rede de esgoto&#x27;,&#x27;&#x27;,
+  327      &#x27;Sistema SIRGAS 2000 / UTM 23S, EPSG:31983. A população refere-se ao Censo 2022. O uso do solo foi identificado como 2025 no projeto e nos códigos anteriores; os metadados internos do raster não confirmam o ano. A integração não atualiza a população para 2025 nem mede crescimento urbano no tempo.&#x27;,&#x27;&#x27;,
+  328      &#x27;## Como abrir&#x27;,&#x27;&#x27;,
+  329      &#x27;Abra TECO_integracao_territorial.qgz no QGIS após a etapa de conferência. Os grupos permitem alternar população, área urbanizada, esgotamento, cadastro de rede e ETEs. Integracao_territorial_TECO.zip contém o conjunto portável completo. O projeto original permanece intacto.&#x27;,&#x27;&#x27;,
+  330      &#x27;## Camadas principais&#x27;,&#x27;&#x27;,
+  331      &#x27;- shapefiles/setores_integrados_bacias.shp: camada principal para análise nas três bacias, com população, densidade, saneamento e uso do solo.&#x27;,&#x27;- shapefiles/setores_integrados_inteiros.shp: setores na unidade estatística original.&#x27;,&#x27;- shapefiles/resumo_integrado_bacias.shp: resumo das três bacias.&#x27;,&#x27;- shapefiles/rede_bh_bacias.shp: disponibilidade cadastrada por traçado, consolidada sem duplicar sobreposições.&#x27;,&#x27;- shapefiles/ete_bacias.shp: pontos de ETE no cadastro recebido, se houver dentro das bacias.&#x27;,&#x27;- integracao_territorial_teco.gpkg reúne as camadas e mantém também os registros originais de rede recortados.&#x27;,&#x27;- uso_ocupacao_bacias.tif: recorte alinhado ao raster original, sem reamostragem.&#x27;,&#x27;- dicionario_campos.csv descreve os campos; resumo_bacias.csv e atributos_integrados_bacias.csv permitem conferir os valores.&#x27;,&#x27;&#x27;,
+  332      &#x27;## População e adensamento&#x27;,&#x27;&#x27;,
+  333      &#x27;pop_2022 é a população oficial do SETOR INTEIRO. dens_pop é pop_2022 / set_km2, em habitantes/km². No recorte, essa densidade continua referenciada ao setor inteiro. pop_a_est é a estimativa proporcional à área do setor dentro da bacia. Não somar pop_2022 no recorte, pois um setor pode participar de mais de uma bacia. Somar somente pop_a_est para o resumo territorial.&#x27;,
+  334      &#x27;No resumo por bacia, dens_pop usa a população estimada e a área da bacia. A alocação uniforme pode distorcer resultados de setores parcialmente recortados, principalmente onde a ocupação se concentra. Não foram atribuídos moradores a cada pixel urbanizado. A classe de área urbanizada inclui usos não residenciais e não comprova a localização dos domicílios.&#x27;,
+  335      &#x27;cens_urb e pct_pop_u descrevem a situação urbana/rural censitária, que difere da mancha urbanizada identificada pelo uso do solo. Não interpretar população de setor urbano como população localizada em pixels urbanos.&#x27;,&#x27;&#x27;,
+  336      &#x27;## Uso e ocupação&#x27;,&#x27;&#x27;,
+  337      &#x27;Os códigos foram relacionados à legenda fornecida do MapBiomas 10 m, Coleção 4. O código 24 corresponde a área urbanizada. A resolução efetiva do arquivo reprojetado é registrada na auditoria. O cálculo conta centros de pixels contidos em cada geometria, sem interpolação. As áreas são aproximadas pela contagem de pixels e os percentuais usam somente pixels válidos. uso_cov informa a completude da cobertura, inclusive partes de setores que ultrapassam o raster.&#x27;,
+  338      &#x27;urb_km2/pct_urb, veg_km2/pct_veg, agro_km2/pct_agro, min_km2/pct_min, agua_km2/pct_agua e nveg_km2/pct_nveg caracterizam as geometrias. No arquivo de setores inteiros, representam o setor inteiro; no de recortes, representam apenas o recorte. A categoria agro inclui silvicultura; água inclui aquicultura. Os percentuais não indicam intensidade de resistência antimicrobiana. uso_ocupacao_por_classe.csv preserva o detalhamento por código original.&#x27;,&#x27;&#x27;,
+  339      &#x27;## Rede de BH: significado e qualidade&#x27;,&#x27;&#x27;,
+  340      &#x27;Segundo o dicionário da PBH, IND_RDESG informa existência de rede no trecho ou fragmento: S sim, N não e branco sem informação. LADO_RDESG distingue ambos os lados, esquerdo e direito. DATA é a data de apuração, não de instalação. A camada não é um cadastro de ligações residenciais nem comprova encaminhamento para tratamento. O denominador de pct_t_s é comprimento cadastrado, não domicílios ou habitantes.&#x27;,
+  341      &#x27;Foram preservados os registros de origem no GeoPackage. As geometrias coincidentes de S e N foram isoladas como C (conflito), sem escolher um status automaticamente. Geometrias sem informação que coincidem com registros conhecidos não são somadas novamente. As extensões por bacia são únicas e as quatro classes são geometricamente exclusivas. Não se deve somar extensões entre setores: trechos nas divisas podem tocar mais de um setor.&#x27;,
+  342      &#x27;Fora do domínio municipal de BH, os indicadores de rede ficam NULOS, não zero. area_bh e bh_pct mostram o domínio efetivamente considerado. Em BH sem trecho cadastrado no recorte, rede_qual=sem_tr não significa ausência comprovada de infraestrutura. dens_rede usa somente a área de BH no denominador. Dados de Contagem, Betim, Ibirité, Sarzedo e demais parcelas não foram inventados ou extrapolados.&#x27;,&#x27;&#x27;,
+  343      &#x27;## ETEs e limites de interpretação&#x27;,&#x27;&#x27;,
+  344      _cp_adaptar(&#x27;A camada de ETEs utiliza o arquivo já recebido em E:/teco/ete. A presença de um ponto, sua fase ou situação de licenciamento não demonstra operação atual, vazão atendida, eficiência de tratamento ou conexão de cada setor. Não foi construído índice de RAM, pesos, k-means ou Moran nesta etapa. Os insumos e o projeto E:/teco/projeto_teco.qgz foram preservados. A delimitação das bacias é a fornecida, ainda sujeita à conferência hidrológica indicada em seu script de origem.&#x27;),&#x27;&#x27;,
+  345      &#x27;## Complementos recomendados, sem ampliar o número de eixos do estudo&#x27;,&#x27;&#x27;,
+  346      &#x27;1. CNEFE 2022, filtrado para endereços domiciliares, para melhorar o rateio nos setores cortados e preparar uma alocação dasimétrica. Um endereço ainda não informa número de residentes, ocupação ou ligação à rede. https://www.ibge.gov.br/estatisticas/sociais/populacao/38734-cadastro-nacional-de-enderecos-para-fins-estatisticos.html&#x27;,
+  347      &#x27;2. Cadastro de rede dos demais municípios, interceptores/elevatórias, áreas de atendimento e destino dos lançamentos, com data de referência. Para ETEs, vazões e operação atual são mais úteis que somente a localização.&#x27;,
+  348      &#x27;3. CNES georreferenciado, incluindo hospitais, UBS, urgências, laboratórios e diálise. Pode integrar o eixo de serviços de saúde já previsto, sem criar automaticamente mais variáveis.&#x27;,
+  349      &#x27;4. Confirmar o ano/coleção/banda do raster e, se possível, disponibilizar uso do solo 2022 para uma comparação temporalmente coerente. Manter 2025 como retrato mais recente é possível, desde que a diferença temporal seja explicitada.&#x27;,&#x27;&#x27;,
+  350      &#x27;## Resumo exploratório por bacia&#x27;,&#x27;&#x27;,
+  351      &#x27;| Bacia | População estimada por área* | Habitantes/km²* | Área urbanizada entre pixels válidos (%) | Cobertura do raster (%) |&#x27;,&#x27;|---|---:|---:|---:|---:|&#x27;]
+  352      for r in a[&#x27;summary&#x27;]:p.append(f&quot;| {r[&#x27;bas_nome&#x27;]} | {r[&#x27;pop_a_est&#x27;]:.1f} | {r[&#x27;dens_pop&#x27;]:.1f} | {r[&#x27;pct_urb&#x27;]:.2f} | {r[&#x27;uso_cov&#x27;]:.2f} |&quot;)
+  353      p+=[&#x27;&#x27;,&#x27;*Estimativa exploratória por rateio de área. Não é contagem observada da população dentro de cada bacia.&#x27;,&#x27;&#x27;,
+  354      &#x27;## Fontes e reprodução&#x27;,&#x27;&#x27;,
+  355      &#x27;População: Agregados por setores, Básico BR, revisão 20/05/2026, IBGE. https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/Agregados_por_Setor_csv/Agregados_por_setores_basico_BR_20260520.zip&#x27;,
+  356      &#x27;Malha: shapefile MG_setores_CD2022 fornecido pelo autor. Seus códigos e geometrias coincidem com o recorte usado na etapa anterior.&#x27;,
+  357      &#x27;Dicionário de rede PBH: https://ckan.pbh.gov.br/dataset/cb4df0e5-0849-4d1f-9f19-32a189824a7a/resource/329ad4ec-5912-457d-b13a-134747a2e55a/download/trecho_rede_esgoto.pdf&#x27;,
+  358      _cp_adaptar(&#x27;Scripts em E:/teco/codigo/integrar_populacao_uso_rede.py e E:/teco/codigo/projeto_integracao_qgis.py. Saídas substituídas são preservadas em E:/teco/descontinuado. A auditoria registra fontes e hashes.&#x27;)]
+  359      (OUT/&#x27;LEIA_PRIMEIRO.md&#x27;).write_text(&#x27;\n&#x27;.join(p),encoding=&#x27;utf8&#x27;)
+  360  
+  361  # Preview
+  362  def preview(clip,bas):
+  363      import matplotlib
+  364      matplotlib.use(&#x27;Agg&#x27;)
+  365      import matplotlib.pyplot as plt
+  366      from matplotlib.colors import BoundaryNorm,ListedColormap
+  367      from matplotlib.patches import Patch
+  368      from matplotlib.ticker import FuncFormatter,MaxNLocator
+  369      colors=[&#x27;#edf4f8&#x27;,&#x27;#c4dce8&#x27;,&#x27;#8bbbd2&#x27;,&#x27;#438eb4&#x27;,&#x27;#145674&#x27;];geo=clip.to_crs(4674);bg=bas.to_crs(4674)
+  370      for field,title,bins in [(&#x27;dens_pop&#x27;,&#x27;Densidade populacional dos setores - Censo 2022 (hab./km²)&#x27;,[0,1000,5000,10000,20000,np.inf]),(&#x27;pct_urb&#x27;,&#x27;Área urbanizada entre pixels válidos (%) - ano informado: 2025&#x27;,[0,20,40,60,80,100.00001])]:
+  371          fig,axs=plt.subplots(1,3,figsize=(14,6.5));cmap=ListedColormap(colors);norm=BoundaryNorm(bins,5)
+  372          for ax,(_,b) in zip(axs,bg.iterrows()):
+  373              g=geo[geo.bas_id==b.bas_id];g.plot(ax=ax,column=field,cmap=cmap,norm=norm,edgecolor=&#x27;#4f626b&#x27;,linewidth=.18,missing_kwds={&#x27;color&#x27;:&#x27;#d2d2d2&#x27;,&#x27;hatch&#x27;:&#x27;///&#x27;});bg[bg.bas_id==b.bas_id].boundary.plot(ax=ax,color=&#x27;#173b4b&#x27;,linewidth=1.1)
+  374              ax.set_title({&#x27;vargem_flores&#x27;:&#x27;Vargem das Flores&#x27;,&#x27;pampulha&#x27;:&#x27;Lagoa da Pampulha&#x27;,&#x27;ibirite_regap&#x27;:&#x27;Ibirité / REGAP&#x27;}[b.bas_id],fontsize=12,fontweight=&#x27;bold&#x27;,pad=8);ax.set_aspect(1/np.cos(np.deg2rad(b.geometry.centroid.y)))
+  375              ax.xaxis.set_major_locator(MaxNLocator(3));ax.yaxis.set_major_locator(MaxNLocator(3));ax.xaxis.set_major_formatter(FuncFormatter(lambda v,p:f&#x27;{abs(v):.2f}°O&#x27;));ax.yaxis.set_major_formatter(FuncFormatter(lambda v,p:f&#x27;{abs(v):.2f}°S&#x27;));ax.tick_params(labelsize=8);ax.set_xlabel(&#x27;&#x27;);ax.set_ylabel(&#x27;&#x27;)
+  376          labels=[&#x27;0–1.000&#x27;,&#x27;&gt;1.000–5.000&#x27;,&#x27;&gt;5.000–10.000&#x27;,&#x27;&gt;10.000–20.000&#x27;,&#x27;&gt;20.000&#x27;] if field==&#x27;dens_pop&#x27; else [&#x27;0–20%&#x27;,&#x27;&gt;20–40%&#x27;,&#x27;&gt;40–60%&#x27;,&#x27;&gt;60–80%&#x27;,&#x27;&gt;80–100%&#x27;]
+  377          fig.legend(handles=[Patch(facecolor=c,edgecolor=&#x27;#536064&#x27;,label=l) for c,l in zip(colors,labels)],loc=&#x27;lower center&#x27;,bbox_to_anchor=(.5,.08),ncol=5,frameon=False,fontsize=9)
+  378          fig.suptitle(title,fontsize=14,fontweight=&#x27;bold&#x27;,y=.96);fig.text(.5,.025,&#x27;SIRGAS 2000 · Densidade referenciada ao setor inteiro; uso do solo calculado no recorte · Prévia para conferência&#x27;,ha=&#x27;center&#x27;,fontsize=8,color=&#x27;#526b76&#x27;);fig.subplots_adjust(left=.06,right=.98,bottom=.22,top=.86,wspace=.28)
+  379          fig.savefig(OUT/f&#x27;Previa_{field}.png&#x27;,dpi=200,facecolor=&#x27;white&#x27;);plt.close(fig)
+  380  
+  381  if __name__==&#x27;__main__&#x27;:main()</code></pre></article></html>

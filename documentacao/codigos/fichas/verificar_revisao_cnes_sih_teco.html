@@ -1,0 +1,142 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/verificar_revisao_cnes_sih_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/verificar_revisao_cnes_sih_teco.py</h2>
+<p>Verificar revisao cnes sih teco. Conferência/teste. As instruções são executadas no corpo principal, na ordem do arquivo.</p>
+<p><strong>Papel.</strong> Conferência/teste. <strong>Fonte inspecionada.</strong> E:\teco\codigo\verificar_revisao_cnes_sih_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>csv</td><td>Leitura/escrita de tabelas delimitadas com separador e codificação explícitos.</td></tr><tr><td>geopandas</td><td>Camadas vetoriais com referência espacial, reprojeção, recorte e interseção de geometrias.</td></tr><tr><td>hashlib</td><td>Assinaturas SHA-256 para identificar alterações de arquivos; não é validação do conteúdo científico.</td></tr><tr><td>io</td><td>Fluxos em memória para imagens, tabelas e documentos.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>numpy</td><td>Matrizes numéricas, máscaras de validade, transformações, percentis e estatísticas vetorizadas.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>pyproj</td><td>Dependência importada; conferir as chamadas efetivas abaixo e a instalação do ambiente correspondente.</td></tr><tr><td>re</td><td>Extração e validação de padrões textuais, datas, identificadores e linhas dos modelos.</td></tr><tr><td>shapely.geometry</td><td>Operações geométricas usadas nas áreas, distâncias, limites e relações espaciais.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/00_fontes/sih_cnv_qimg100921200_198_31_2.csv — chamada .read_text, linha 51.</li>
+<li>E:/teco/entrega_final/01_entradas/01_bacias/bacias.shp — chamada gpd.read_file, linha 56.</li>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/00_fontes/CNES_MG.csv — chamada .open, linha 58.</li>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/01_tabelas/Selecionados_nas_bacias.csv — chamada pd.read_csv, linha 64.</li>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/01_tabelas/CNES_nas_bacias.csv — chamada pd.read_csv, linha 67.</li>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/01_tabelas/Internacoes_gerais_selecionados_mensal.csv — chamada pd.read_csv, linha 69.</li>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/01_tabelas/Internacoes_gerais_selecionados_anual.csv — chamada pd.read_csv, linha 70.</li>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/02_camadas/01_cnes_bacias/cnes_2026.shp — chamada gpd.read_file, linha 76.</li>
+<li>{src} — chamada src.read_bytes, linha 80.</li>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/00_fontes/src.name — chamada .read_bytes, linha 80.</li>
+<li>E:/teco/entrega_final/00_documentacao/Integridade_SHA256.csv — chamada .open, linha 83.</li>
+<li>E:/teco/entrega_final/row[&#x27;arquivo&#x27;] — chamada p.read_bytes, linha 87.</li>
+<p><strong>Saídas.</strong></p>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/04_documentacao/Validacao_independente_CNES_SIH.json — chamada .write_text, linha 90.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>r: Estabelecimento.</li>
+<li>row: CNES, STATUS DO ESTABELECIMENTO, arquivo, location, sha256.</li>
+<li>sel: CNES, INT_15_26.</li>
+<li>monthly: CNES.</li>
+<li>annual: CNES.</li>
+<li>g: SIH_HIST.</li>
+<p><strong>Sequência.</strong> A rotina executa no corpo principal. Os pontos de leitura/escrita acima e os trechos abaixo mostram a ordem de processamento. Não é uma função que possa ser importada sem considerar esses efeitos.</p>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/verificar_revisao_cnes_sih_teco.py, linhas 54-60.</p>
+<pre><code>recent=[x for x in header if re.match(r&#x27;^202[456]/&#x27;,x)]
+positive={r[&#x27;Estabelecimento&#x27;][:7] for r in records if sum(int(r[c]) for c in recent if r[c]!=&#x27;-&#x27;)&gt;0}
+bas=gpd.read_file(F/&#x27;01_entradas/01_bacias/bacias.shp&#x27;).geometry.union_all();trans=Transformer.from_crs(4326,31983,always_xy=True)
+expected=set();allinside=set()
+with (P/&#x27;00_fontes/CNES_MG.csv&#x27;).open(encoding=&#x27;utf-8-sig&#x27;,newline=&#x27;&#x27;) as stream:
+    for row in csv.DictReader(stream):
+        c=row[&#x27;CNES&#x27;].zfill(7);lat,lon=map(float,row[&#x27;location&#x27;].split(&#x27;,&#x27;));point=Point(*trans.transform(lon,lat))</code></pre>
+<p>Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</p>
+<p>Trecho de codigo/verificar_revisao_cnes_sih_teco.py, linhas 71-77.</p>
+<pre><code>for row in sel.itertuples():
+    assert monthly[monthly.CNES.eq(row.CNES)].INTERNACOES.sum()==row.INT_15_26
+    assert annual[annual.CNES.eq(row.CNES)].INTERNACOES.sum()==row.INT_15_26
+    assert len(monthly[monthly.CNES.eq(row.CNES)])==141
+    assert set(annual[annual.CNES.eq(row.CNES)].ANO)==set(range(2015,2027))
+g=gpd.read_file(P/&#x27;02_camadas/01_cnes_bacias/cnes_2026.shp&#x27;)
+assert g.loc[g.SIH_HIST.eq(0),[&#x27;INT_FONTE&#x27;,&#x27;INT_15_26&#x27;,&#x27;INT_24_26&#x27;]].isna().all().all()</code></pre>
+<p>Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</p>
+<p><strong>Cálculos a observar nesta rotina.</strong></p>
+<li>sum: Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</li>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/00_fontes/sih_cnv_qimg100921200_198_31_2.csv | .read_text.
+    5  # Entrada: E:/teco/entrega_final/01_entradas/01_bacias/bacias.shp | gpd.read_file.
+    6  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/00_fontes/CNES_MG.csv | .open.
+    7  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/01_tabelas/Selecionados_nas_bacias.csv | pd.read_csv.
+    8  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/01_tabelas/CNES_nas_bacias.csv | pd.read_csv.
+    9  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/01_tabelas/Internacoes_gerais_selecionados_mensal.csv | pd.read_csv.
+   10  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/01_tabelas/Internacoes_gerais_selecionados_anual.csv | pd.read_csv.
+   11  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/02_camadas/01_cnes_bacias/cnes_2026.shp | gpd.read_file.
+   12  # Entrada: {src} | src.read_bytes.
+   13  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/00_fontes/src.name | .read_bytes.
+   14  # Entrada: E:/teco/entrega_final/00_documentacao/Integridade_SHA256.csv | .open.
+   15  # Entrada: E:/teco/entrega_final/row[&#x27;arquivo&#x27;] | p.read_bytes.
+   16  # Campos/chaves em r: Estabelecimento.
+   17  # Campos/chaves em row: CNES, STATUS DO ESTABELECIMENTO, arquivo, location, sha256.
+   18  # Campos/chaves em sel: CNES, INT_15_26.
+   19  # Campos/chaves em monthly: CNES.
+   20  # Campos/chaves em annual: CNES.
+   21  # Campos/chaves em g: SIH_HIST.
+   22  # Saída: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/04_documentacao/Validacao_independente_CNES_SIH.json | .write_text.
+   23  # CNES: identificador do estabelecimento de saúde.
+   24  # CÓDIGO DO PROCESSAMENTO
+   25  
+   26  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   27  import sys as _cp_sys
+   28  from pathlib import Path as _cp_Path
+   29  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   30  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   31      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   32      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   33          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   34          break
+   35  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   36  # FIM DOS CAMINHOS PORTÁTEIS
+   37  
+   38  from pathlib import Path
+   39  import csv
+   40  import io
+   41  import re
+   42  import hashlib
+   43  import json
+   44  import numpy as np
+   45  import pandas as pd
+   46  import geopandas as gpd
+   47  from pyproj import Transformer
+   48  from shapely.geometry import Point
+   49  
+   50  R=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));F=R/&#x27;entrega_final&#x27;;P=F/&#x27;01_entradas/17_estabelecimentos_2026&#x27;;T=P/&#x27;01_tabelas&#x27;;D=P/&#x27;04_documentacao&#x27;
+   51  raw=list(csv.reader(io.StringIO((P/&#x27;00_fontes/sih_cnv_qimg100921200_198_31_2.csv&#x27;).read_text(&#x27;latin1&#x27;)),delimiter=&#x27;;&#x27;))
+   52  header=next(row for row in raw if row and row[0]==&#x27;Estabelecimento&#x27;)
+   53  records=[dict(zip(header,row)) for row in raw if row and re.match(r&#x27;^\d{7}\s&#x27;,row[0])]
+   54  recent=[x for x in header if re.match(r&#x27;^202[456]/&#x27;,x)]
+   55  positive={r[&#x27;Estabelecimento&#x27;][:7] for r in records if sum(int(r[c]) for c in recent if r[c]!=&#x27;-&#x27;)&gt;0}
+   56  bas=gpd.read_file(F/&#x27;01_entradas/01_bacias/bacias.shp&#x27;).geometry.union_all();trans=Transformer.from_crs(4326,31983,always_xy=True)
+   57  expected=set();allinside=set()
+   58  with (P/&#x27;00_fontes/CNES_MG.csv&#x27;).open(encoding=&#x27;utf-8-sig&#x27;,newline=&#x27;&#x27;) as stream:
+   59      for row in csv.DictReader(stream):
+   60          c=row[&#x27;CNES&#x27;].zfill(7);lat,lon=map(float,row[&#x27;location&#x27;].split(&#x27;,&#x27;));point=Point(*trans.transform(lon,lat))
+   61          if bas.intersects(point):
+   62              allinside.add(c)
+   63              if c in positive and row[&#x27;STATUS DO ESTABELECIMENTO&#x27;]==&#x27;ATIVO&#x27;:expected.add(c)
+   64  sel=pd.read_csv(T/&#x27;Selecionados_nas_bacias.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str})
+   65  assert set(sel.CNES)==expected and len(expected)==3
+   66  assert len(allinside)==742
+   67  assert set(pd.read_csv(T/&#x27;CNES_nas_bacias.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str}).CNES)==allinside
+   68  
+   69  monthly=pd.read_csv(T/&#x27;Internacoes_gerais_selecionados_mensal.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str})
+   70  annual=pd.read_csv(T/&#x27;Internacoes_gerais_selecionados_anual.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str})
+   71  for row in sel.itertuples():
+   72      assert monthly[monthly.CNES.eq(row.CNES)].INTERNACOES.sum()==row.INT_15_26
+   73      assert annual[annual.CNES.eq(row.CNES)].INTERNACOES.sum()==row.INT_15_26
+   74      assert len(monthly[monthly.CNES.eq(row.CNES)])==141
+   75      assert set(annual[annual.CNES.eq(row.CNES)].ANO)==set(range(2015,2027))
+   76  g=gpd.read_file(P/&#x27;02_camadas/01_cnes_bacias/cnes_2026.shp&#x27;)
+   77  assert g.loc[g.SIH_HIST.eq(0),[&#x27;INT_FONTE&#x27;,&#x27;INT_15_26&#x27;,&#x27;INT_24_26&#x27;]].isna().all().all()
+   78  assert g.geometry.intersects(bas).all()
+   79  for src in [Path(_cp_externo(&#x27;cnes_mg_csv_510331d&#x27;)),Path(_cp_externo(&#x27;sih_cnv_qimg100921200_198_31_2_csv_7af2046&#x27;))]:
+   80      assert hashlib.sha256(src.read_bytes()).hexdigest()==hashlib.sha256((P/&#x27;00_fontes&#x27;/src.name).read_bytes()).hexdigest()
+   81  
+   82  checks=0
+   83  with (F/&#x27;00_documentacao/Integridade_SHA256.csv&#x27;).open(encoding=&#x27;utf-8-sig&#x27;,newline=&#x27;&#x27;) as stream:
+   84      for row in csv.DictReader(stream,delimiter=&#x27;;&#x27;):
+   85          p=F/row[&#x27;arquivo&#x27;]
+   86          if p.suffix.lower() not in [&#x27;.shp&#x27;,&#x27;.shx&#x27;,&#x27;.dbf&#x27;,&#x27;.prj&#x27;,&#x27;.cpg&#x27;,&#x27;.tif&#x27;,&#x27;.png&#x27;,&#x27;.svg&#x27;]:continue
+   87          assert hashlib.sha256(p.read_bytes()).hexdigest()==row[&#x27;sha256&#x27;],p
+   88          checks+=1
+   89  report={&#x27;status&#x27;:&#x27;APROVADO&#x27;,&#x27;selecao_independente_por_CNES_e_coordenadas&#x27;:sorted(expected),&#x27;cadastros_internos&#x27;:len(allinside),&#x27;internacoes_gerais_2015_2026&#x27;:int(sel.INT_15_26.sum()),&#x27;meses_por_estabelecimento&#x27;:141,&#x27;fontes_copiadas_integralmente&#x27;:True,&#x27;nulos_sem_SIH_preservados&#x27;:True,&#x27;arquivos_geograficos_e_figuras_anteriores_conferidos&#x27;:checks}
+   90  (D/&#x27;Validacao_independente_CNES_SIH.json&#x27;).write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;)
+   91  print(json.dumps(report,ensure_ascii=True),flush=True)</code></pre></article></html>

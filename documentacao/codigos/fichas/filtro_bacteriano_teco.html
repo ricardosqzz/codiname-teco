@@ -1,0 +1,142 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/filtro_bacteriano_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/filtro_bacteriano_teco.py</h2>
+<p>Filtro bacteriano teco. Processamento ou módulo de apoio. A organização passa por rule, nums, classify, main.</p>
+<p><strong>Papel.</strong> Processamento ou módulo de apoio. <strong>Fonte inspecionada.</strong> E:\teco\codigo\filtro_bacteriano_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>re</td><td>Extração e validação de padrões textuais, datas, identificadores e linhas dos modelos.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr><tr><td>unicodedata</td><td>Dependência importada; conferir as chamadas efetivas abaixo e a instalação do ambiente correspondente.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:/teco/output/04_grade_500m/tabelas/sih_cid10_mensal.csv — chamada pd.read_csv, linha 88.</li>
+<li>E:/teco/dados_publicos/saude_revisao/CID10_oficial_GO.json — chamada .read_text, linha 89.</li>
+<p><strong>Saídas.</strong></p>
+<li>E:/teco/output/04_grade_500m/filtro_cid10.csv — chamada .to_csv, linha 97.</li>
+<li>E:/teco/output/04_grade_500m/tabelas/classificacao_cid_bacteriana.csv — chamada filt.to_csv, linha 98.</li>
+<li>E:/teco/output/04_grade_500m/tabelas/sih_resumo_etiologico.csv — chamada .to_csv, linha 100.</li>
+<li>E:/teco/output/04_grade_500m/tabelas/regras_filtro_bacteriano.csv — chamada .to_csv, linha 101.</li>
+<li>E:/teco/output/04_grade_500m/auditoria/filtro_bacteriano.json — chamada .write_text, linha 103.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>a: code, display.</li>
+<li>official: concept.</li>
+<li>f: CID10, diagnostico.</li>
+<li>filt: CID10, diagnostico, grupo_para_revisao, incluir, justificativa, nivel_etiologico.</li>
+<li>selected.loc: internacoes.</li>
+<li>selected: incluir.</li>
+<p><strong>Campos e chaves gerados.</strong></p>
+<li>filt: diagnostico, grupo_para_revisao, incluir, justificativa, nivel_etiologico.</li>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>rule(tier, label, prefixes, exclude=())</td><td>41-42</td><td>Chamadas efetivas: RULES.append, tuple, prefixes.split</td></tr><tr><td>nums(letter, a, b)</td><td>45-45</td><td>Chamadas efetivas: .join, range Retorno: &#x27; &#x27;.join((f&#x27;{letter}{i:02d}&#x27; for i in range(a, b + 1))).</td></tr><tr><td>classify(code, description=&#x27;&#x27;)</td><td>74-84</td><td>Chamadas efetivas: .strip, .lower, re.search, .upper, .decode, code.startswith, .replace, .encode Retorno: (&#x27;Fora&#x27;, &#x27;Sem infecção bacteriana ou síndrome elegível no diagnóstico principal&#x27;, False), (&#x27;Fora&#x27;, &#x27;Etiologia não bacteriana explicitada&#x27;, False).</td></tr><tr><td>main()</td><td>87-103</td><td>lê dados; grava produtos</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/filtro_bacteriano_teco.py, linhas 99-104.</p>
+<pre><code> selected=f.merge(filt[[&#x27;CID10&#x27;,&#x27;nivel_etiologico&#x27;,&#x27;incluir&#x27;]],on=&#x27;CID10&#x27;,validate=&#x27;many_to_one&#x27;)
+ selected.groupby([&#x27;CNES&#x27;,&#x27;unidade&#x27;,&#x27;nivel_etiologico&#x27;],as_index=False).internacoes.sum().to_csv(T/&#x27;sih_resumo_etiologico.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+ pd.DataFrame([{&#x27;nivel&#x27;:t,&#x27;grupo&#x27;:n,&#x27;prefixos&#x27;:&#x27; &#x27;.join(p),&#x27;excecoes&#x27;:&#x27; &#x27;.join(e),&#x27;fonte&#x27;:SOURCE} for t,n,p,e in RULES]).to_csv(T/&#x27;regras_filtro_bacteriano.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+ info={&#x27;data&#x27;:&#x27;2026-11-12&#x27;,&#x27;fonte_cid&#x27;:SOURCE,&#x27;criterio&#x27;:&#x27;A+B: etiologia bacteriana codificada e síndromes infecciosas compatíveis; C separado, sem incluir comorbidades isoladas.&#x27;,&#x27;CID_selecionados&#x27;:int(filt.incluir.sum()),&#x27;CID_por_nivel&#x27;:filt.nivel_etiologico.value_counts().to_dict(),&#x27;AIH_selecionadas&#x27;:int(selected.loc[selected.incluir,&#x27;internacoes&#x27;].sum()),&#x27;AIH_por_nivel&#x27;:selected.groupby(&#x27;nivel_etiologico&#x27;).internacoes.sum().to_dict(),&#x27;limitacao&#x27;:&#x27;Diagnóstico principal; sem confirmação de agente, RAM ou residência atendida. Não inclui SIA/e-SUS.&#x27;}
+ (O/&#x27;auditoria/filtro_bacteriano.json&#x27;).write_text(json.dumps(info,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(json.dumps(info,ensure_ascii=True),flush=True)
+if __name__==&#x27;__main__&#x27;:main()</code></pre>
+<p>Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</p>
+<p><strong>Cálculos a observar nesta rotina.</strong></p>
+<li>sum: Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</li>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:/teco/output/04_grade_500m/tabelas/sih_cid10_mensal.csv | pd.read_csv.
+    5  # Entrada: E:/teco/dados_publicos/saude_revisao/CID10_oficial_GO.json | .read_text.
+    6  # Campos/chaves em a: code, display.
+    7  # Campos/chaves em official: concept.
+    8  # Campos/chaves em f: CID10, diagnostico.
+    9  # Campos/chaves em filt: CID10, diagnostico, grupo_para_revisao, incluir, justificativa, nivel_etiologico.
+   10  # Campos/chaves em selected.loc: internacoes.
+   11  # Campos/chaves em selected: incluir.
+   12  # Saída: E:/teco/output/04_grade_500m/filtro_cid10.csv | .to_csv.
+   13  # Saída: E:/teco/output/04_grade_500m/tabelas/classificacao_cid_bacteriana.csv | filt.to_csv.
+   14  # Saída: E:/teco/output/04_grade_500m/tabelas/sih_resumo_etiologico.csv | .to_csv.
+   15  # Saída: E:/teco/output/04_grade_500m/tabelas/regras_filtro_bacteriano.csv | .to_csv.
+   16  # Saída: E:/teco/output/04_grade_500m/auditoria/filtro_bacteriano.json | .write_text.
+   17  # Campos/chaves gerados em filt: diagnostico, grupo_para_revisao, incluir, justificativa, nivel_etiologico.
+   18  # CID10: código de diagnóstico.
+   19  # CÓDIGO DO PROCESSAMENTO
+   20  
+   21  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   22  import sys as _cp_sys
+   23  from pathlib import Path as _cp_Path
+   24  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   25  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   26      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   27      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   28          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   29          break
+   30  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   31  # FIM DOS CAMINHOS PORTÁTEIS
+   32  
+   33  from pathlib import Path
+   34  import json,re,unicodedata
+   35  import pandas as pd
+   36  R=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));O=R/&#x27;output/04_grade_500m&#x27;;T=O/&#x27;tabelas&#x27;
+   37  SOURCE=&#x27;https://fhir.saude.go.gov.br/r4/reds-go/CodeSystem-BRCID10.html&#x27;
+   38  RULES=[]
+   39  
+   40  # Rule
+   41  def rule(tier,label,prefixes,exclude=()):
+   42   RULES.append((tier,label,tuple(prefixes.split()),tuple(exclude)))
+   43  
+   44  # Nums
+   45  def nums(letter,a,b):return &#x27; &#x27;.join(f&#x27;{letter}{i:02d}&#x27; for i in range(a,b+1))
+   46  rule(&#x27;A&#x27;,&#x27;Infecções intestinais bacterianas&#x27;,nums(&#x27;A&#x27;,0,5))
+   47  rule(&#x27;A&#x27;,&#x27;Tuberculose, zoonoses e outras infecções bacterianas&#x27;,nums(&#x27;A&#x27;,15,58))
+   48  rule(&#x27;A&#x27;,&#x27;Espiroquetas, clamídias e riquétsias&#x27;,nums(&#x27;A&#x27;,65,79))
+   49  rule(&#x27;A&#x27;,&#x27;HIV com infecção bacteriana registrada&#x27;,&#x27;B200 B201&#x27;)
+   50  rule(&#x27;A&#x27;,&#x27;Agente bacteriano em doença classificada em outra parte&#x27;,&#x27;B95 B96&#x27;)
+   51  rule(&#x27;A&#x27;,&#x27;Sistema nervoso: etiologia bacteriana codificada&#x27;,&#x27;G00 G01 G042 G050&#x27;)
+   52  rule(&#x27;A&#x27;,&#x27;Manifestações bacterianas em outros órgãos&#x27;,&#x27;I320 I410 J13 J14 J15 J160 J170 J200 J201 J202 J020 J030 M010 M011 M012 M013 M014 M630 M680 N160 N740 N741 N743 N744&#x27;)
+   53  rule(&#x27;A&#x27;,&#x27;Infecção bacteriana neonatal codificada&#x27;,&#x27;P231 P232 P233 P234 P235 P236 P36 P370 P372&#x27;)
+   54  rule(&#x27;B&#x27;,&#x27;Gastroenterite/infecção sem agente especificado&#x27;,&#x27;A085 A09 B99&#x27;)
+   55  rule(&#x27;B&#x27;,&#x27;Abscessos e infecções neurológicas sem agente definido&#x27;,&#x27;G03 G048 G049 G06 G07&#x27;,(&#x27;G030&#x27;,))
+   56  rule(&#x27;B&#x27;,&#x27;Infecções oculares compatíveis&#x27;,&#x27;H000 H043 H044 H050 H100 H102 H103 H104 H108 H109 H160 H440 H441&#x27;)
+   57  rule(&#x27;B&#x27;,&#x27;Infecções de ouvido/mastoide compatíveis&#x27;,&#x27;H600 H601 H602 H603 H608 H609 H65 H66 H67 H70 H750&#x27;)
+   58  rule(&#x27;B&#x27;,&#x27;Endocardite e pericardite infecciosas ou sem etiologia&#x27;,&#x27;I301 I33 I38 I39&#x27;)
+   59  rule(&#x27;B&#x27;,&#x27;Infecções respiratórias de etiologia não definida&#x27;,&#x27;J01 J02 J03 J04 J051 J06 J168 J178 J18 J208 J209 J22 J32 J350 J36 J390 J391 J440 J85 J86&#x27;)
+   60  rule(&#x27;B&#x27;,&#x27;Infecções odontogênicas e de glândulas salivares&#x27;,&#x27;K04 K05 K112 K113 K122&#x27;)
+   61  rule(&#x27;B&#x27;,&#x27;Infecção/abscesso/peritonite abdominal compatível&#x27;,&#x27;K350 K351 K570 K572 K574 K578 K61 K630 K65 K670 K671 K672 K673 K674 K678 K750 K810 K830 K800 K801 K803 K804&#x27;)
+   62  rule(&#x27;B&#x27;,&#x27;Pele e tecido subcutâneo&#x27;,&#x27;L00 L01 L02 L03 L04 L050 L08 L303&#x27;)
+   63  rule(&#x27;B&#x27;,&#x27;Infecções osteoarticulares e de partes moles&#x27;,&#x27;M00 M018 M462 M463 M464 M465 M600 M650 M651 M710 M711 M726 M86 M900 M901 M902&#x27;)
+   64  rule(&#x27;B&#x27;,&#x27;Infecções urinárias/renais compatíveis&#x27;,&#x27;N10 N11 N12 N136 N151 N300 N302 N308 N309 N340 N341 N342 N390&#x27;)
+   65  rule(&#x27;B&#x27;,&#x27;Infecções genitais/mamárias compatíveis&#x27;,&#x27;A64 N41 N431 N45 N481 N49 N51 N61 N70 N71 N72 N73 N748 N751 N760 N761 N762 N763 N764&#x27;)
+   66  rule(&#x27;B&#x27;,&#x27;Infecção na gestação, parto ou puerpério&#x27;,&#x27;O030 O035 O040 O045 O050 O055 O060 O065 O070 O075 O080 O23 O411 O753 O85 O86 O91 O983 O988 O989&#x27;)
+   67  rule(&#x27;B&#x27;,&#x27;Infecções neonatais sem agente definido&#x27;,&#x27;P238 P239 P38 P39&#x27;)
+   68  rule(&#x27;B&#x27;,&#x27;Infecção após procedimento, dispositivo ou trauma&#x27;,&#x27;T793 T802 T814 T826 T827 T835 T836 T845 T846 T847 T857 T874 T880&#x27;)
+   69  rule(&#x27;B&#x27;,&#x27;Choque séptico ou resposta inflamatória com infecção&#x27;,&#x27;R572 R650 R651&#x27;)
+   70  
+   71  rule(&#x27;C&#x27;,&#x27;Sequelas bacterianas ou associação sem infecção ativa documentada&#x27;,&#x27;B90 B92 I00 I01 I02 K25 K26 K27 K28 D593 Z220 Z221 Z222 Z223&#x27;)
+   72  
+   73  # Classify
+   74  def classify(code,description=&#x27;&#x27;):
+   75   code=str(code).replace(&#x27;.&#x27;,&#x27;&#x27;).upper().strip()
+   76   text=unicodedata.normalize(&#x27;NFKD&#x27;,description).encode(&#x27;ascii&#x27;,&#x27;ignore&#x27;).decode().lower()
+   77  
+   78   if re.search(r&#x27;viral|virus|micose|fung|candida|ameb|protozo|toxoplas|helmint|esquistossom&#x27;,text) and not re.search(r&#x27;bacter|estreptoc|estafiloc|gonoc|meningoc&#x27;,text):
+   79    return &#x27;Fora&#x27;,&#x27;Etiologia não bacteriana explicitada&#x27;,False
+   80   for tier,label,pre,exc in RULES:
+   81    if code.startswith(pre) and not code.startswith(exc):return tier,label,tier in [&#x27;A&#x27;,&#x27;B&#x27;]
+   82   if re.search(r&#x27;bacterian|estreptoc|estafiloc|gonococ|meningococ|pneumococ|escherichia|clostrid|salmonel|shigel|chlamydia|clamidia|sifilis|tuberculos|hanseniase|ricketts|riquets&#x27;,text):
+   83    return &#x27;A&#x27;,&#x27;Etiologia bacteriana identificada na descrição oficial&#x27;,True
+   84   return &#x27;Fora&#x27;,&#x27;Sem infecção bacteriana ou síndrome elegível no diagnóstico principal&#x27;,False
+   85  
+   86  # Main
+   87  def main():
+   88   f=pd.read_csv(T/&#x27;sih_cid10_mensal.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str,&#x27;CID10&#x27;:str})
+   89   official=json.loads((R/&#x27;dados_publicos/saude_revisao/CID10_oficial_GO.json&#x27;).read_text(&#x27;utf8&#x27;))
+   90   desc={a[&#x27;code&#x27;].replace(&#x27;.&#x27;,&#x27;&#x27;):a[&#x27;display&#x27;] for a in official[&#x27;concept&#x27;]}
+   91   filt=f[[&#x27;CID10&#x27;,&#x27;diagnostico&#x27;]].drop_duplicates(&#x27;CID10&#x27;).sort_values(&#x27;CID10&#x27;).copy()
+   92   filt[&#x27;diagnostico&#x27;]=[desc.get(c,d) for c,d in zip(filt.CID10,filt.diagnostico)]
+   93   results=[classify(c,d) for c,d in zip(filt.CID10,filt.diagnostico)]
+   94   filt[&#x27;nivel_etiologico&#x27;]=[x[0] for x in results];filt[&#x27;grupo_para_revisao&#x27;]=[x[1] for x in results];filt[&#x27;incluir&#x27;]=[x[2] for x in results]
+   95   explanations={&#x27;A&#x27;:&#x27;Doença/agente bacteriano codificado; não equivale a cultura positiva nem resistência confirmada.&#x27;,&#x27;B&#x27;:&#x27;Síndrome infecciosa compatível: pode ter causa bacteriana, mas a CID principal não confirma o agente.&#x27;,&#x27;C&#x27;:&#x27;Condição associada, sequela ou portador; separada do índice principal de infecções ativas.&#x27;,&#x27;Fora&#x27;:&#x27;Excluído do filtro operacional: ausência de síndrome elegível ou etiologia não bacteriana explícita.&#x27;}
+   96   filt[&#x27;justificativa&#x27;]=filt.nivel_etiologico.map(explanations)
+   97   filt[[&#x27;CID10&#x27;,&#x27;diagnostico&#x27;,&#x27;grupo_para_revisao&#x27;,&#x27;incluir&#x27;,&#x27;justificativa&#x27;,&#x27;nivel_etiologico&#x27;]].to_csv(O/&#x27;filtro_cid10.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+   98   filt.to_csv(T/&#x27;classificacao_cid_bacteriana.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+   99   selected=f.merge(filt[[&#x27;CID10&#x27;,&#x27;nivel_etiologico&#x27;,&#x27;incluir&#x27;]],on=&#x27;CID10&#x27;,validate=&#x27;many_to_one&#x27;)
+  100   selected.groupby([&#x27;CNES&#x27;,&#x27;unidade&#x27;,&#x27;nivel_etiologico&#x27;],as_index=False).internacoes.sum().to_csv(T/&#x27;sih_resumo_etiologico.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+  101   pd.DataFrame([{&#x27;nivel&#x27;:t,&#x27;grupo&#x27;:n,&#x27;prefixos&#x27;:&#x27; &#x27;.join(p),&#x27;excecoes&#x27;:&#x27; &#x27;.join(e),&#x27;fonte&#x27;:SOURCE} for t,n,p,e in RULES]).to_csv(T/&#x27;regras_filtro_bacteriano.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+  102   info={&#x27;data&#x27;:&#x27;2026-11-12&#x27;,&#x27;fonte_cid&#x27;:SOURCE,&#x27;criterio&#x27;:&#x27;A+B: etiologia bacteriana codificada e síndromes infecciosas compatíveis; C separado, sem incluir comorbidades isoladas.&#x27;,&#x27;CID_selecionados&#x27;:int(filt.incluir.sum()),&#x27;CID_por_nivel&#x27;:filt.nivel_etiologico.value_counts().to_dict(),&#x27;AIH_selecionadas&#x27;:int(selected.loc[selected.incluir,&#x27;internacoes&#x27;].sum()),&#x27;AIH_por_nivel&#x27;:selected.groupby(&#x27;nivel_etiologico&#x27;).internacoes.sum().to_dict(),&#x27;limitacao&#x27;:&#x27;Diagnóstico principal; sem confirmação de agente, RAM ou residência atendida. Não inclui SIA/e-SUS.&#x27;}
+  103   (O/&#x27;auditoria/filtro_bacteriano.json&#x27;).write_text(json.dumps(info,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(json.dumps(info,ensure_ascii=True),flush=True)
+  104  if __name__==&#x27;__main__&#x27;:main()</code></pre></article></html>

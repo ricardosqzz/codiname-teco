@@ -1,0 +1,266 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/idioma_cartografico_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/idioma_cartografico_teco.py</h2>
+<p>Idioma cartografico teco. Cartografia/apresentação. A organização passa por en, field_alias.</p>
+<p><strong>Papel.</strong> Cartografia/apresentação. <strong>Fonte inspecionada.</strong> E:\teco\codigo\idioma_cartografico_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>re</td><td>Extração e validação de padrões textuais, datas, identificadores e linhas dos modelos.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<p>Interface por parâmetros, retorno de funções ou programas chamados; os caminhos literais e as funções estão no inventário e no código integral.</p>
+<p><strong>Saídas.</strong></p>
+<p>Interface por parâmetros, retorno de funções ou programas chamados; os caminhos literais e as funções estão no inventário e no código integral.</p>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>en(text)</td><td>176-184</td><td>Chamadas efetivas: text.replace, sorted, re.sub, .replace, isinstance, WORDS.items, out.replace, len Retorno: out, text.</td></tr><tr><td>field_alias(name)</td><td>236-242</td><td>Chamadas efetivas: name.startswith, .lower, field_alias Retorno: name, FIELDS[name].</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/idioma_cartografico_teco.py, linhas 176-184.</p>
+<pre><code>def en(text):
+ if not isinstance(text,str):return text
+ if text in WORDS:return WORDS[text]
+ text=text.replace(&#x27;reported year 2025&#x27;,&#x27;2025&#x27;)
+ out=text
+ for a,b in sorted(WORDS.items(),key=lambda kv:len(kv[0]),reverse=True):out=out.replace(a,b)
+ out=re.sub(r&#x27;(?&lt;=\d) a (?=\d)&#x27;,&#x27; to &#x27;,out)
+ out=out.replace(&#x27;°O&#x27;,&#x27;°W&#x27;).replace(&#x27;2,5&#x27;,&#x27;2.5&#x27;)
+ return out</code></pre>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entradas: argumentos do chamador e módulos locais relacionados no relatório.
+    5  # Saídas: retorno de funções, verificações ou arquivos definidos pelo chamador.
+    6  # CÓDIGO DO PROCESSAMENTO
+    7  
+    8  # INÍCIO DOS CAMINHOS PORTÁTEIS
+    9  import sys as _cp_sys
+   10  from pathlib import Path as _cp_Path
+   11  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   12  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   13      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   14      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   15          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   16          break
+   17  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   18  # FIM DOS CAMINHOS PORTÁTEIS
+   19  
+   20  import re
+   21  WORDS={
+   22  &#x27;População censitária · setores de origem&#x27;:&#x27;Census population · original census sectors&#x27;,
+   23  &#x27;Habitantes no setor completo de origem&#x27;:&#x27;Residents in the complete original sector&#x27;,
+   24  &#x27;População no recorte censitário · estimativa por área&#x27;:&#x27;Population within basin boundaries · area allocation&#x27;,
+   25  &#x27;Habitantes estimados no recorte da bacia&#x27;:&#x27;Estimated residents within the basin clip&#x27;,
+   26  &#x27;Adensamento populacional · setores censitários&#x27;:&#x27;Population density · census sectors&#x27;,
+   27  &#x27;Habitantes/km²&#x27;:&#x27;Residents/km²&#x27;,
+   28  &#x27;Ligação à rede · dado censitário observado&#x27;:&#x27;Sewer network connection · observed census data&#x27;,
+   29  &#x27;Domicílios com rede (%)&#x27;:&#x27;Households connected to the network (%)&#x27;,
+   30  &#x27;Ausência de ligação à rede · dado observado&#x27;:&#x27;No sewer network connection · observed data&#x27;,
+   31  &#x27;Domicílios sem rede (%)&#x27;:&#x27;Households without a network connection (%)&#x27;,
+   32  &#x27;Destinação declarada em vala ou corpo hídrico&#x27;:&#x27;Reported disposal into a ditch or water body&#x27;,
+   33  &#x27;Domicílios com destinação em vala ou corpo hídrico (%)&#x27;:&#x27;Households reporting disposal into a ditch or water body (%)&#x27;,
+   34  &#x27;Dado não publicado / ausente&#x27;:&#x27;Unpublished / missing data&#x27;,
+   35  &#x27;Estabelecimentos com internações confirmadas · localização nas bacias&#x27;:&#x27;Facilities with confirmed admissions · locations within basins&#x27;,
+   36  &#x27;Internações por estabelecimento · filtro bacteriano e compatível&#x27;:&#x27;Hospital admissions · bacterial and compatible diagnoses&#x27;,
+   37  &#x27;Média anual de AIH selecionadas (2016-2025) · localização do hospital&#x27;:&#x27;Selected admissions per year (2016-2025) · hospital location&#x27;,
+   38  &#x27;Malha viária · hierarquia cadastral&#x27;:&#x27;Road network · registered hierarchy&#x27;,
+   39  &#x27;Cursos hídricos e reservatórios&#x27;:&#x27;Watercourses and reservoirs&#x27;,
+   40  &#x27;Uso e ocupação do solo · 2025 informado&#x27;:&#x27;Land use and land cover · 2025&#x27;,
+   41  &#x27;Declividade · classes Embrapa&#x27;:&#x27;Slope · Embrapa classes&#x27;,
+   42  &#x27;Potencial relativo exploratório&#x27;:&#x27;Exploratory relative pressure&#x27;,
+   43  &#x27;Perfis multivariados&#x27;:&#x27;Multivariate profiles&#x27;,
+   44  &#x27;Comparação por quintis · índice relativo local&#x27;:&#x27;Quintile comparison · local relative index&#x27;,
+   45  &#x27;Estabilidade entre cenários de ponderação&#x27;:&#x27;Stability across weighting scenarios&#x27;,
+   46  &#x27;Cenários com o mesmo perfil (%)&#x27;:&#x27;Scenarios retaining the reference profile (%)&#x27;,
+   47  &#x27;Associação espacial exploratória · Moran local&#x27;:&#x27;Exploratory spatial association · local Moran&#x27;,
+   48  &#x27;HH · alto próximo de alto&#x27;:&#x27;HH · high surrounded by high&#x27;,
+   49  &#x27;LL · baixo próximo de baixo&#x27;:&#x27;LL · low surrounded by low&#x27;,
+   50  &#x27;HL · alto próximo de baixo&#x27;:&#x27;HL · high surrounded by low&#x27;,
+   51  &#x27;LH · baixo próximo de alto&#x27;:&#x27;LH · low surrounded by high&#x27;,
+   52  &#x27;Associação não significativa&#x27;:&#x27;No significant association&#x27;,
+   53  &#x27;Informação não elegível&#x27;:&#x27;Ineligible information&#x27;,
+   54  &#x27;Sem vizinho elegível&#x27;:&#x27;No eligible neighbour&#x27;,
+   55  &#x27;Pressão territorial média a montante · cenário topológico&#x27;:&#x27;Mean upstream territorial pressure · topological scenario&#x27;,
+   56  &#x27;Média ponderada por área do índice S0 (0-100)&#x27;:&#x27;Area-weighted upstream mean of S0 (0-100)&#x27;,
+   57  &#x27;Área válida contribuinte pelo terreno&#x27;:&#x27;Valid topographic contributing area&#x27;,
+   58  &#x27;Área a montante (km²)&#x27;:&#x27;Upstream area (km²)&#x27;,
+   59  &#x27;Grade de análise e vizinhanças de 500 m&#x27;:&#x27;Analysis grid and 500 m neighbourhoods&#x27;,
+   60  &#x27;Grade de análise e vizinhanças de500m&#x27;:&#x27;Analysis grid and 500 m neighbourhoods&#x27;,
+   61  &#x27;Vias, cursos hídricos e trajetórias superficiais candidatas&#x27;:&#x27;Roads, watercourses and candidate surface pathways&#x27;,
+   62  &#x27;Plano · 0-3%&#x27;:&#x27;Flat · 0-3%&#x27;, &#x27;Suave ondulado · 3-8%&#x27;:&#x27;Gently undulating · 3-8%&#x27;,
+   63  &#x27;Ondulado · 8-20%&#x27;:&#x27;Undulating · 8-20%&#x27;, &#x27;Forte ondulado · 20-45%&#x27;:&#x27;Strongly undulating · 20-45%&#x27;,
+   64  &#x27;Montanhoso · 45-75%&#x27;:&#x27;Mountainous · 45-75%&#x27;, &#x27;Escarpado · &gt;75%&#x27;:&#x27;Steep · &gt;75%&#x27;,
+   65  &#x27;Área urbanizada&#x27;:&#x27;Built-up area&#x27;,&#x27;Vegetação natural&#x27;:&#x27;Natural vegetation&#x27;,
+   66  &#x27;Agropecuária / silvicultura&#x27;:&#x27;Agriculture / planted forest&#x27;,&#x27;Mineração&#x27;:&#x27;Mining&#x27;,
+   67  &#x27;Água / aquicultura&#x27;:&#x27;Water / aquaculture&#x27;,&#x27;Outras superfícies&#x27;:&#x27;Other surfaces&#x27;,
+   68  &#x27;Muito baixo&#x27;:&#x27;Very low&#x27;,&#x27;Muito alto&#x27;:&#x27;Very high&#x27;,&#x27;Moderado&#x27;:&#x27;Moderate&#x27;,&#x27;Baixo&#x27;:&#x27;Low&#x27;,&#x27;Alto&#x27;:&#x27;High&#x27;,
+   69  &#x27;Informação incompleta&#x27;:&#x27;Incomplete information&#x27;,&#x27;Perfil 1&#x27;:&#x27;Profile 1&#x27;,&#x27;Perfil 2&#x27;:&#x27;Profile 2&#x27;,
+   70  &#x27;Hipsometria&#x27;:&#x27;Elevation&#x27;,&#x27;Elevação (m)&#x27;:&#x27;Elevation (m)&#x27;,&#x27;Declividade (%)&#x27;:&#x27;Slope (%)&#x27;,&#x27;Declividade&#x27;:&#x27;Slope&#x27;,
+   71  &#x27;Distância superficial ao reservatório&#x27;:&#x27;Surface flow-path distance to the reservoir&#x27;,&#x27;Distância D8 (km)&#x27;:&#x27;D8 distance (km)&#x27;,
+   72  &#x27;Via secundária / coletora&#x27;:&#x27;Secondary / collector road&#x27;,&#x27;Via principal&#x27;:&#x27;Primary road&#x27;,&#x27;Via local&#x27;:&#x27;Local road&#x27;,
+   73  &#x27;Via sem classe cadastrada&#x27;:&#x27;Unclassified road&#x27;,&#x27;Sem classe cadastrada&#x27;:&#x27;No registered class&#x27;,
+   74  &#x27;Trajetória D8 candidata&#x27;:&#x27;Candidate D8 pathway&#x27;,&#x27;Curso hídrico&#x27;:&#x27;Watercourse&#x27;,&#x27;Reservatório&#x27;:&#x27;Reservoir&#x27;,
+   75  &#x27;Célula de apresentação&#x27;:&#x27;Display cell&#x27;,&#x27;Raio de cálculo · 500m&#x27;:&#x27;Calculation radius · 500 m&#x27;,
+   76  &#x27;Centro da vizinhança&#x27;:&#x27;Neighbourhood centre&#x27;,&#x27;Escala 1:225.000&#x27;:&#x27;Scale 1:225,000&#x27;,
+   77  &#x27;Adensamento | setores censitários&#x27;:&#x27;Population density | census sectors&#x27;,
+   78  &#x27;Ausência de rede | observado&#x27;:&#x27;No network connection | observed&#x27;,
+   79  &#x27;Ligação à rede | observado&#x27;:&#x27;Network connection | observed&#x27;,
+   80  &#x27;Limites das bacias&#x27;:&#x27;Basin boundaries&#x27;,
+   81  &#x27;População censitária | setor de origem&#x27;:&#x27;Census population | original sector&#x27;,
+   82  &#x27;População no recorte | estimativa por área&#x27;:&#x27;Population in basin clip | area allocation&#x27;,
+   83  &#x27;Círculos de cálculo | raio500m&#x27;:&#x27;Calculation circles | 500 m radius&#x27;,
+   84  &#x27;Centros das vizinhanças&#x27;:&#x27;Neighbourhood centres&#x27;,
+   85  &#x27;Vias de fundo | hierarquia cadastral&#x27;:&#x27;Background roads | registered hierarchy&#x27;,
+   86  &#x27;Vias recortadas para análise&#x27;:&#x27;Roads clipped for analysis&#x27;,
+   87  &#x27;Cursos hídricos&#x27;:&#x27;Watercourses&#x27;,
+   88  &#x27;Exutórios de referência&#x27;:&#x27;Reference outlets&#x27;,
+   89  &#x27;Trajetórias topográficas candidatas D8&#x27;:&#x27;Candidate D8 topographic pathways&#x27;,
+   90  &#x27;Estações de tratamento no cadastro recebido&#x27;:&#x27;Treatment plants in the supplied register&#x27;,
+   91  &#x27;Rede cadastrada por trecho - apenas domínio de BH&#x27;:&#x27;Registered network segments - Belo Horizonte coverage only&#x27;,
+   92  &#x27;Hospitais com internações confirmadas | dentro das bacias&#x27;:&#x27;Hospitals with confirmed admissions | within basins&#x27;,
+   93  &#x27;383 estabelecimentos com internações | residência municipal&#x27;:&#x27;383 admitting facilities | municipal residence query&#x27;,
+   94  &#x27;Localização dentro das bacias&#x27;:&#x27;Located within basins&#x27;,&#x27;Instituição fora das bacias&#x27;:&#x27;Facility outside the basins&#x27;,
+   95  &#x27;Coordenada pendente, produção confirmada&#x27;:&#x27;Coordinates pending, hospital activity confirmed&#x27;,
+   96  &#x27;Administrativo / móvel / outros&#x27;:&#x27;Administrative / mobile / other&#x27;,
+   97  &#x27;Farmácia (cadastro CNES)&#x27;:&#x27;Pharmacy (CNES register)&#x27;,
+   98  &#x27;Outros serviços assistenciais&#x27;:&#x27;Other healthcare services&#x27;,
+   99  &#x27;Atenção básica&#x27;:&#x27;Primary care&#x27;,&#x27;Urgência / pronto atendimento&#x27;:&#x27;Emergency / urgent care&#x27;,
+  100  &#x27;Hospital / hospital-dia&#x27;:&#x27;Hospital / day hospital&#x27;,
+  101  &#x27;Perfis k-means: identificadores sem ordem universal de risco&#x27;:&#x27;K-means profiles: identifiers without a universal risk order&#x27;,
+  102  &#x27;Perfis sem ordem de risco&#x27;:&#x27;Profiles without a risk order&#x27;,
+  103  &#x27;K-means S0 | perfis de atributos&#x27;:&#x27;K-means S0 | attribute profiles&#x27;,
+  104  &#x27;K-means S1 | perfis de atributos&#x27;:&#x27;K-means S1 | attribute profiles&#x27;,
+  105  &#x27;K-means S2 | perfis de atributos&#x27;:&#x27;K-means S2 | attribute profiles&#x27;,
+  106  &#x27;K-means S3 | perfis de atributos&#x27;:&#x27;K-means S3 | attribute profiles&#x27;,
+  107  &#x27;K-means S4 | perfis de atributos&#x27;:&#x27;K-means S4 | attribute profiles&#x27;,
+  108  &#x27;Moran local | Queen e FDR5%&#x27;:&#x27;Local Moran | Queen and 5% FDR&#x27;,
+  109  &#x27;Moran local do cenário S0&#x27;:&#x27;Local Moran for S0&#x27;,
+  110  &#x27;Associação espacial | Moran local&#x27;:&#x27;Spatial association | local Moran&#x27;,
+  111  &#x27;HH/LL associação; HL/LH contraste&#x27;:&#x27;HH/LL association; HL/LH contrast&#x27;,
+  112  &#x27;Escores e faixas dos cinco cenários&#x27;:&#x27;Scores and classes for the five scenarios&#x27;,
+  113  &#x27;Comparação dos cenários de ponderação&#x27;:&#x27;Weighting scenario comparison&#x27;,
+  114  &#x27;Quintis: comparação distinta das faixas fixas&#x27;:&#x27;Quintiles: comparison distinct from fixed score classes&#x27;,
+  115  &#x27;Faixas do escore relativo&#x27;:&#x27;Relative score classes&#x27;,
+  116  &#x27;Habitantes no setor completo&#x27;:&#x27;Residents in the complete sector&#x27;,
+  117  &#x27;Habitantes estimados no recorte&#x27;:&#x27;Estimated residents in the basin clip&#x27;,
+  118  &#x27;Domicílios (%)&#x27;:&#x27;Households (%)&#x27;,&#x27;Hipsometria (m)&#x27;:&#x27;Elevation (m)&#x27;,
+  119  &#x27;Distância D8 até o lago (km)&#x27;:&#x27;D8 distance to the lake (km)&#x27;,
+  120  &#x27;Relevo - classes Embrapa&#x27;:&#x27;Terrain - Embrapa slope classes&#x27;,
+  121  &#x27;Relevo e condicionantes&#x27;:&#x27;Terrain and physical context&#x27;,
+  122  &#x27;Pressão média a montante&#x27;:&#x27;Mean upstream pressure&#x27;,
+  123  &#x27;Área contribuinte km²&#x27;:&#x27;Contributing area km²&#x27;,
+  124  &#x27;Figura&#x27;:&#x27;Figure&#x27;,
+  125  }
+  126  FIELDS={
+  127  &#x27;GRID_ID&#x27;:&#x27;Grid identifier&#x27;,&#x27;BACIA&#x27;:&#x27;Basin identifier&#x27;,&#x27;id&#x27;:&#x27;Identifier&#x27;,&#x27;setor_id&#x27;:&#x27;Census sector identifier&#x27;,
+  128  &#x27;NOME&#x27;:&#x27;Name&#x27;,&#x27;NOME_BACIA&#x27;:&#x27;Basin name&#x27;,&#x27;NOME_TABNET&#x27;:&#x27;Name in TabNet&#x27;,&#x27;MUNICIPIO&#x27;:&#x27;Municipality&#x27;,
+  129  &#x27;POP_OFIC&#x27;:&#x27;Population of the complete original sector&#x27;,&#x27;POP_REC&#x27;:&#x27;Area-allocated population in the basin clip&#x27;,
+  130  &#x27;DENS_POP&#x27;:&#x27;Population density (residents/km²)&#x27;,&#x27;POP_DENS&#x27;:&#x27;Population density (residents/km²)&#x27;,
+  131  &#x27;POP&#x27;:&#x27;Area-allocated population in the neighbourhood&#x27;,&#x27;DOM&#x27;:&#x27;Area-allocated households in the neighbourhood&#x27;,
+  132  &#x27;DOM_TOT&#x27;:&#x27;Households in the complete original sector&#x27;,&#x27;DOM_REDE&#x27;:&#x27;Households connected to the network&#x27;,
+  133  &#x27;REDE_PCT&#x27;:&#x27;Households connected to the network (%)&#x27;,&#x27;SEM_REDE_OBS&#x27;:&#x27;Households without a network connection - observed (%)&#x27;,
+  134  &#x27;SEM_REDE&#x27;:&#x27;Households without a network connection - analytical (%)&#x27;,&#x27;SEM_OBS_P&#x27;:&#x27;Households without a network connection - observed coverage (%)&#x27;,
+  135  &#x27;REDE_DIR&#x27;:&#x27;Households connected to a general or stormwater sewer&#x27;,&#x27;FOSS_REDE&#x27;:&#x27;Septic tank connected to the sewer network&#x27;,
+  136  &#x27;FOSS_SREDE&#x27;:&#x27;Septic tank not connected to the network&#x27;,&#x27;FOSSA_RUD&#x27;:&#x27;Rudimentary pit&#x27;,&#x27;VALA&#x27;:&#x27;Disposal into a ditch&#x27;,
+  137  &#x27;RIO_LAGO&#x27;:&#x27;Disposal into a river lake stream or sea&#x27;,&#x27;DESC_RIO&#x27;:&#x27;Ditch or water-body disposal (%)&#x27;,
+  138  &#x27;OUTRO&#x27;:&#x27;Other disposal&#x27;,&#x27;SEM_BANH&#x27;:&#x27;No toilet or sanitary facility&#x27;,&#x27;SIGILO_N&#x27;:&#x27;Unpublished sanitation fields&#x27;,
+  139  &#x27;AIH_LOCAL&#x27;:&#x27;Selected hospital admissions per year at the local facility&#x27;,
+  140  &#x27;AIH_ORIG&#x27;:&#x27;Admissions by patient origin - pending spatial allocation&#x27;,
+  141  &#x27;AIH_A&#x27;:&#x27;Admissions with explicitly bacterial diagnoses&#x27;,
+  142  &#x27;AIH_B&#x27;:&#x27;Admissions with compatible diagnoses&#x27;,
+  143  &#x27;AIH_AB&#x27;:&#x27;Admissions selected by the A+B filter&#x27;,
+  144  &#x27;AIH_ANO&#x27;:&#x27;Selected hospital admissions per year&#x27;,
+  145  &#x27;AIH_FILT&#x27;:&#x27;Selected hospital admissions total&#x27;,
+  146  &#x27;AIH_TODAS&#x27;:&#x27;Hospital admissions - all causes&#x27;,
+  147  &#x27;AIH_NRMG&#x27;:&#x27;Admissions in the municipal residence query&#x27;,
+  148  &#x27;MEDIA_ANUAL_AB&#x27;:&#x27;Selected hospital admissions per year (A+B)&#x27;,
+  149  &#x27;N_AIH_LOCAL&#x27;:&#x27;Normal admissions recorded at the facility&#x27;,
+  150  &#x27;CNES&#x27;:&#x27;National healthcare facility identifier (CNES)&#x27;,
+  151  &#x27;AREA_KM2&#x27;:&#x27;Area (km²)&#x27;,&#x27;AREA_CEL&#x27;:&#x27;Display cell area (km²)&#x27;,&#x27;RAIO_M&#x27;:&#x27;Calculation radius (m)&#x27;,
+  152  &#x27;COB_ESG&#x27;:&#x27;Households with observed sanitation data (%)&#x27;,&#x27;EST_ESG&#x27;:&#x27;Households with imputed sanitation data (%)&#x27;,
+  153  &#x27;DOM_OBS&#x27;:&#x27;Area-allocated households with observed sanitation&#x27;,&#x27;DOM_EST&#x27;:&#x27;Area-allocated households with imputed sanitation&#x27;,
+  154  &#x27;SEM&#x27;:&#x27;Area-allocated households without a network connection - analytical&#x27;,
+  155  &#x27;SEM_OBS&#x27;:&#x27;Area-allocated households without a network connection - observed&#x27;,
+  156  &#x27;SAUDE_N&#x27;:&#x27;Number of admitting facilities in the neighbourhood&#x27;,&#x27;VALIDO&#x27;:&#x27;Complete main analytical inputs&#x27;,
+  157  &#x27;URB_PCT&#x27;:&#x27;Built-up land (%)&#x27;,&#x27;TERRA_PCT&#x27;:&#x27;Land surface (%)&#x27;,&#x27;HIPS_M&#x27;:&#x27;Mean elevation (m)&#x27;,
+  158  &#x27;DECL_PCT&#x27;:&#x27;Mean slope (%)&#x27;,&#x27;DIST_KM&#x27;:&#x27;Mean D8 distance to the reservoir (km)&#x27;,
+  159  &#x27;VIAS_KM&#x27;:&#x27;Road length (km)&#x27;,&#x27;HIDRO_KM&#x27;:&#x27;Watercourse length (km)&#x27;,&#x27;USO_N&#x27;:&#x27;Valid land-cover pixels&#x27;,
+  160  &#x27;E&#x27;:&#x27;Easting (m)&#x27;,&#x27;N&#x27;:&#x27;Northing (m)&#x27;,&#x27;CENTRO_INT&#x27;:&#x27;Centre located inside a basin&#x27;,
+  161  &#x27;ESTABILIDADE&#x27;:&#x27;Weighting scenarios retaining the reference profile (%)&#x27;,
+  162  &#x27;QUINTIL&#x27;:&#x27;Relative S0 quintile&#x27;,&#x27;MORAN&#x27;:&#x27;Local Moran association class&#x27;,&#x27;MORAN_Q&#x27;:&#x27;Local Moran FDR-adjusted p-value&#x27;,
+  163  &#x27;ORIG_STATUS&#x27;:&#x27;Patient-origin allocation status&#x27;,&#x27;TIPO&#x27;:&#x27;Type&#x27;,&#x27;TIPO_VIA&#x27;:&#x27;Road class&#x27;,&#x27;GRUPO&#x27;:&#x27;Facility type&#x27;,
+  164  &#x27;SIT_ESPACIAL&#x27;:&#x27;Spatial verification status&#x27;,&#x27;QA_MUN&#x27;:&#x27;Coordinate municipality verification&#x27;,
+  165  &#x27;DIST_BACIA_M&#x27;:&#x27;Distance to a basin (m)&#x27;,&#x27;COMP_KM&#x27;:&#x27;Length (km)&#x27;,&#x27;COLETA_ID&#x27;:&#x27;Sampling point identifier&#x27;,
+  166  &#x27;PERFIL_S0&#x27;:&#x27;Reference profile description&#x27;,&#x27;reserv&#x27;:&#x27;Reservoir&#x27;,&#x27;area_km2&#x27;:&#x27;Area (km²)&#x27;,
+  167  &#x27;orig_km2&#x27;:&#x27;Original area (km²)&#x27;,&#x27;reduz_km2&#x27;:&#x27;Removed area (km²)&#x27;,&#x27;incl_pct&#x27;:&#x27;Reservoir area included (%)&#x27;,
+  168  &#x27;situacao&#x27;:&#x27;Verification status&#x27;,&#x27;metodo&#x27;:&#x27;Method&#x27;,&#x27;bacia&#x27;:&#x27;Basin identifier&#x27;,&#x27;dist_km&#x27;:&#x27;Distance (km)&#x27;,
+  169  &#x27;utm_e&#x27;:&#x27;Easting (m)&#x27;,&#x27;utm_n&#x27;:&#x27;Northing (m)&#x27;,&#x27;comp_m&#x27;:&#x27;Length (m)&#x27;,&#x27;mun_nome&#x27;:&#x27;Municipality&#x27;,
+  170  &#x27;prec_m&#x27;:&#x27;Coordinate precision (m)&#x27;,&#x27;sit_nome&#x27;:&#x27;Site name&#x27;,&#x27;sit_rede&#x27;:&#x27;Network status&#x27;,
+  171  &#x27;fase_lic&#x27;:&#x27;Licensing stage&#x27;,&#x27;situ_lic&#x27;:&#x27;Licensing status&#x27;,&#x27;ete_id&#x27;:&#x27;Treatment plant identifier&#x27;,
+  172  &#x27;acum_cel&#x27;:&#x27;Upstream cell count&#x27;,&#x27;hier_legal&#x27;:&#x27;Registered road hierarchy&#x27;,&#x27;status&#x27;:&#x27;Status&#x27;,&#x27;AREA&#x27;:&#x27;Overlap area (km²)&#x27;,
+  173  }
+  174  
+  175  # En
+  176  def en(text):
+  177   if not isinstance(text,str):return text
+  178   if text in WORDS:return WORDS[text]
+  179   text=text.replace(&#x27;reported year 2025&#x27;,&#x27;2025&#x27;)
+  180   out=text
+  181   for a,b in sorted(WORDS.items(),key=lambda kv:len(kv[0]),reverse=True):out=out.replace(a,b)
+  182   out=re.sub(r&#x27;(?&lt;=\d) a (?=\d)&#x27;,&#x27; to &#x27;,out)
+  183   out=out.replace(&#x27;°O&#x27;,&#x27;°W&#x27;).replace(&#x27;2,5&#x27;,&#x27;2.5&#x27;)
+  184   return out
+  185  
+  186  WORDS.update({
+  187  &#x27;TECO | grade de500m e cenários&#x27;:&#x27;TECO | 500 m grid and scenarios&#x27;,
+  188  &#x27;01 Classificação relativa&#x27;:&#x27;01 Relative classification&#x27;,&#x27;02 Entradas originais&#x27;:&#x27;02 Original inputs&#x27;,
+  189  &#x27;03 Entradas normalizadas&#x27;:&#x27;03 Normalised inputs&#x27;,&#x27;04 K-means e Moran&#x27;:&#x27;04 K-means and Moran&#x27;,
+  190  &#x27;05 Saúde e grade&#x27;:&#x27;05 Healthcare and grid&#x27;,&#x27;06 Contexto&#x27;:&#x27;06 Context&#x27;,
+  191  &#x27;07 Suporte aos layouts&#x27;:&#x27;07 Layout support layers&#x27;,&#x27;08 Conectividade topológica&#x27;:&#x27;08 Topological connectivity&#x27;,
+  192  &#x27;Saúde | rede confirmada por residência NRMG&#x27;:&#x27;Healthcare | confirmed municipal residence query NRMG&#x27;,
+  193  &#x27;TECO | avaliação espacial atual&#x27;:&#x27;TECO | current spatial assessment&#x27;,
+  194  &#x27;01 Bases temáticas | mesma geometria censitária&#x27;:&#x27;01 Thematic inputs | common census geometry&#x27;,
+  195  &#x27;02 Pressão relativa e agrupamentos | exploratório&#x27;:&#x27;02 Relative pressure and exploratory clustering&#x27;,
+  196  &#x27;03 Conectividade topográfica | não é rede de esgoto&#x27;:&#x27;03 Topographic connectivity | not a sewer network&#x27;,
+  197  &#x27;04 Estabelecimentos | CNES ativo consultado&#x27;:&#x27;04 Facilities | queried active CNES register&#x27;,
+  198  &#x27;05 Relevo | Copernicus 30 m&#x27;:&#x27;05 Terrain | Copernicus 30 m&#x27;,
+  199  &#x27;Entradas e saídas | arquivos individuais&#x27;:&#x27;Inputs and outputs | individual files&#x27;,
+  200  &#x27;CNES | estabelecimentos por tipo assistencial&#x27;:&#x27;CNES | facilities by healthcare type&#x27;,
+  201  &#x27;Conferência do ponto anterior e vertedouro | Vargem&#x27;:&#x27;Previous point and spillway verification | Vargem&#x27;,
+  202  &#x27;Destinação declarada em rio/lago/mar&#x27;:&#x27;Reported disposal into a ditch or water body&#x27;,
+  203  &#x27;ETE / unidade | ANA2020&#x27;:&#x27;WWTP / facility | ANA 2020&#x27;,&#x27;ETE | cadastro IDE-Sisema&#x27;:&#x27;WWTP | IDE-Sisema register&#x27;,
+  204  &#x27;Entradas no lago | proxy censitário, não carga de ARG&#x27;:&#x27;Lake inflows | census proxy, not an ARG load&#x27;,
+  205  &#x27;Esgotamento | somente informações domiciliares&#x27;:&#x27;Sanitation | household information only&#x27;,
+  206  &#x27;Esgoto no recorte | estimativas, não totais oficiais&#x27;:&#x27;Sanitation in basin clips | estimates, not official totals&#x27;,
+  207  &#x27;K-means base | cinco perfis&#x27;:&#x27;Historical K-means reference | five profiles&#x27;,
+  208  &#x27;K-means | tipologias de adensamento e rede&#x27;:&#x27;K-means | population density and network profiles&#x27;,
+  209  &#x27;Limites das três bacias&#x27;:&#x27;Boundaries of the three basins&#x27;,
+  210  &#x27;Moran bivariado | população × ausência de rede nos vizinhos&#x27;:&#x27;Bivariate Moran | population and neighbouring network deficit&#x27;,
+  211  &#x27;Moran local | índice relativo | FDR 5%&#x27;:&#x27;Local Moran | relative index | 5% FDR&#x27;,
+  212  &#x27;Oito vizinhos | base&#x27;:&#x27;Eight neighbours | reference&#x27;,
+  213  &#x27;Outorgas modo18 regionais | fora das três bacias&#x27;:&#x27;Regional discharge permits mode 18 | outside the three basins&#x27;,
+  214  &#x27;População estimada no recorte | rateio por área&#x27;:&#x27;Estimated population in basin clips | area allocation&#x27;,
+  215  &#x27;População oficial | apenas ID e total de pessoas&#x27;:&#x27;Official population | identifier and total residents&#x27;,
+  216  &#x27;Pressão relativa | quintis | pesos 50/50&#x27;:&#x27;Historical relative pressure | quintiles | 50/50 weights&#x27;,
+  217  &#x27;Queen | base&#x27;:&#x27;Queen | reference&#x27;,&#x27;Queen | sem esgoto&#x27;:&#x27;Queen | without sanitation&#x27;,
+  218  &#x27;Vargem conferido&#x27;:&#x27;Vargem verified&#x27;,&#x27;potencial relativo exploratório&#x27;:&#x27;exploratory relative pressure&#x27;,
+  219  &#x27;perfis de sensibilidade&#x27;:&#x27;sensitivity profiles&#x27;,
+  220  &#x27;SIH 2016-2025 | cobertura e atividade dos estabelecimentos&#x27;:&#x27;SIH 2016-2025 | facility coverage and activity&#x27;,
+  221  &#x27;TECO - 3 sub-bacias exclusivas (EPSG:31983)&#x27;:&#x27;TECO - three non-overlapping sub-basins (EPSG:31983)&#x27;,
+  222  &#x27;TECO | exutórios de referência corrigidos&#x27;:&#x27;TECO | verified reference outlets&#x27;,
+  223  &#x27;Trajetórias D8 amostradas | candidatas a conferência&#x27;:&#x27;Sampled D8 pathways | candidates for verification&#x27;,
+  224  &#x27;setores_integrados_bacias&#x27;:&#x27;Integrated census sector and basin clips&#x27;,
+  225  &#x27;Índice base | 0-100, sem classificação de risco&#x27;:&#x27;Reference index | 0-100, without a risk classification&#x27;,
+  226  &#x27;ARTERIAL PRIMARIA&#x27;:&#x27;PRIMARY ARTERIAL&#x27;,&#x27;ARTERIAL SECUNDARIA&#x27;:&#x27;SECONDARY ARTERIAL&#x27;,
+  227  &#x27;ARTERIAL&#x27;:&#x27;ARTERIAL&#x27;,&#x27;COLETORA&#x27;:&#x27;COLLECTOR&#x27;,&#x27;LOCAL&#x27;:&#x27;LOCAL&#x27;,&#x27;EXPRESSA&#x27;:&#x27;EXPRESSWAY&#x27;,
+  228  &#x27;Fora das bacias&#x27;:&#x27;Outside the basins&#x27;,&#x27;Dentro das bacias&#x27;:&#x27;Within the basins&#x27;,
+  229  })
+  230  FIELDS.update({&#x27;PROD_TOT&#x27;:&#x27;Hospital production - all causes and origins&#x27;,&#x27;PROD_A&#x27;:&#x27;Hospital production - bacterial diagnoses&#x27;,
+  231  &#x27;PROD_B&#x27;:&#x27;Hospital production - compatible diagnoses&#x27;,&#x27;PROD_AB&#x27;:&#x27;Hospital production - selected A+B diagnoses&#x27;,
+  232  &#x27;RES_RD&#x27;:&#x27;Patient residence query - raw RD total&#x27;,&#x27;DIF_RES&#x27;:&#x27;Difference between raw RD and official residence query&#x27;,
+  233  &#x27;RES_NRMG&#x27;:&#x27;Official municipal residence query total&#x27;,&#x27;RES_AB&#x27;:&#x27;Municipal residents - selected A+B diagnoses&#x27;})
+  234  
+  235  # Field alias
+  236  def field_alias(name):
+  237   if name in FIELDS:return FIELDS[name]
+  238   if name.startswith(&#x27;I_S&#x27;):return &#x27;Relative pressure score - &#x27;+name[2:]
+  239   if name.startswith(&#x27;F_S&#x27;):return &#x27;Relative pressure class - &#x27;+name[2:]
+  240   if name.startswith(&#x27;K_S&#x27;):return &#x27;Multivariate profile - &#x27;+name[2:]
+  241   if name.startswith(&#x27;N_&#x27;):return &#x27;Normalised &#x27;+field_alias(name[2:]).lower()
+  242   return name</code></pre></article></html>

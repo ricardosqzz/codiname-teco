@@ -1,0 +1,308 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/mapas_grade_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/mapas_grade_teco.py</h2>
+<p>Mapas grade teco. Cartografia/apresentação. A organização passa por roadtype, _savefig_en, neat, start, drawroads, finish, cat, ready, continuous, categories.</p>
+<p><strong>Papel.</strong> Cartografia/apresentação. <strong>Fonte inspecionada.</strong> E:\teco\codigo\mapas_grade_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>ast</td><td>Inspeção/transformação da sintaxe Python sem executar o processamento científico.</td></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>geopandas</td><td>Camadas vetoriais com referência espacial, reprojeção, recorte e interseção de geometrias.</td></tr><tr><td>idioma_cartografico_teco</td><td>Módulo autoral local; sua ficha está neste relatório.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>math</td><td>Funções matemáticas escalares.</td></tr><tr><td>matplotlib</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.collections</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.colors</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.lines</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.patches</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.pyplot</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.text</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.ticker</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>numpy</td><td>Matrizes numéricas, máscaras de validade, transformações, percentis e estatísticas vetorizadas.</td></tr><tr><td>paleta_hipsometria_teco</td><td>Módulo autoral local; sua ficha está neste relatório.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>pyproj</td><td>Dependência importada; conferir as chamadas efetivas abaixo e a instalação do ambiente correspondente.</td></tr><tr><td>rasterio</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>rasterio.features</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>rasterio.windows</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>shapely.geometry</td><td>Operações geométricas usadas nas áreas, distâncias, limites e relações espaciais.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr><tr><td>xml.etree.ElementTree</td><td>Leitura/edição de XML de projetos e documentos.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:/teco/config/encartes_teco.json — chamada .read_text, linha 64.</li>
+<li>E:/teco/output/04_grade_500m/teco_grade_500m.gpkg [camada &#x27;centros_500m&#x27;] — chamada gpd.read_file, linha 245.</li>
+<li>E:/teco/output/02_avaliacao_espacial/teco_avaliacao.gpkg [camada &#x27;rotas_d8_candidatas&#x27;] — chamada gpd.read_file, linha 249.</li>
+<li>E:/teco/reservatorio/{key}.shp — chamada gpd.read_file, linha 68.</li>
+<li>E:/teco/vias/malha_viaria.shp — chamada gpd.read_file, linha 69.</li>
+<li>E:/teco/teco_base/mg_mun/ide_1103_mg_municipios_pol.shp — chamada gpd.read_file, linha 80.</li>
+<li>E:/teco/codigo/figuras_multivariada_teco.py — chamada .read_text, linha 84.</li>
+<li>E:/teco/output/02_avaliacao_espacial/rasters/{r.id}_{suffix}.tif — chamada rasterio.open, linha 212.</li>
+<li>E:/teco/teco_base/uso_terra/uso_terra-reservatorio.tif — chamada rasterio.open, linha 219.</li>
+<li>E:/teco/output/02_avaliacao_espacial/rasters/{r.id}_declividade_embrapa.tif — chamada rasterio.open, linha 227.</li>
+<li>E:/teco/output/04_grade_500m/auditoria/metodo_grade.json — chamada .read_text, linha 229.</li>
+<li>E:/teco/output/04_grade_500m/rasters/{r.id}_{suffix}.tif — chamada rasterio.open, linha 243.</li>
+<p><strong>Saídas.</strong></p>
+<li>E:/teco/output/04_grade_500m/teco_grade_500m.gpkg [camada &#x27;vias_contexto&#x27;] — chamada roads.to_file, linha 252.</li>
+<li>E:/teco/output/04_grade_500m/teco_grade_500m.gpkg [camada &#x27;hidro_contexto&#x27;] — chamada .to_file, linha 255.</li>
+<li>E:/teco/output/04_grade_500m/auditoria/galeria_mapas.json — chamada .write_text, linha 256.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>.loc: ibirite_regap, pampulha, vargem_flores.</li>
+<li>kwargs: bar.</li>
+<li>census: BACIA.</li>
+<li>health: AIH_ANO, BACIA.</li>
+<li>meta: cenarios.</li>
+<li>circ: BACIA.</li>
+<li>route: bacia.</li>
+<p><strong>Campos e chaves gerados.</strong></p>
+<li>roads: TIPO_VIA.</li>
+<li>kwargs: bar, waterdraw.</li>
+<li>a: QUINTIL.</li>
+<li>av: QUINTIL.</li>
+<li>hh: BACIA.</li>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>roadtype(s)</td><td>73-78</td><td>Chamadas efetivas: .upper, str Retorno: &#x27;Sem classe cadastrada&#x27;, &#x27;Principal&#x27;.</td></tr><tr><td>_savefig_en(fig, *args, **kwargs)</td><td>91-99</td><td>Chamadas efetivas: fig.findobj, _savefig, en, value.startswith, txt.set_text, txt.get_text, txt.set_fontsize, txt.set_linespacing Retorno: _savefig(fig, *args, **kwargs).</td></tr><tr><td>neat(t)</td><td>105-105</td><td>Chamadas efetivas: .replace, t.replace Retorno: t.replace(&#x27;de500m&#x27;, &#x27;de 500 m&#x27;).replace(&#x27;de500&#x27;, &#x27;de 500&#x27;).replace(&#x27;500m&#x27;, &#x27;500 m&#x27;).</td></tr><tr><td>start(title, sectors=True)</td><td>109-109</td><td>Chamadas efetivas: base_start, en, neat Retorno: base_start(en(neat(title)), sectors).</td></tr><tr><td>drawroads(ax, r, foreground=False)</td><td>114-119</td><td>Chamadas efetivas: ax.get_xlim, ax.get_ylim, box, .copy, .simplify, rr.explode, .get, len</td></tr><tr><td>finish(fig, axs, *args, **kwargs)</td><td>122-133</td><td>Chamadas efetivas: zip, list, kwargs.get, original_finish, b.itertuples, drawroads, ww.boundary.plot, ww.plot Retorno: original_finish(fig, axs, *args, **kwargs).</td></tr><tr><td>cat(field, title, slug, labels, colors, group)</td><td>136-141</td><td>Chamadas efetivas: ready, start, zip, finish, b.itertuples, gg.plot, .fillna, Patch</td></tr><tr><td>ready(slug, title, group)</td><td>144-150</td><td>Chamadas efetivas: ET.parse, gallery.append, max, path.stat, .stat, Path Retorno: True, False.</td></tr><tr><td>continuous(field, title, name, group, *args, **kwargs)</td><td>154-155</td><td>Chamadas efetivas: ready, original_continuous</td></tr><tr><td>categories(field, title, name, group)</td><td>158-159</td><td>Chamadas efetivas: ready, original_categories</td></tr><tr><td>number_health(axs, health)</td><td>162-168</td><td>Chamadas efetivas: zip, b.itertuples, .itertuples, ax.annotate, str, dict</td></tr><tr><td>native_maps(fields=None, health_only=False)</td><td>171-204</td><td>lê dados</td></tr><tr><td>relevo_maps(suffixes=None)</td><td>207-213</td><td>Chamadas efetivas: start, Normalize, zip, finish, hipso_colormap, b.itertuples, rasterio.open, ax.imshow</td></tr><tr><td>main()</td><td>216-256</td><td>lê dados; grava produtos</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/mapas_grade_teco.py, linhas 73-81.</p>
+<pre><code>def roadtype(s):
+ s=str(s).upper()
+ if &#x27;ARTERIAL PRIMARIA&#x27; in s or &#x27;EXPRESSA&#x27; in s:return &#x27;Principal&#x27;
+ if &#x27;ARTERIAL&#x27; in s or &#x27;COLETORA&#x27; in s:return &#x27;Secundária / coletora&#x27;
+ if &#x27;LOCAL&#x27; in s:return &#x27;Local&#x27;
+ return &#x27;Sem classe cadastrada&#x27;
+roads[&#x27;TIPO_VIA&#x27;]=roads.hier_legal.map(roadtype)
+mun=gpd.read_file(R/&#x27;teco_base/mg_mun/ide_1103_mg_municipios_pol.shp&#x27;,bbox=tuple(gpd.GeoSeries([box(*b.total_bounds)],crs=b.crs).to_crs(4326).total_bounds)).to_crs(31983)
+mun=mun.iloc[:0]</code></pre>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:/teco/config/encartes_teco.json | .read_text.
+    5  # Entrada: E:/teco/output/04_grade_500m/teco_grade_500m.gpkg | gpd.read_file | camada=&#x27;centros_500m&#x27;.
+    6  # Entrada: E:/teco/output/02_avaliacao_espacial/teco_avaliacao.gpkg | gpd.read_file | camada=&#x27;rotas_d8_candidatas&#x27;.
+    7  # Entrada: E:/teco/reservatorio/{key}.shp | gpd.read_file.
+    8  # Entrada: E:/teco/vias/malha_viaria.shp | gpd.read_file.
+    9  # Entrada: E:/teco/teco_base/mg_mun/ide_1103_mg_municipios_pol.shp | gpd.read_file.
+   10  # Entrada: E:/teco/codigo/figuras_multivariada_teco.py | .read_text.
+   11  # Entrada: E:/teco/output/02_avaliacao_espacial/rasters/{r.id}_{suffix}.tif | rasterio.open.
+   12  # Entrada: E:/teco/teco_base/uso_terra/uso_terra-reservatorio.tif | rasterio.open.
+   13  # Entrada: E:/teco/output/02_avaliacao_espacial/rasters/{r.id}_declividade_embrapa.tif | rasterio.open.
+   14  # Entrada: E:/teco/output/04_grade_500m/auditoria/metodo_grade.json | .read_text.
+   15  # Entrada: E:/teco/output/04_grade_500m/rasters/{r.id}_{suffix}.tif | rasterio.open.
+   16  # Campos/chaves em .loc: ibirite_regap, pampulha, vargem_flores.
+   17  # Campos/chaves em kwargs: bar.
+   18  # Campos/chaves em census: BACIA.
+   19  # Campos/chaves em health: AIH_ANO, BACIA.
+   20  # Campos/chaves em meta: cenarios.
+   21  # Campos/chaves em circ: BACIA.
+   22  # Campos/chaves em route: bacia.
+   23  # Saída: E:/teco/output/04_grade_500m/teco_grade_500m.gpkg | roads.to_file.
+   24  # Saída: E:/teco/output/04_grade_500m/teco_grade_500m.gpkg | .to_file.
+   25  # Saída: E:/teco/output/04_grade_500m/auditoria/galeria_mapas.json | .write_text.
+   26  # Campos/chaves gerados em roads: TIPO_VIA.
+   27  # Campos/chaves gerados em kwargs: bar, waterdraw.
+   28  # Campos/chaves gerados em a: QUINTIL.
+   29  # Campos/chaves gerados em av: QUINTIL.
+   30  # Campos/chaves gerados em hh: BACIA.
+   31  # BACIA: identificador da bacia.
+   32  # CÓDIGO DO PROCESSAMENTO
+   33  
+   34  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   35  import sys as _cp_sys
+   36  from pathlib import Path as _cp_Path
+   37  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   38  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   39      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   40      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   41          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   42          break
+   43  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   44  # FIM DOS CAMINHOS PORTÁTEIS
+   45  
+   46  from pathlib import Path
+   47  import ast,json,math
+   48  import numpy as np,pandas as pd,geopandas as gpd,rasterio
+   49  import matplotlib
+   50  matplotlib.use(&#x27;Agg&#x27;)
+   51  import matplotlib.pyplot as plt
+   52  from matplotlib.collections import LineCollection
+   53  from matplotlib.colors import Normalize,LinearSegmentedColormap,ListedColormap,BoundaryNorm
+   54  from matplotlib.patches import Patch,Rectangle
+   55  from matplotlib.lines import Line2D
+   56  from matplotlib.ticker import FuncFormatter
+   57  from pyproj import Transformer
+   58  from shapely.geometry import box
+   59  from rasterio.windows import from_bounds
+   60  from rasterio.features import rasterize
+   61  from paleta_hipsometria_teco import colormap as hipso_colormap
+   62  from idioma_cartografico_teco import en
+   63  R=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));O=R/&#x27;output/04_grade_500m&#x27;;B=R/&#x27;output/02_avaliacao_espacial&#x27;;G=O/&#x27;teco_grade_500m.gpkg&#x27;
+   64  MAP_VIEWS=json.loads((R/&#x27;config/encartes_teco.json&#x27;).read_text(&#x27;utf8&#x27;)) if (R/&#x27;config/encartes_teco.json&#x27;).exists() else {}
+   65  plt.rcParams.update({&#x27;font.family&#x27;:&#x27;Arial&#x27;,&#x27;font.size&#x27;:9,&#x27;svg.fonttype&#x27;:&#x27;none&#x27;,&#x27;axes.titleweight&#x27;:&#x27;bold&#x27;})
+   66  a=gpd.read_file(G,layer=&#x27;grade_resultados&#x27;).rename(columns={&#x27;BACIA&#x27;:&#x27;bas_id&#x27;});av=a.copy();u=a
+   67  b=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;bacias_estudo&#x27;).set_index(&#x27;id&#x27;).loc[[&#x27;pampulha&#x27;,&#x27;vargem_flores&#x27;,&#x27;ibirite_regap&#x27;]].reset_index()
+   68  water=gpd.GeoDataFrame(pd.concat([gpd.read_file(R/&#x27;reservatorio&#x27;/f&#x27;{key}.shp&#x27;).to_crs(31983) for key in b.id],ignore_index=True),crs=31983)
+   69  hyd=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;hidrografia_bacias&#x27;);roads=gpd.read_file(R/&#x27;vias/malha_viaria.shp&#x27;).to_crs(31983)
+   70  hydclip={r.id:gpd.clip(hyd,r.geometry) for r in b.itertuples()}
+   71  
+   72  # Roadtype
+   73  def roadtype(s):
+   74   s=str(s).upper()
+   75   if &#x27;ARTERIAL PRIMARIA&#x27; in s or &#x27;EXPRESSA&#x27; in s:return &#x27;Principal&#x27;
+   76   if &#x27;ARTERIAL&#x27; in s or &#x27;COLETORA&#x27; in s:return &#x27;Secundária / coletora&#x27;
+   77   if &#x27;LOCAL&#x27; in s:return &#x27;Local&#x27;
+   78   return &#x27;Sem classe cadastrada&#x27;
+   79  roads[&#x27;TIPO_VIA&#x27;]=roads.hier_legal.map(roadtype)
+   80  mun=gpd.read_file(R/&#x27;teco_base/mg_mun/ide_1103_mg_municipios_pol.shp&#x27;,bbox=tuple(gpd.GeoSeries([box(*b.total_bounds)],crs=b.crs).to_crs(4326).total_bounds)).to_crs(31983)
+   81  mun=mun.iloc[:0]
+   82  names={&#x27;pampulha&#x27;:&#x27;Pampulha&#x27;,&#x27;vargem_flores&#x27;:&#x27;Vargem das Flores&#x27;,&#x27;ibirite_regap&#x27;:&#x27;Ibirité / REGAP&#x27;};PAL=[&#x27;#7198ad&#x27;,&#x27;#b8c99b&#x27;,&#x27;#dfb77b&#x27;,&#x27;#bc7d7d&#x27;,&#x27;#8c7ba4&#x27;,&#x27;#55a28e&#x27;];CM=LinearSegmentedColormap.from_list(&#x27;teco_pressao&#x27;,[&#x27;#c8e7ef&#x27;,&#x27;#88bcb0&#x27;,&#x27;#e4d78d&#x27;,&#x27;#de9b66&#x27;,&#x27;#b94f58&#x27;]);trans=Transformer.from_crs(31983,4326,always_xy=True);span=18225.;scale=225000;gallery=[]
+   83  
+   84  base_source=(R/&#x27;codigo/figuras_multivariada_teco.py&#x27;).read_text(&#x27;utf8&#x27;).replace(&#x27;hyd[hyd.intersects(frame)]&#x27;,&#x27;hydclip[r.id]&#x27;)
+   85  
+   86  base_source=base_source.replace(&quot;.2f}°O&#x27;.replace(&#x27;.&#x27;,&#x27;,&#x27;)&quot;, &quot;.2f}°W&#x27;&quot;).replace(&quot;.2f}°S&#x27;.replace(&#x27;.&#x27;,&#x27;,&#x27;)&quot;, &quot;.2f}°S&#x27;&quot;)
+   87  base_source=base_source.replace(&quot;f&#x27;{v:,.0f}&#x27;.replace(&#x27;,&#x27;,&#x27;.&#x27;) if abs(v)&gt;=100 else f&#x27;{v:.1f}&#x27;.rstrip(&#x27;0&#x27;).rstrip(&#x27;.&#x27;).replace(&#x27;.&#x27;,&#x27;,&#x27;)&quot;, &quot;f&#x27;{v:,.0f}&#x27; if abs(v)&gt;=100 else f&#x27;{v:.1f}&#x27;.rstrip(&#x27;0&#x27;).rstrip(&#x27;.&#x27;)&quot;)
+   88  _savefig=plt.Figure.savefig
+   89  
+   90  # Savefig en
+   91  def _savefig_en(fig,*args,**kwargs):
+   92   from matplotlib.text import Text
+   93   for txt in fig.findobj(Text):
+   94    value=en(txt.get_text())
+   95    if value.startswith(&#x27;Datum: SIRGAS 2000&#x27;):
+   96     if &#x27;Brentano&#x27; not in value:value+=&#x27;\nBrentano, M. C. B.&#x27;
+   97     txt.set_fontsize(5.1);txt.set_linespacing(1.05)
+   98    txt.set_text(value)
+   99   return _savefig(fig,*args,**kwargs)
+  100  plt.Figure.savefig=_savefig_en
+  101  tree=ast.parse(base_source);keep={&#x27;legend&#x27;,&#x27;legend_small&#x27;,&#x27;start&#x27;,&#x27;finish&#x27;,&#x27;continuous&#x27;,&#x27;categories&#x27;}
+  102  exec(compile(ast.Module(body=[n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in keep],type_ignores=[]),&#x27;&lt;composicao_cartografica_teco&gt;&#x27;,&#x27;exec&#x27;))
+  103  
+  104  # Neat
+  105  def neat(t):return t.replace(&#x27;de500m&#x27;,&#x27;de 500 m&#x27;).replace(&#x27;de500&#x27;,&#x27;de 500&#x27;).replace(&#x27;500m&#x27;,&#x27;500 m&#x27;)
+  106  base_start=start
+  107  
+  108  # Start
+  109  def start(title,sectors=True):return base_start(en(neat(title)),sectors)
+  110  original_finish=finish
+  111  ROAD_CACHE={}
+  112  
+  113  # Drawroads
+  114  def drawroads(ax,r,foreground=False):
+  115   if r.id not in ROAD_CACHE:
+  116    x0,x1=ax.get_xlim();y0,y1=ax.get_ylim();frame=box(x0,y0,x1,y1);rr=roads[roads.intersects(frame)].copy();rr.geometry=rr.geometry.intersection(frame).simplify(2,preserve_topology=True);parts=rr.explode(index_parts=False);parts=parts[parts.geom_type==&#x27;LineString&#x27;];ROAD_CACHE[r.id]={cl:[np.asarray(x.coords) for x in parts.loc[parts.TIPO_VIA==cl].geometry] for cl in parts.TIPO_VIA.unique()}
+  117   for cls,co,lw in [(&#x27;Sem classe cadastrada&#x27;,&#x27;#b5b6b0&#x27;,.16),(&#x27;Local&#x27;,&#x27;#9caaa9&#x27;,.21),(&#x27;Secundária / coletora&#x27;,&#x27;#8f8274&#x27;,.32),(&#x27;Principal&#x27;,&#x27;#7a6b59&#x27;,.48)]:
+  118    segments=ROAD_CACHE[r.id].get(cls,[])
+  119    if len(segments):ax.add_collection(LineCollection(segments,colors=co,linewidths=lw,zorder=6 if foreground else .8,alpha=.80))
+  120  
+  121  # Finish
+  122  def finish(fig,axs,*args,**kwargs):
+  123   for ax,r in zip(axs,b.itertuples()):
+  124    drawroads(ax,r,True)
+  125    ww=water[water.intersects(r.geometry)]
+  126    ww.boundary.plot(ax=ax,color=&#x27;white&#x27;,lw=2.0,zorder=10)
+  127    ww.plot(ax=ax,color=&#x27;#45a8cf&#x27;,edgecolor=&#x27;#155777&#x27;,lw=.85,zorder=11)
+  128   kwargs[&#x27;waterdraw&#x27;]=False
+  129   args=list(args)
+  130   if len(args)&gt;1:args[1]=neat(args[1])
+  131   if kwargs.get(&#x27;bar&#x27;):kwargs[&#x27;bar&#x27;]=(kwargs[&#x27;bar&#x27;][0],en(neat(kwargs[&#x27;bar&#x27;][1])))
+  132   for h in kwargs.get(&#x27;handles&#x27;,[]) or []:h.set_label(en(neat(h.get_label())))
+  133   return original_finish(fig,axs,*args,**kwargs)
+  134  
+  135  # Cat
+  136  def cat(field,title,slug,labels,colors,group):
+  137   if ready(slug,title,group):return
+  138   fig,axs=start(title)
+  139   for ax,r in zip(axs,b.itertuples()):
+  140    gg=av[av.bas_id==r.id];gg.plot(ax=ax,color=gg[field].map(colors).fillna(&#x27;#cbd0d0&#x27;),edgecolor=&#x27;#71888b&#x27;,lw=.12,zorder=2)
+  141   finish(fig,axs,slug,title,group,handles=[Patch(color=colors[k],label=v) for k,v in labels.items()])
+  142  
+  143  # Ready
+  144  def ready(slug,title,group):
+  145   import xml.etree.ElementTree as ET
+  146   try:
+  147    path=O/&#x27;figuras&#x27;/f&#x27;{slug}.png&#x27;
+  148    assert path.stat().st_size&gt;1000 and path.stat().st_mtime &gt;= max((O/&#x27;auditoria/metodo_grade.json&#x27;).stat().st_mtime,Path(__file__).stat().st_mtime)
+  149    ET.parse(O/&#x27;figuras&#x27;/f&#x27;{slug}.svg&#x27;);gallery.append({&#x27;slug&#x27;:slug,&#x27;titulo&#x27;:title,&#x27;grupo&#x27;:group});return True
+  150   except Exception:return False
+  151  original_continuous=continuous;original_categories=categories
+  152  
+  153  # Continuous
+  154  def continuous(field,title,name,group,*args,**kwargs):
+  155   if not ready(name,title,group):original_continuous(field,title,name,group,*args,**kwargs)
+  156  
+  157  # Categories
+  158  def categories(field,title,name,group):
+  159   if not ready(name,title,group):original_categories(field,title,name,group)
+  160  
+  161  # Number health
+  162  def number_health(axs,health):
+  163  
+  164   labels={&#x27;2191164&#x27;:(&#x27;1&#x27;,(-14,16)),&#x27;2200473&#x27;:(&#x27;2&#x27;,(14,-16)),&#x27;6892256&#x27;:(&#x27;3&#x27;,(10,10))}
+  165   for ax,r in zip(axs,b.itertuples()):
+  166    for row in health[health.BACIA==r.id].itertuples():
+  167     number,offset=labels[str(row.CNES)]
+  168     ax.annotate(number,xy=(row.geometry.x,row.geometry.y),xytext=offset,textcoords=&#x27;offset points&#x27;,ha=&#x27;center&#x27;,va=&#x27;center&#x27;,fontsize=8,fontweight=&#x27;bold&#x27;,color=&#x27;white&#x27;,bbox=dict(boxstyle=&#x27;circle,pad=.28&#x27;,fc=&#x27;#a83e59&#x27;,ec=&#x27;white&#x27;,lw=.6),arrowprops=dict(arrowstyle=&#x27;-&#x27;,color=&#x27;#633644&#x27;,lw=.65,shrinkA=0,shrinkB=2),zorder=20)
+  169  
+  170  # Native maps
+  171  def native_maps(fields=None,health_only=False):
+  172   census=gpd.read_file(G,layer=&#x27;entradas_censitarias_nativas&#x27;);health=gpd.read_file(G,layer=&#x27;saude_todos&#x27;)
+  173   for field,title,unit,hi in [(&#x27;POP_OFIC&#x27;,&#x27;População censitária · setores de origem&#x27;,&#x27;Habitantes no setor completo de origem&#x27;,None),(&#x27;POP_REC&#x27;,&#x27;População no recorte censitário · estimativa por área&#x27;,&#x27;Habitantes estimados no recorte da bacia&#x27;,None),(&#x27;DENS_POP&#x27;,&#x27;Adensamento populacional · setores censitários&#x27;,&#x27;Habitantes/km²&#x27;,None),(&#x27;REDE_PCT&#x27;,&#x27;Ligação à rede · dado censitário observado&#x27;,&#x27;Domicílios com rede (%)&#x27;,100),(&#x27;SEM_REDE_OBS&#x27;,&#x27;Ausência de ligação à rede · dado observado&#x27;,&#x27;Domicílios sem rede (%)&#x27;,100),(&#x27;DESC_RIO&#x27;,&#x27;Destinação declarada em vala ou corpo hídrico&#x27;,&#x27;Domicílios com destinação em vala ou corpo hídrico (%)&#x27;,100)]:
+  174    if health_only:continue
+  175    if fields and field not in fields:continue
+  176    title=neat(title);fig,axs=start(title,sectors=False);upper=hi if hi else float(census[field].max());norm=Normalize(0,upper)
+  177    for ax,r in zip(axs,b.itertuples()):
+  178     cc=census[census.BACIA==r.id];cc.plot(ax=ax,column=field,cmap=CM,norm=norm,edgecolor=&#x27;#526f77&#x27;,lw=.12,zorder=2,missing_kwds={&#x27;color&#x27;:&#x27;#cbd0d0&#x27;,&#x27;edgecolor&#x27;:&#x27;#647b83&#x27;,&#x27;label&#x27;:&#x27;Dado não publicado / ausente&#x27;})
+  179    if census[field].isna().any():fig.legend(handles=[Patch(color=&#x27;#cbd0d0&#x27;,label=&#x27;Dado não publicado / ausente&#x27;)],loc=&#x27;upper center&#x27;,bbox_to_anchor=(.515,.19),frameon=False,fontsize=7)
+  180    finish(fig,axs,&#x27;nativo_&#x27;+field,title,&#x27;Entradas na geometria de origem&#x27;,bar=(plt.cm.ScalarMappable(norm=norm,cmap=CM),unit))
+  181   if fields:return
+  182   title=&#x27;Estabelecimentos com internações confirmadas · localização nas bacias&#x27;;fig,axs=start(title,sectors=False)
+  183   types=[(&#x27;Administrativo / móvel / outros&#x27;,&#x27;#7f8589&#x27;,&#x27;^&#x27;,8),(&#x27;Farmácia (cadastro CNES)&#x27;,&#x27;#558b62&#x27;,&#x27;s&#x27;,8),(&#x27;Outros serviços assistenciais&#x27;,&#x27;#9a7967&#x27;,&#x27;o&#x27;,6),(&#x27;Atenção básica&#x27;,&#x27;#765b93&#x27;,&#x27;o&#x27;,11),(&#x27;Urgência / pronto atendimento&#x27;,&#x27;#df9b48&#x27;,&#x27;D&#x27;,15),(&#x27;Hospital / hospital-dia&#x27;,&#x27;#b73857&#x27;,&#x27;P&#x27;,22)]
+  184   for ax,r in zip(axs,b.itertuples()):
+  185    hh=health[health.BACIA==r.id]
+  186    for kind,co,marker,size in types:
+  187     sub=hh[hh.GRUPO==kind]
+  188     if len(sub):sub.plot(ax=ax,color=co,marker=marker,markersize=size,edgecolor=&#x27;white&#x27;,lw=.22,zorder=15)
+  189   number_health(axs,health)
+  190   finish(fig,axs,&#x27;saude_todos&#x27;,title,&#x27;Saúde e abrangência&#x27;,handles=[Line2D([],[],marker=&#x27;o&#x27;,ls=&#x27;&#x27;,color=&#x27;#a83e59&#x27;,ms=4,label=label) for label in [&#x27;1 · CMI Contagem&#x27;,&#x27;2 · Hospital Municipal de Contagem&#x27;,&#x27;3 · Regional de Ibirité&#x27;]])
+  191   title=&#x27;Internações por estabelecimento · filtro bacteriano e compatível&#x27;;fig,axs=start(title,sectors=False);hi=float(health.AIH_ANO.max());norm=Normalize(0,hi)
+  192   for ax,r in zip(axs,b.itertuples()):
+  193    hh=health[health.BACIA==r.id];hh.plot(ax=ax,color=&#x27;#858d91&#x27;,markersize=3,edgecolor=&#x27;white&#x27;,lw=.1,zorder=14);v=hh[hh.AIH_ANO.notna()]
+  194    if len(v):v.plot(ax=ax,column=&#x27;AIH_ANO&#x27;,cmap=CM,norm=norm,markersize=65,edgecolor=&#x27;#253f49&#x27;,lw=.5,zorder=16)
+  195   number_health(axs,health)
+  196   finish(fig,axs,&#x27;saude_internacoes_pontos&#x27;,title,&#x27;Saúde e abrangência&#x27;,bar=(plt.cm.ScalarMappable(norm=norm,cmap=CM),&#x27;Média anual de AIH selecionadas (2016-2025) · localização do hospital&#x27;))
+  197   if health_only:return
+  198   for slug,title,kind in [(&#x27;vias_nativas&#x27;,&#x27;Malha viária · hierarquia cadastral&#x27;,&#x27;vias&#x27;),(&#x27;hidrografia_nativa&#x27;,&#x27;Cursos hídricos e reservatórios&#x27;,&#x27;hidro&#x27;)]:
+  199    fig,axs=start(title,sectors=False)
+  200    if kind==&#x27;hidro&#x27;:
+  201     for ax,r in zip(axs,b.itertuples()):hydclip[r.id].plot(ax=ax,color=&#x27;#2783a8&#x27;,lw=.55,zorder=9)
+  202     handles=[Line2D([],[],color=&#x27;#2783a8&#x27;,label=&#x27;Curso hídrico&#x27;),Patch(color=&#x27;#45a8cf&#x27;,ec=&#x27;#155777&#x27;,label=&#x27;Reservatório&#x27;)]
+  203    else:handles=[Line2D([],[],color=co,lw=lw,label=la) for la,co,lw in [(&#x27;Via principal&#x27;,&#x27;#7a6b59&#x27;,1.2),(&#x27;Via secundária / coletora&#x27;,&#x27;#8f8274&#x27;,.8),(&#x27;Via local&#x27;,&#x27;#9caaa9&#x27;,.5),(&#x27;Sem classe cadastrada&#x27;,&#x27;#b5b6b0&#x27;,.4)]]
+  204    finish(fig,axs,slug,title,&#x27;Entradas na geometria de origem&#x27;,handles=handles)
+  205  
+  206  # Relevo maps
+  207  def relevo_maps(suffixes=None):
+  208   for suffix,title,label,cmap,lims in [(&#x27;hipsometria&#x27;,&#x27;Hipsometria&#x27;,&#x27;Elevação (m)&#x27;,hipso_colormap(),(780,1450)),(&#x27;declividade_pct&#x27;,&#x27;Declividade&#x27;,&#x27;Declividade (%)&#x27;,&#x27;YlOrBr&#x27;,(0,120)),(&#x27;distancia_hidrologica_km&#x27;,&#x27;Distância superficial ao reservatório&#x27;,&#x27;Distância D8 (km)&#x27;,&#x27;YlGnBu&#x27;,(0,20))]:
+  209    if suffixes and suffix not in suffixes:continue
+  210    fig,axs=start(title,sectors=False);norm=Normalize(*lims)
+  211    for ax,r in zip(axs,b.itertuples()):
+  212     with rasterio.open(B/&#x27;rasters&#x27;/f&#x27;{r.id}_{suffix}.tif&#x27;) as d:ax.imshow(d.read(1,masked=True),extent=(d.bounds.left,d.bounds.right,d.bounds.bottom,d.bounds.top),cmap=cmap,norm=norm,zorder=2)
+  213    finish(fig,axs,&#x27;relevo_&#x27;+suffix,title,&#x27;Relevo&#x27;,bar=(plt.cm.ScalarMappable(norm=norm,cmap=cmap),label))
+  214  
+  215  # Main
+  216  def main():
+  217   native_maps()
+  218   fig,axs=start(&#x27;Uso e ocupação do solo · 2025 informado&#x27;,sectors=False);codes={24:1,1:2,3:2,4:2,5:2,11:2,12:2,9:3,15:3,19:3,21:3,36:3,30:4,31:5,33:5,25:6,29:6};colors=[&#x27;#d57c74&#x27;,&#x27;#6b9d78&#x27;,&#x27;#d6bd74&#x27;,&#x27;#9f88a3&#x27;,&#x27;#76b8d0&#x27;,&#x27;#c8c2b5&#x27;]
+  219   with rasterio.open(R/&#x27;teco_base/uso_terra/uso_terra-reservatorio.tif&#x27;) as d:
+  220    for ax,r in zip(axs,b.itertuples()):
+  221     win=from_bounds(*r.geometry.bounds,d.transform).round_offsets().round_lengths();arr=d.read(1,window=win);t=d.window_transform(win);mapped=np.full(arr.shape,np.nan)
+  222     for value,group in codes.items():mapped[arr==value]=group
+  223     mask=rasterize([(r.geometry,1)],out_shape=arr.shape,transform=t).astype(bool);mapped[~mask]=np.nan;ax.imshow(mapped,extent=(t.c,t.c+arr.shape[1]*t.a,t.f+arr.shape[0]*t.e,t.f),cmap=ListedColormap(colors),norm=BoundaryNorm(np.arange(.5,7.5),6),zorder=2)
+  224   finish(fig,axs,&#x27;uso_categorias_grade&#x27;,&#x27;Uso e ocupação do solo · 2025 informado&#x27;,&#x27;Entradas originais&#x27;,handles=[Patch(color=co,label=la) for co,la in zip(colors,[&#x27;Área urbanizada&#x27;,&#x27;Vegetação natural&#x27;,&#x27;Agropecuária / silvicultura&#x27;,&#x27;Mineração&#x27;,&#x27;Água / aquicultura&#x27;,&#x27;Outras superfícies&#x27;])])
+  225   fig,axs=start(&#x27;Declividade · classes Embrapa&#x27;,sectors=False);colors=[&#x27;#b7dce6&#x27;,&#x27;#a6cba0&#x27;,&#x27;#dfd28f&#x27;,&#x27;#dda168&#x27;,&#x27;#c17866&#x27;,&#x27;#946078&#x27;]
+  226   for ax,r in zip(axs,b.itertuples()):
+  227    with rasterio.open(B/&#x27;rasters&#x27;/f&#x27;{r.id}_declividade_embrapa.tif&#x27;) as d:ax.imshow(d.read(1,masked=True),extent=(d.bounds.left,d.bounds.right,d.bounds.bottom,d.bounds.top),cmap=ListedColormap(colors),norm=BoundaryNorm(np.arange(.5,7.5),6),zorder=2)
+  228   finish(fig,axs,&#x27;declividade_embrapa_grade&#x27;,&#x27;Declividade · classes Embrapa&#x27;,&#x27;Relevo&#x27;,handles=[Patch(color=co,label=la) for co,la in zip(colors,[&#x27;Plano · 0-3%&#x27;,&#x27;Suave ondulado · 3-8%&#x27;,&#x27;Ondulado · 8-20%&#x27;,&#x27;Forte ondulado · 20-45%&#x27;,&#x27;Montanhoso · 45-75%&#x27;,&#x27;Escarpado · &gt;75%&#x27;])])
+  229   meta=json.loads((O/&#x27;auditoria/metodo_grade.json&#x27;).read_text(&#x27;utf8&#x27;))
+  230   tierlabels={1:&#x27;Muito baixo&#x27;,2:&#x27;Baixo&#x27;,3:&#x27;Moderado&#x27;,4:&#x27;Alto&#x27;,5:&#x27;Muito alto&#x27;,0:&#x27;Informação incompleta&#x27;};tiercolors=dict(zip(range(1,6),[&#x27;#b7dce6&#x27;,&#x27;#8bbca9&#x27;,&#x27;#e0ce81&#x27;,&#x27;#d99965&#x27;,&#x27;#b94d5c&#x27;]));tiercolors[0]=&#x27;#cbd0d0&#x27;
+  231   for code,(name,_) in meta[&#x27;cenarios&#x27;].items():
+  232    cat(&#x27;F_&#x27;+code,&#x27;Potencial relativo exploratório · &#x27;+code,&#x27;faixas_&#x27;+code,tierlabels,tiercolors,&#x27;Classificação em cinco faixas&#x27;)
+  233    categories(&#x27;K_&#x27;+code,&#x27;Perfis multivariados · &#x27;+code,&#x27;kmeans_&#x27;+code,&#x27;K-means&#x27;)
+  234  
+  235   vals=a.I_S0;valid=vals.notna();a[&#x27;QUINTIL&#x27;]=0;a.loc[valid,&#x27;QUINTIL&#x27;]=pd.qcut(vals[valid].rank(method=&#x27;average&#x27;),5,labels=False,duplicates=&#x27;drop&#x27;)+1;av[&#x27;QUINTIL&#x27;]=a.QUINTIL
+  236   cat(&#x27;QUINTIL&#x27;,&#x27;Comparação por quintis · índice relativo local&#x27;,&#x27;quintis_grade&#x27;,tierlabels,tiercolors,&#x27;Comparação percentílica&#x27;)
+  237   continuous(&#x27;ESTABILIDADE&#x27;,&#x27;Estabilidade entre cenários de ponderação&#x27;,&#x27;estabilidade_grade&#x27;,&#x27;Sensibilidade&#x27;,&#x27;Cenários com o mesmo perfil (%)&#x27;,100,cmap=&#x27;YlGnBu&#x27;)
+  238   labels={&#x27;HH&#x27;:&#x27;HH · alto próximo de alto&#x27;,&#x27;LL&#x27;:&#x27;LL · baixo próximo de baixo&#x27;,&#x27;HL&#x27;:&#x27;HL · alto próximo de baixo&#x27;,&#x27;LH&#x27;:&#x27;LH · baixo próximo de alto&#x27;,&#x27;NS&#x27;:&#x27;Associação não significativa&#x27;,&#x27;ND&#x27;:&#x27;Informação não elegível&#x27;,&#x27;ISO&#x27;:&#x27;Sem vizinho elegível&#x27;};colors={&#x27;HH&#x27;:&#x27;#b23a4b&#x27;,&#x27;LL&#x27;:&#x27;#5595b0&#x27;,&#x27;HL&#x27;:&#x27;#e8ac79&#x27;,&#x27;LH&#x27;:&#x27;#9b7daa&#x27;,&#x27;NS&#x27;:&#x27;#e2e5df&#x27;,&#x27;ND&#x27;:&#x27;#c1c7c6&#x27;,&#x27;ISO&#x27;:&#x27;#faf9f3&#x27;};cat(&#x27;MORAN&#x27;,&#x27;Associação espacial exploratória · Moran local&#x27;,&#x27;moran_grade&#x27;,labels,colors,&#x27;Moran&#x27;)
+  239   relevo_maps()
+  240   for suffix,title,label,hi in [(&#x27;pressao_montante&#x27;,&#x27;Pressão territorial média a montante · cenário topológico&#x27;,&#x27;Média ponderada por área do índice S0 (0-100)&#x27;,100),(&#x27;area_montante_km2&#x27;,&#x27;Área válida contribuinte pelo terreno&#x27;,&#x27;Área a montante (km²)&#x27;,80)]:
+  241    fig,axs=start(title,sectors=False);norm=Normalize(0,hi)
+  242    for ax,r in zip(axs,b.itertuples()):
+  243     with rasterio.open(O/&#x27;rasters&#x27;/f&#x27;{r.id}_{suffix}.tif&#x27;) as d:ax.imshow(d.read(1,masked=True),extent=(d.bounds.left,d.bounds.right,d.bounds.bottom,d.bounds.top),cmap=CM,norm=norm,zorder=2)
+  244    finish(fig,axs,&#x27;rota_&#x27;+suffix,title,&#x27;Conectividade exploratória&#x27;,bar=(plt.cm.ScalarMappable(norm=norm,cmap=CM),label))
+  245   fig,axs=start(&#x27;Grade de análise e vizinhanças de500m&#x27;,sectors=False);circ=gpd.read_file(G,layer=&#x27;influencia_500m&#x27;);points=gpd.read_file(G,layer=&#x27;centros_500m&#x27;)
+  246   for ax,r in zip(axs,b.itertuples()):
+  247    av[av.bas_id==r.id].boundary.plot(ax=ax,color=&#x27;#577a84&#x27;,lw=.35,zorder=3);circ[circ.BACIA==r.id].boundary.plot(ax=ax,color=&#x27;#b47b69&#x27;,lw=.28,alpha=.5,zorder=4);points[points.intersects(r.geometry.buffer(500))].plot(ax=ax,color=&#x27;#416d7c&#x27;,markersize=2,zorder=6)
+  248   finish(fig,axs,&#x27;grade_circulos&#x27;,&#x27;Grade de análise e vizinhanças de500m&#x27;,&#x27;Grade e contexto&#x27;,handles=[Line2D([],[],color=&#x27;#577a84&#x27;,label=&#x27;Célula de apresentação&#x27;),Line2D([],[],color=&#x27;#b47b69&#x27;,label=&#x27;Raio de cálculo · 500m&#x27;),Line2D([],[],marker=&#x27;o&#x27;,ls=&#x27;&#x27;,color=&#x27;#416d7c&#x27;,ms=3,label=&#x27;Centro da vizinhança&#x27;)])
+  249   fig,axs=start(&#x27;Vias, cursos hídricos e trajetórias superficiais candidatas&#x27;,sectors=False);route=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;rotas_d8_candidatas&#x27;)
+  250   for ax,r in zip(axs,b.itertuples()):route[route.bacia==r.id].plot(ax=ax,color=&#x27;#348594&#x27;,lw=.6,alpha=.65,zorder=5)
+  251   finish(fig,axs,&#x27;vias_rotas_grade&#x27;,&#x27;Vias, cursos hídricos e trajetórias superficiais candidatas&#x27;,&#x27;Grade e contexto&#x27;,handles=[Line2D([],[],color=&#x27;#7a6b59&#x27;,lw=1,label=&#x27;Via principal&#x27;),Line2D([],[],color=&#x27;#8f8274&#x27;,label=&#x27;Via secundária / coletora&#x27;),Line2D([],[],color=&#x27;#9caaa9&#x27;,label=&#x27;Via local&#x27;),Line2D([],[],color=&#x27;#b5b6b0&#x27;,label=&#x27;Via sem classe cadastrada&#x27;),Line2D([],[],color=&#x27;#348594&#x27;,label=&#x27;Trajetória D8 candidata&#x27;)])
+  252   roads.to_file(G,layer=&#x27;vias_contexto&#x27;,driver=&#x27;GPKG&#x27;)
+  253   hparts=[]
+  254   for key,hh in hydclip.items():hh=hh.copy();hh[&#x27;BACIA&#x27;]=key;hparts.append(hh)
+  255   gpd.GeoDataFrame(pd.concat(hparts,ignore_index=True),crs=31983).to_file(G,layer=&#x27;hidro_contexto&#x27;,driver=&#x27;GPKG&#x27;)
+  256   (O/&#x27;auditoria/galeria_mapas.json&#x27;).write_text(json.dumps(gallery,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(&#x27;ATLAS_GRADE&#x27;,len(gallery),flush=True)
+  257  if __name__==&#x27;__main__&#x27;:main()</code></pre></article></html>

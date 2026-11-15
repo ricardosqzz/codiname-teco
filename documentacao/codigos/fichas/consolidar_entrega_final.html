@@ -1,0 +1,221 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/consolidar_entrega_final.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/consolidar_entrega_final.py</h2>
+<p>Consolidar entrega final. Processamento ou módulo de apoio. A organização passa por slug, desc, shapefile, raster, copy, main.</p>
+<p><strong>Papel.</strong> Processamento ou módulo de apoio. <strong>Fonte inspecionada.</strong> E:\teco\codigo\consolidar_entrega_final.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>csv</td><td>Leitura/escrita de tabelas delimitadas com separador e codificação explícitos.</td></tr><tr><td>datetime</td><td>Calendários, datas e duração dos períodos avaliados.</td></tr><tr><td>dicionario_campos_teco</td><td>Módulo autoral local; sua ficha está neste relatório.</td></tr><tr><td>geopandas</td><td>Camadas vetoriais com referência espacial, reprojeção, recorte e interseção de geometrias.</td></tr><tr><td>hashlib</td><td>Assinaturas SHA-256 para identificar alterações de arquivos; não é validação do conteúdo científico.</td></tr><tr><td>html</td><td>Escape e construção de páginas HTML de documentação/visualização.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>numpy</td><td>Matrizes numéricas, máscaras de validade, transformações, percentis e estatísticas vetorizadas.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>rasterio</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>re</td><td>Extração e validação de padrões textuais, datas, identificadores e linhas dos modelos.</td></tr><tr><td>shapely.geometry</td><td>Operações geométricas usadas nas áreas, distâncias, limites e relações espaciais.</td></tr><tr><td>shutil</td><td>Cópia e movimentação de arquivos, inclusive preservação de versões geradas.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr><tr><td>unicodedata</td><td>Dependência importada; conferir as chamadas efetivas abaixo e a instalação do ambiente correspondente.</td></tr><tr><td>zoneinfo</td><td>Dependência importada; conferir as chamadas efetivas abaixo e a instalação do ambiente correspondente.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:/teco/entrega_final/{rel} — chamada gpd.read_file, linha 87.</li>
+<li>E:/teco/entrega_final/{rel} — chamada rasterio.open, linha 97.</li>
+<li>E:/teco/output/04_grade_500m/teco_grade_500m.gpkg [camada &#x27;influencia_500m&#x27;] — chamada gpd.read_file, linha 146.</li>
+<li>E:/teco/output/02_avaliacao_espacial/teco_avaliacao.gpkg [camada &#x27;rotas_d8_candidatas&#x27;] — chamada gpd.read_file, linha 147.</li>
+<li>E:/teco/reservatorio/{key}.shp — chamada gpd.read_file, linha 118.</li>
+<li>E:/teco/config/encartes_teco.json — chamada .read_text, linha 125.</li>
+<li>E:/teco/output/05_auditoria_saude/saude_tabnet_auditada.gpkg [camada &#x27;rede_internacoes_residentes&#x27;] — chamada gpd.read_file, linha 129.</li>
+<li>E:/teco/output/03_multivariada/teco_multivariada.gpkg [camada &#x27;exutorios_referencia&#x27;] — chamada gpd.read_file, linha 130.</li>
+<li>{p} — chamada gpd.read_file, linha 133.</li>
+<li>E:/teco/output/04_grade_500m/auditoria/galeria.json — chamada .read_text, linha 150.</li>
+<li>E:/teco/output/04_grade_500m/auditoria/metodo_grade.json — chamada .read_text, linha 161.</li>
+<li>E:/teco/output/05_auditoria_saude/consolidacao.json — chamada .read_text, linha 161.</li>
+<p><strong>Saídas.</strong></p>
+<li>E:/teco/entrega_final/{rel} — chamada g.to_file, linha 86.</li>
+<li>path.parent/dicionario_campos.csv — chamada .to_csv, linha 91.</li>
+<li>E:/teco/entrega_final/00_documentacao/Dicionario_dos_campos.csv — chamada .to_csv, linha 160.</li>
+<li>E:/teco/entrega_final/00_documentacao/Inventario_de_camadas.csv — chamada .to_csv, linha 160.</li>
+<li>E:/teco/entrega_final/00_documentacao/manifesto.json — chamada .write_text, linha 162.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>r: arquivo.</li>
+<li>record: arquivo.</li>
+<li>b: geometry, id.</li>
+<li>c: V00309, V00310, V00311, V00312, V00313, V00314, V00315, V00316, bas_id, dens_pop, dom_set, n_sigilo, pct_nrede, pct_rede, pct_vrio, pop_2022, pop_a_est, rede_set, setor_id.</li>
+<li>hyd: BACIA, geometry, id.</li>
+<li>b.loc: id.</li>
+<li>roads: TIPO_VIA, geometry, hier_legal, ogc_fid.</li>
+<li>q: Name, geometry.</li>
+<li>row: grupo, slug.</li>
+<p><strong>Campos e chaves gerados.</strong></p>
+<li>ww: AREA_KM2.</li>
+<li>hyd: COMP_KM.</li>
+<li>inner: COMP_KM.</li>
+<li>q: BACIA.</li>
+<li>a: AREA_CEL.</li>
+<li>km: PERFIL_S0.</li>
+<li>row: titulo.</li>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>slug(text)</td><td>64-64</td><td>Chamadas efetivas: .strip, re.sub, .lower, .decode, .encode, unicodedata.normalize Retorno: re.sub(&#x27;[^a-z0-9]+&#x27;, &#x27;_&#x27;, unicodedata.normalize(&#x27;NFKD&#x27;, text).encode(&#x27;ascii&#x27;, &#x27;ignore&#x27;).decode().lower()).strip(&#x27;_&#x27;).</td></tr><tr><td>desc(field, arquivo=&#x27;&#x27;)</td><td>67-68</td><td>Chamadas efetivas: descrever_campo Retorno: descrever_campo(field, arquivo).</td></tr><tr><td>shapefile(g, rel, role, title, source)</td><td>71-92</td><td>lê dados; grava produtos Retorno: path.</td></tr><tr><td>raster(src, rel, role, title)</td><td>95-102</td><td>Chamadas efetivas: dst.parent.mkdir, shutil.copy2, str, rasterio.open, d.read, vals.compressed, len, RASTERS.append Retorno: dst.</td></tr><tr><td>copy(src, rel)</td><td>105-106</td><td>Chamadas efetivas: dst.parent.mkdir, shutil.copy2 Retorno: dst.</td></tr><tr><td>main()</td><td>109-162</td><td>lê dados; grava produtos</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/consolidar_entrega_final.py, linhas 89-95.</p>
+<pre><code>  if c in mapping:assert read[mapping[c]].astype(&#x27;string&#x27;).equals(g[mapping[c]].astype(&#x27;string&#x27;)),(title,c)
+ record={&#x27;arquivo&#x27;:str(Path(rel)).replace(&#x27;\\&#x27;,&#x27;/&#x27;),&#x27;titulo&#x27;:title,&#x27;papel&#x27;:role,&#x27;feicoes&#x27;:len(g),&#x27;sem_geometria&#x27;:int(g.geometry.isna().sum()),&#x27;crs&#x27;:&#x27;EPSG:31983&#x27;,&#x27;fonte&#x27;:source,&#x27;campos&#x27;:mapping};VECTORS.append(record)
+ pd.DataFrame([r for r in FIELDS if r[&#x27;arquivo&#x27;]==record[&#x27;arquivo&#x27;]]).to_csv(path.parent/&#x27;dicionario_campos.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+ print(&#x27;SHP&#x27;,path.stem,len(g),flush=True);return path
+
+# Raster
+def raster(src,rel,role,title):</code></pre>
+<p>Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</p>
+<p><strong>Cálculos a observar nesta rotina.</strong></p>
+<li>sum: Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</li>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:/teco/entrega_final/{rel} | gpd.read_file.
+    5  # Entrada: E:/teco/entrega_final/{rel} | rasterio.open.
+    6  # Entrada: E:/teco/output/04_grade_500m/teco_grade_500m.gpkg | gpd.read_file | camada=&#x27;influencia_500m&#x27;.
+    7  # Entrada: E:/teco/output/02_avaliacao_espacial/teco_avaliacao.gpkg | gpd.read_file | camada=&#x27;rotas_d8_candidatas&#x27;.
+    8  # Entrada: E:/teco/reservatorio/{key}.shp | gpd.read_file.
+    9  # Entrada: E:/teco/config/encartes_teco.json | .read_text.
+   10  # Entrada: E:/teco/output/05_auditoria_saude/saude_tabnet_auditada.gpkg | gpd.read_file | camada=&#x27;rede_internacoes_residentes&#x27;.
+   11  # Entrada: E:/teco/output/03_multivariada/teco_multivariada.gpkg | gpd.read_file | camada=&#x27;exutorios_referencia&#x27;.
+   12  # Entrada: {p} | gpd.read_file.
+   13  # Entrada: E:/teco/output/04_grade_500m/auditoria/galeria.json | .read_text.
+   14  # Entrada: E:/teco/output/04_grade_500m/auditoria/metodo_grade.json | .read_text.
+   15  # Entrada: E:/teco/output/05_auditoria_saude/consolidacao.json | .read_text.
+   16  # Campos/chaves em r: arquivo.
+   17  # Campos/chaves em record: arquivo.
+   18  # Campos/chaves em b: geometry, id.
+   19  # Campos/chaves em c: V00309, V00310, V00311, V00312, V00313, V00314, V00315, V00316, bas_id, dens_pop, dom_set, n_sigilo, pct_nrede, pct_rede, pct_vrio, pop_2022, pop_a_est, rede_set, setor_id.
+   20  # Campos/chaves em hyd: BACIA, geometry, id.
+   21  # Campos/chaves em b.loc: id.
+   22  # Campos/chaves em roads: TIPO_VIA, geometry, hier_legal, ogc_fid.
+   23  # Campos/chaves em q: Name, geometry.
+   24  # Campos/chaves em row: grupo, slug.
+   25  # Saída: E:/teco/entrega_final/{rel} | g.to_file.
+   26  # Saída: path.parent/dicionario_campos.csv | .to_csv.
+   27  # Saída: E:/teco/entrega_final/00_documentacao/Dicionario_dos_campos.csv | .to_csv.
+   28  # Saída: E:/teco/entrega_final/00_documentacao/Inventario_de_camadas.csv | .to_csv.
+   29  # Saída: E:/teco/entrega_final/00_documentacao/manifesto.json | .write_text.
+   30  # Campos/chaves gerados em ww: AREA_KM2.
+   31  # Campos/chaves gerados em hyd: COMP_KM.
+   32  # Campos/chaves gerados em inner: COMP_KM.
+   33  # Campos/chaves gerados em q: BACIA.
+   34  # Campos/chaves gerados em a: AREA_CEL.
+   35  # Campos/chaves gerados em km: PERFIL_S0.
+   36  # Campos/chaves gerados em row: titulo.
+   37  # BACIA: identificador da bacia.
+   38  # CÓDIGO DO PROCESSAMENTO
+   39  
+   40  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   41  import sys as _cp_sys
+   42  from pathlib import Path as _cp_Path
+   43  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   44  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   45      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   46      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   47          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   48          break
+   49  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   50  # FIM DOS CAMINHOS PORTÁTEIS
+   51  
+   52  from dicionario_campos_teco import descrever_campo
+   53  from pathlib import Path
+   54  from datetime import datetime
+   55  from zoneinfo import ZoneInfo
+   56  import json,shutil,re,unicodedata,csv,html,hashlib
+   57  import numpy as np,pandas as pd,geopandas as gpd,rasterio
+   58  from shapely.geometry import box
+   59  R=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));F=R/&#x27;entrega_final&#x27;;B=R/&#x27;output/02_avaliacao_espacial&#x27;;O=R/&#x27;output/04_grade_500m&#x27;;H=R/&#x27;output/05_auditoria_saude&#x27;;G=O/&#x27;teco_grade_500m.gpkg&#x27;;NOW=datetime.now(ZoneInfo(&#x27;America/Sao_Paulo&#x27;))
+   60  VECTORS=[];RASTERS=[];FIELDS=[];MAPS=[];SOURCE_MAP={}
+   61  ALIAS={&#x27;SEM_REDE_OBS&#x27;:&#x27;SEM_REDE&#x27;,&#x27;ESTABILIDADE&#x27;:&#x27;ESTAB_PCT&#x27;,&#x27;N_AIH_LOCAL&#x27;:&#x27;N_AIH_LOC&#x27;,&#x27;ORIG_STATUS&#x27;:&#x27;ORIG_SIT&#x27;,&#x27;SIT_ESPACIAL&#x27;:&#x27;SIT_ESP&#x27;,&#x27;NOME_TABNET&#x27;:&#x27;NOME&#x27;,&#x27;AIH_NRMG&#x27;:&#x27;AIH_RES&#x27;,&#x27;MEDIA_ANUAL_AB&#x27;:&#x27;AIH_AB_ANO&#x27;,&#x27;DIST_BACIA_M&#x27;:&#x27;DIST_BAC_M&#x27;,&#x27;MUNICIPIO&#x27;:&#x27;MUN_CNES&#x27;}
+   62  
+   63  # Slug
+   64  def slug(text):return re.sub(r&#x27;[^a-z0-9]+&#x27;,&#x27;_&#x27;,unicodedata.normalize(&#x27;NFKD&#x27;,text).encode(&#x27;ascii&#x27;,&#x27;ignore&#x27;).decode().lower()).strip(&#x27;_&#x27;)
+   65  
+   66  # Desc
+   67  def desc(field, arquivo=&#x27;&#x27;):
+   68   return descrever_campo(field, arquivo)
+   69  
+   70  # Shapefile
+   71  def shapefile(g,rel,role,title,source):
+   72   g=g.copy()
+   73   if g.crs is None:raise ValueError(&#x27;CRS ausente: &#x27;+title)
+   74   g=g.to_crs(31983);assert g.loc[g.geometry.notna()].geometry.is_valid.all(),title
+   75   path=F/rel;path.parent.mkdir(parents=True,exist_ok=True);mapping={};seen=set()
+   76   for c in g.columns:
+   77    if c==&#x27;geometry&#x27;:continue
+   78    name=ALIAS.get(c,c)
+   79    name=re.sub(&#x27;[^A-Za-z0-9_]&#x27;,&#x27;_&#x27;,unicodedata.normalize(&#x27;NFKD&#x27;,name).encode(&#x27;ascii&#x27;,&#x27;ignore&#x27;).decode())[:10] or &#x27;CAMPO&#x27;
+   80    base=name;count=1
+   81    while name.upper() in seen:name=base[:8]+str(count);count+=1
+   82    seen.add(name.upper());mapping[c]=name
+   83    if pd.api.types.is_bool_dtype(g[c]):g[c]=g[c].astype(&#x27;Int32&#x27;)
+   84    if c in [&#x27;CNES&#x27;,&#x27;setor_id&#x27;,&#x27;CD_SETOR&#x27;,&#x27;GRID_ID&#x27;]:g[c]=g[c].astype(&#x27;string&#x27;)
+   85    FIELDS.append({&#x27;arquivo&#x27;:str(Path(rel)).replace(&#x27;\\&#x27;,&#x27;/&#x27;),&#x27;campo_shp&#x27;:name,&#x27;campo_original&#x27;:c,&#x27;descricao&#x27;:desc(c,str(Path(rel)).replace(&#x27;\\&#x27;,&#x27;/&#x27;))})
+   86   g=g.rename(columns=mapping);g=g[[c for c in g.columns if c!=&#x27;geometry&#x27;]+[&#x27;geometry&#x27;]];g.to_file(path,index=False,driver=&#x27;ESRI Shapefile&#x27;,encoding=&#x27;UTF-8&#x27;)
+   87   read=gpd.read_file(path);assert len(read)==len(g) and list(read.columns)==list(g.columns),(title,read.columns,g.columns)
+   88   for c in [&#x27;CNES&#x27;,&#x27;setor_id&#x27;,&#x27;CD_SETOR&#x27;,&#x27;GRID_ID&#x27;]:
+   89    if c in mapping:assert read[mapping[c]].astype(&#x27;string&#x27;).equals(g[mapping[c]].astype(&#x27;string&#x27;)),(title,c)
+   90   record={&#x27;arquivo&#x27;:str(Path(rel)).replace(&#x27;\\&#x27;,&#x27;/&#x27;),&#x27;titulo&#x27;:title,&#x27;papel&#x27;:role,&#x27;feicoes&#x27;:len(g),&#x27;sem_geometria&#x27;:int(g.geometry.isna().sum()),&#x27;crs&#x27;:&#x27;EPSG:31983&#x27;,&#x27;fonte&#x27;:source,&#x27;campos&#x27;:mapping};VECTORS.append(record)
+   91   pd.DataFrame([r for r in FIELDS if r[&#x27;arquivo&#x27;]==record[&#x27;arquivo&#x27;]]).to_csv(path.parent/&#x27;dicionario_campos.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+   92   print(&#x27;SHP&#x27;,path.stem,len(g),flush=True);return path
+   93  
+   94  # Raster
+   95  def raster(src,rel,role,title):
+   96   dst=F/rel;dst.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(src,dst)
+   97   with rasterio.open(dst) as d:
+   98    vals=d.read(1,masked=True);v=vals.compressed();v=v[np.isfinite(v)];assert len(v),dst;RASTERS.append({&#x27;arquivo&#x27;:str(Path(rel)).replace(&#x27;\\&#x27;,&#x27;/&#x27;),&#x27;titulo&#x27;:title,&#x27;papel&#x27;:role,&#x27;crs&#x27;:str(d.crs),&#x27;pixel_x_m&#x27;:d.res[0],&#x27;pixel_y_m&#x27;:d.res[1],&#x27;min&#x27;:float(v.min()),&#x27;max&#x27;:float(v.max()),&#x27;fonte&#x27;:str(src)})
+   99   for extra in [&#x27;.qml&#x27;]:
+  100    if src.with_suffix(extra).exists():shutil.copy2(src.with_suffix(extra),dst.with_suffix(extra))
+  101   SOURCE_MAP[str(src).replace(&#x27;\\&#x27;,&#x27;/&#x27;)]=str(dst)
+  102   return dst
+  103  
+  104  # Copy
+  105  def copy(src,rel):
+  106   dst=F/rel;dst.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(src,dst);return dst
+  107  
+  108  # Main
+  109  def main():
+  110   if F.exists():
+  111    assert F.resolve().parent==R.resolve() and F.name==&#x27;entrega_final&#x27;
+  112    target=R/&#x27;descontinuado&#x27;/NOW.strftime(&#x27;%Y%m%d_%H%M%S_entrega_final&#x27;);assert target.resolve().is_relative_to((R/&#x27;descontinuado&#x27;).resolve());F.rename(target)
+  113   F.mkdir();(F/&#x27;00_documentacao&#x27;).mkdir();b=gpd.read_file(G,layer=&#x27;bacias_estudo&#x27;);a=gpd.read_file(G,layer=&#x27;grade_resultados&#x27;);c=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;analise_setores&#x27;)
+  114   shapefile(b,&#x27;01_entradas/01_bacias/bacias.shp&#x27;,&#x27;entrada&#x27;,&#x27;Delimitações utilizadas&#x27;,str(G)+&#x27;|bacias_estudo&#x27;)
+  115   water=[]
+  116   names={&#x27;pampulha&#x27;:&#x27;Lagoa da Pampulha&#x27;,&#x27;vargem_flores&#x27;:&#x27;Reservatório de Vargem das Flores&#x27;,&#x27;ibirite_regap&#x27;:&#x27;Reservatório de Ibirité / REGAP&#x27;}
+  117   for key in b.id:
+  118    ww=gpd.read_file(R/&#x27;reservatorio&#x27;/f&#x27;{key}.shp&#x27;).to_crs(31983);water.append({&#x27;BACIA&#x27;:key,&#x27;NOME&#x27;:names[key],&#x27;geometry&#x27;:ww.geometry.union_all()})
+  119   ww=gpd.GeoDataFrame(water,crs=31983);ww[&#x27;AREA_KM2&#x27;]=ww.area/1e6;shapefile(ww,&#x27;01_entradas/02_reservatorios/reservatorios.shp&#x27;,&#x27;entrada&#x27;,&#x27;Reservatórios em estudo&#x27;,_cp_texto(&#x27;reservatorio&#x27;, &#x27;posix&#x27;))
+  120   pop=gpd.GeoDataFrame({&#x27;setor_id&#x27;:c.setor_id,&#x27;BACIA&#x27;:c.bas_id,&#x27;POP_OFIC&#x27;:c.pop_2022,&#x27;POP_REC&#x27;:c.pop_a_est,&#x27;DENS_POP&#x27;:c.dens_pop,&#x27;geometry&#x27;:c.geometry},crs=c.crs);shapefile(pop,&#x27;01_entradas/03_populacao/populacao.shp&#x27;,&#x27;entrada&#x27;,&#x27;População nos setores recortados&#x27;,str(B/&#x27;teco_avaliacao.gpkg&#x27;)+&#x27;|analise_setores&#x27;)
+  121   sewer=gpd.GeoDataFrame({&#x27;setor_id&#x27;:c.setor_id,&#x27;BACIA&#x27;:c.bas_id,&#x27;DOM_TOT&#x27;:c.dom_set,&#x27;DOM_REDE&#x27;:c.rede_set,&#x27;REDE_PCT&#x27;:c.pct_rede,&#x27;SEM_REDE_OBS&#x27;:c.pct_nrede,&#x27;DESC_RIO&#x27;:c.pct_vrio,&#x27;REDE_DIR&#x27;:c.V00309,&#x27;FOSS_REDE&#x27;:c.V00310,&#x27;FOSS_SREDE&#x27;:c.V00311,&#x27;FOSSA_RUD&#x27;:c.V00312,&#x27;VALA&#x27;:c.V00313,&#x27;RIO_LAGO&#x27;:c.V00314,&#x27;OUTRO&#x27;:c.V00315,&#x27;SEM_BANH&#x27;:c.V00316,&#x27;SIGILO_N&#x27;:c.n_sigilo,&#x27;geometry&#x27;:c.geometry},crs=c.crs);shapefile(sewer,&#x27;01_entradas/04_esgotamento/esgotamento.shp&#x27;,&#x27;entrada&#x27;,&#x27;Esgotamento observado: contagens e percentuais&#x27;,str(B/&#x27;teco_avaliacao.gpkg&#x27;)+&#x27;|analise_setores&#x27;)
+  122   hyd=gpd.read_file(G,layer=&#x27;hidro_contexto&#x27;);hyd=hyd[[&#x27;id&#x27;,&#x27;BACIA&#x27;,&#x27;geometry&#x27;]].copy();hyd[&#x27;COMP_KM&#x27;]=hyd.length/1000;shapefile(hyd,&#x27;01_entradas/05_hidrografia/hidrografia.shp&#x27;,&#x27;entrada&#x27;,&#x27;Hidrografia dentro das bacias&#x27;,str(G)+&#x27;|hidro_contexto&#x27;)
+  123   roads=gpd.read_file(G,layer=&#x27;vias_contexto&#x27;);frames=[]
+  124   for geom in b.geometry:
+  125    x0,y0,x1,y1=geom.bounds;key=b.loc[b.geometry==geom,&#x27;id&#x27;].iloc[0];view=json.loads((R/&#x27;config/encartes_teco.json&#x27;).read_text(&#x27;utf8&#x27;)).get(key,{}) if (R/&#x27;config/encartes_teco.json&#x27;).exists() else {};cx=(x0+x1)/2+view.get(&#x27;dx&#x27;,0);cy=(y0+y1)/2+view.get(&#x27;dy&#x27;,0);frames.append(box(cx-9112.5,cy-9112.5,cx+9112.5,cy+9112.5))
+  126   context=gpd.clip(roads[[&#x27;ogc_fid&#x27;,&#x27;hier_legal&#x27;,&#x27;TIPO_VIA&#x27;,&#x27;geometry&#x27;]],gpd.GeoSeries(frames,crs=31983).union_all());context=context[context.geom_type.isin([&#x27;LineString&#x27;,&#x27;MultiLineString&#x27;])];shapefile(context,&#x27;01_entradas/06_vias_contexto/vias_contexto.shp&#x27;,&#x27;entrada&#x27;,&#x27;Vias de composição dos encartes&#x27;,str(G)+&#x27;|vias_contexto&#x27;)
+  127   inner=gpd.overlay(roads[[&#x27;ogc_fid&#x27;,&#x27;hier_legal&#x27;,&#x27;TIPO_VIA&#x27;,&#x27;geometry&#x27;]],b[[&#x27;id&#x27;,&#x27;geometry&#x27;]],how=&#x27;intersection&#x27;,keep_geom_type=True).rename(columns={&#x27;id&#x27;:&#x27;BACIA&#x27;});inner[&#x27;COMP_KM&#x27;]=inner.length/1000;shapefile(inner,&#x27;01_entradas/07_vias_bacias/vias_bacias.shp&#x27;,&#x27;entrada&#x27;,&#x27;Vias recortadas para análise&#x27;,str(G)+&#x27;|vias_contexto&#x27;)
+  128   health=gpd.read_file(G,layer=&#x27;saude_todos&#x27;);cols=[&#x27;CNES&#x27;,&#x27;NOME&#x27;,&#x27;GRUPO&#x27;,&#x27;TIPO&#x27;,&#x27;BACIA&#x27;,&#x27;AIH_TODAS&#x27;,&#x27;AIH_FILT&#x27;,&#x27;AIH_ANO&#x27;,&#x27;QA_MUN&#x27;,&#x27;geometry&#x27;];shapefile(health[cols],&#x27;01_entradas/08_saude_local/saude_local.shp&#x27;,&#x27;entrada&#x27;,&#x27;Instituições com SIH positivo dentro das bacias&#x27;,str(G)+&#x27;|saude_todos&#x27;)
+  129   hr=gpd.read_file(H/&#x27;saude_tabnet_auditada.gpkg&#x27;,layer=&#x27;rede_internacoes_residentes&#x27;);cols=[&#x27;CNES&#x27;,&#x27;NOME_TABNET&#x27;,&#x27;MUNICIPIO&#x27;,&#x27;BACIA&#x27;,&#x27;SIT_ESPACIAL&#x27;,&#x27;AIH_NRMG&#x27;,&#x27;AIH_A&#x27;,&#x27;AIH_B&#x27;,&#x27;AIH_AB&#x27;,&#x27;MEDIA_ANUAL_AB&#x27;,&#x27;DIST_BACIA_M&#x27;,&#x27;geometry&#x27;];shapefile(hr[cols],&#x27;01_entradas/09_saude_residencia/saude_residencia.shp&#x27;,&#x27;entrada&#x27;,&#x27;Rede de internações de residentes dos quatro municípios&#x27;,str(H/&#x27;saude_tabnet_auditada.gpkg&#x27;)+&#x27;|rede_internacoes_residentes&#x27;)
+  130   ex=gpd.read_file(R/&#x27;output/03_multivariada/teco_multivariada.gpkg&#x27;,layer=&#x27;exutorios_referencia&#x27;);shapefile(ex,&#x27;01_entradas/10_exutorios/exutorios.shp&#x27;,&#x27;referencia&#x27;,&#x27;Exutórios de referência&#x27;,str(R/&#x27;output/03_multivariada/teco_multivariada.gpkg&#x27;)+&#x27;|exutorios_referencia&#x27;)
+  131   samples=[]
+  132   for p in (R/&#x27;pt_coleta&#x27;).glob(&#x27;*.shp&#x27;):
+  133    q=gpd.read_file(p).to_crs(31983);q=q[[&#x27;Name&#x27;,&#x27;geometry&#x27;]].rename(columns={&#x27;Name&#x27;:&#x27;COLETA_ID&#x27;});q[&#x27;BACIA&#x27;]=&#x27;ibirite_regap&#x27; if p.stem==&#x27;regap_ibirite&#x27; else p.stem;samples.append(q)
+  134   shapefile(gpd.GeoDataFrame(pd.concat(samples,ignore_index=True),crs=31983),&#x27;01_entradas/11_pontos_coleta/pontos_coleta.shp&#x27;,&#x27;referencia&#x27;,&#x27;Pontos de coleta fornecidos pelo pesquisador&#x27;,_cp_texto(&#x27;pt_coleta&#x27;, &#x27;posix&#x27;))
+  135   raster(R/&#x27;teco_base/uso_terra/uso_terra-reservatorio.tif&#x27;,&#x27;01_entradas/12_uso_solo/uso_solo_2025.tif&#x27;,&#x27;entrada&#x27;,&#x27;Uso do solo: ano 2025 informado no projeto&#x27;)
+  136   raster(R/&#x27;temp/cop30_dem.tif&#x27;,&#x27;01_entradas/13_relevo/MDE_base_Copernicus.tif&#x27;,&#x27;entrada&#x27;,&#x27;MDE integrado Copernicus, suporte do relevo&#x27;)
+  137   for p in (B/&#x27;rasters&#x27;).glob(&#x27;*.tif&#x27;):
+  138    if any(p.name.endswith(&#x27;_&#x27;+s+&#x27;.tif&#x27;) for s in [&#x27;hipsometria&#x27;,&#x27;declividade_pct&#x27;,&#x27;declividade_embrapa&#x27;,&#x27;distancia_hidrologica_km&#x27;,&#x27;conexao_lago&#x27;]):raster(p,&#x27;01_entradas/13_relevo/&#x27;+p.name,&#x27;entrada_tratada&#x27;,&#x27;Relevo e condicionantes · &#x27;+p.stem)
+  139   a[&#x27;AREA_CEL&#x27;]=a.area/1e6;shapefile(a,&#x27;02_saidas/01_matriz_completa/matriz_resultados.shp&#x27;,&#x27;saida&#x27;,&#x27;Matriz completa de resultados na grade de apresentação&#x27;,str(G)+&#x27;|grade_resultados&#x27;)
+  140   base=[&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;,&#x27;VALIDO&#x27;,&#x27;AREA_KM2&#x27;,&#x27;AREA_CEL&#x27;];score=base+[&#x27;POP_DENS&#x27;,&#x27;SEM_REDE&#x27;,&#x27;AIH_LOCAL&#x27;,&#x27;N_POP_DENS&#x27;,&#x27;N_SEM_REDE&#x27;,&#x27;N_AIH_LOCAL&#x27;]+[f&#x27;{k}_S{i}&#x27; for i in range(5) for k in [&#x27;I&#x27;,&#x27;F&#x27;]];shapefile(a[score+[&#x27;geometry&#x27;]],&#x27;02_saidas/02_multivariada/multivariada.shp&#x27;,&#x27;saida&#x27;,&#x27;Escores e faixas dos cinco cenários&#x27;,str(G)+&#x27;|grade_resultados&#x27;)
+  141   km=a[base+[&#x27;POP_DENS&#x27;,&#x27;SEM_REDE&#x27;,&#x27;AIH_LOCAL&#x27;,&#x27;URB_PCT&#x27;]+[f&#x27;K_S{i}&#x27; for i in range(5)]+[&#x27;ESTABILIDADE&#x27;,&#x27;geometry&#x27;]].copy();km[&#x27;PERFIL_S0&#x27;]=km.K_S0.map({0:&#x27;Sem classe: entrada incompleta&#x27;,1:&#x27;Maior adensamento e maior ligacao a rede&#x27;,2:&#x27;Menor adensamento e menor ligacao a rede&#x27;});shapefile(km,&#x27;02_saidas/03_kmeans/kmeans.shp&#x27;,&#x27;saida&#x27;,&#x27;Perfis k-means: identificadores sem ordem universal de risco&#x27;,str(G)+&#x27;|grade_resultados&#x27;)
+  142   shapefile(a[base+[&#x27;I_S0&#x27;,&#x27;MORAN&#x27;,&#x27;MORAN_Q&#x27;,&#x27;COB_ESG&#x27;,&#x27;EST_ESG&#x27;,&#x27;geometry&#x27;]],&#x27;02_saidas/04_moran/moran.shp&#x27;,&#x27;saida&#x27;,&#x27;Moran local do cenário S0&#x27;,str(G)+&#x27;|grade_resultados&#x27;)
+  143   shapefile(a[base+[f&#x27;{k}_S{i}&#x27; for i in range(5) for k in [&#x27;I&#x27;,&#x27;F&#x27;,&#x27;K&#x27;]]+[&#x27;ESTABILIDADE&#x27;,&#x27;geometry&#x27;]],&#x27;02_saidas/05_sensibilidade/sensibilidade.shp&#x27;,&#x27;saida&#x27;,&#x27;Comparação dos cenários de ponderação&#x27;,str(G)+&#x27;|grade_resultados&#x27;)
+  144   shapefile(a[base+[&#x27;I_S0&#x27;,&#x27;QUINTIL&#x27;,&#x27;geometry&#x27;]],&#x27;02_saidas/06_quintis/quintis.shp&#x27;,&#x27;saida&#x27;,&#x27;Quintis: comparação distinta das faixas fixas&#x27;,str(G)+&#x27;|grade_resultados&#x27;)
+  145   shapefile(gpd.read_file(G,layer=&#x27;centros_500m&#x27;),&#x27;02_saidas/07_centros_grade/centros.shp&#x27;,&#x27;suporte&#x27;,&#x27;Centros da grade de análise&#x27;,str(G)+&#x27;|centros_500m&#x27;)
+  146   circles=gpd.read_file(G,layer=&#x27;influencia_500m&#x27;);shapefile(circles,&#x27;02_saidas/08_vizinhancas_500m/vizinhancas.shp&#x27;,&#x27;suporte&#x27;,&#x27;Vizinhanças circulares onde os atributos são calculados&#x27;,str(G)+&#x27;|influencia_500m&#x27;)
+  147   route=gpd.read_file(B/&#x27;teco_avaliacao.gpkg&#x27;,layer=&#x27;rotas_d8_candidatas&#x27;);shapefile(route,&#x27;02_saidas/09_rotas_terreno/rotas_terreno.shp&#x27;,&#x27;complemento&#x27;,&#x27;Trajetórias topográficas candidatas D8&#x27;,str(B/&#x27;teco_avaliacao.gpkg&#x27;)+&#x27;|rotas_d8_candidatas&#x27;)
+  148   for p in (O/&#x27;rasters&#x27;).glob(&#x27;*.tif&#x27;):raster(p,&#x27;02_saidas/10_conectividade/&#x27;+p.name,&#x27;saida&#x27;,&#x27;Leitura topológica a montante · &#x27;+p.stem)
+  149   groups={&#x27;Entradas na geometria de origem&#x27;:&#x27;01_entradas&#x27;,&#x27;Saúde e abrangência&#x27;:&#x27;02_saude&#x27;,&#x27;Entradas originais&#x27;:&#x27;03_uso_solo&#x27;,&#x27;Relevo&#x27;:&#x27;04_relevo&#x27;,&#x27;Classificação em cinco faixas&#x27;:&#x27;05_multivariada&#x27;,&#x27;K-means&#x27;:&#x27;06_kmeans&#x27;,&#x27;Comparação percentílica&#x27;:&#x27;07_quintis&#x27;,&#x27;Sensibilidade&#x27;:&#x27;08_sensibilidade&#x27;,&#x27;Moran&#x27;:&#x27;09_moran&#x27;,&#x27;Conectividade exploratória&#x27;:&#x27;10_conectividade&#x27;,&#x27;Grade e contexto&#x27;:&#x27;11_grade_e_contexto&#x27;,&#x27;Internações por residência&#x27;:&#x27;12_series_internacoes&#x27;}
+  150   gallery=json.loads((O/&#x27;auditoria/galeria.json&#x27;).read_text(&#x27;utf8&#x27;))
+  151   for row in gallery:
+  152    if row[&#x27;slug&#x27;]==&#x27;nativo_DESC_RIO&#x27;:row[&#x27;titulo&#x27;]=&#x27;Destinação declarada em vala ou corpo hídrico&#x27;
+  153    sub=groups.get(row[&#x27;grupo&#x27;],slug(row[&#x27;grupo&#x27;]));relative=&#x27;03_mapas/&#x27;+sub+&#x27;/&#x27;+row[&#x27;slug&#x27;];row={**row,&#x27;arquivo&#x27;:relative+&#x27;.png&#x27;,&#x27;vetorial&#x27;:relative+&#x27;.svg&#x27;}
+  154    for ext in [&#x27;png&#x27;,&#x27;svg&#x27;]:copy(O/&#x27;figuras&#x27;/f&quot;{row[&#x27;slug&#x27;]}.{ext}&quot;,relative+&#x27;.&#x27;+ext)
+  155    MAPS.append(row)
+  156   for name in [&#x27;Conferencia_Internacoes_Residencia.xlsx&#x27;,&#x27;Estabelecimentos_confirmados_residencia.csv&#x27;,&#x27;NRMG_compativel_mensal_estabelecimento.csv&#x27;,&#x27;NRMG_compativel_mensal_CID10.csv&#x27;,&#x27;NRMG_compativel_anual_CID10.csv&#x27;,&#x27;NRMG_internacoes_por_residencia_anuais.csv&#x27;,&#x27;Filtro_CID10_residencia.csv&#x27;,&#x27;RD_residentes_CEP_agregado.csv&#x27;,&#x27;RD_registros_codificacao_nao_mapeada.csv&#x27;,&#x27;conferencia_NRMG_RD_reconciliada.csv&#x27;,&#x27;explorador_residencia.html&#x27;,&#x27;consolidacao.json&#x27;,&#x27;validacao_final.json&#x27;]:copy(H/name,&#x27;04_saude_residencia/&#x27;+name)
+  157   for name in [&#x27;Relatorio_TECO.pdf&#x27;,&#x27;Relatorio_TECO.md&#x27;]:copy(B/name,&#x27;00_documentacao/&#x27;+name)
+  158   copy(O/&#x27;Estatisticas_e_Metodologia_TECO.xlsx&#x27;,&#x27;00_documentacao/Estatisticas_e_Metodologia_TECO.xlsx&#x27;)
+  159   for name in [&#x27;cenarios_grade.csv&#x27;,&#x27;kmeans_grade.csv&#x27;,&#x27;perfis_grade.csv&#x27;,&#x27;moran_grade.csv&#x27;,&#x27;normalizacao_grade.csv&#x27;,&#x27;indicadores_grade.csv&#x27;,&#x27;estatisticas_camadas.csv&#x27;,&#x27;regras_filtro_bacteriano.csv&#x27;]:copy(O/&#x27;tabelas&#x27;/name,&#x27;00_documentacao/tabelas/&#x27;+name)
+  160   pd.DataFrame(FIELDS).to_csv(F/&#x27;00_documentacao/Dicionario_dos_campos.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;);pd.DataFrame([{k:v for k,v in r.items() if k!=&#x27;campos&#x27;} for r in VECTORS]+RASTERS).to_csv(F/&#x27;00_documentacao/Inventario_de_camadas.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+  161   manifest={&#x27;data&#x27;:NOW.isoformat(),&#x27;pasta&#x27;:str(F),&#x27;vetores&#x27;:VECTORS,&#x27;rasters&#x27;:RASTERS,&#x27;mapas&#x27;:MAPS,&#x27;metodo_kmeans&#x27;:json.loads((O/&#x27;auditoria/metodo_grade.json&#x27;).read_text(&#x27;utf8&#x27;)),&#x27;saude&#x27;:json.loads((H/&#x27;consolidacao.json&#x27;).read_text(&#x27;utf8&#x27;)),&#x27;observacoes&#x27;:[&#x27;Um SHP por pasta; manter SHP, SHX, DBF, PRJ e CPG juntos.&#x27;,&#x27;Rasters nativos preservados, sem vetorização ou redução de resolução.&#x27;,&#x27;Grade apenas nas análises, não no desenho dos dados de entrada.&#x27;,&#x27;Os grupos atuais usam o cenário institucional local. A rede ampliada NRMG ainda exige geografia da residência para atribuição à grade.&#x27;,&#x27;DESC_RIO contém vala+corpo hídrico: rótulo corrigido para corresponder ao cálculo.&#x27;]}
+  162   (F/&#x27;00_documentacao/manifesto.json&#x27;).write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(&#x27;CONSOLIDADO&#x27;,len(VECTORS),&#x27;SHP&#x27;,len(RASTERS),&#x27;RASTERS&#x27;,len(MAPS),&#x27;FIGURAS&#x27;,flush=True)
+  163  if __name__==&#x27;__main__&#x27;:main()</code></pre></article></html>

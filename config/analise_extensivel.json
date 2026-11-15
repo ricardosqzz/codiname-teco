@@ -1,0 +1,104 @@
+{
+  "base": {
+    "arquivo": "dados/grade_consolidada.geojson"
+  },
+  "suporte_calculo": {
+    "arquivo": "dados/vizinhancas_500m.geojson"
+  },
+  "chaves": [
+    "GRID_ID",
+    "BACIA"
+  ],
+  "campo_bacia": "BACIA",
+  "normalizacao": "minmax",
+  "semente": 20261112,
+  "passo_semente": 100,
+  "inicializacoes": 15,
+  "metodos": [
+    "kmeans"
+  ],
+  "moran": true,
+  "k_testados": [
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "saida": "output/reproducao_configuravel",
+  "variaveis": [
+    {
+      "nome": "POP_DENS",
+      "origem": "base",
+      "campo": "POP_DENS",
+      "transformacao": "log1p",
+      "unidade": "habitantes/km²"
+    },
+    {
+      "nome": "SEM_REDE",
+      "origem": "base",
+      "campo": "SEM_REDE",
+      "transformacao": "identidade",
+      "unidade": "% de domicílios sem rede"
+    },
+    {
+      "nome": "AIH_LOCAL",
+      "origem": "base",
+      "campo": "AIH_LOCAL",
+      "transformacao": "log1p",
+      "unidade": "internações locais médias por ano"
+    }
+  ],
+  "cenarios": {
+    "S0": {
+      "pesos": {
+        "POP_DENS": 1,
+        "SEM_REDE": 1,
+        "AIH_LOCAL": 1
+      }
+    },
+    "S1": {
+      "pesos": {
+        "POP_DENS": 1,
+        "SEM_REDE": 1,
+        "AIH_LOCAL": 3
+      }
+    },
+    "S2": {
+      "pesos": {
+        "POP_DENS": 1,
+        "SEM_REDE": 3,
+        "AIH_LOCAL": 1
+      }
+    },
+    "S3": {
+      "pesos": {
+        "POP_DENS": 3,
+        "SEM_REDE": 1,
+        "AIH_LOCAL": 1
+      }
+    },
+    "S4": {
+      "pesos": {
+        "POP_DENS": 1,
+        "SEM_REDE": 1,
+        "AIH_LOCAL": 0
+      }
+    }
+  },
+  "como_ampliar": {
+    "origens": [
+      "base",
+      "tabela",
+      "vetor",
+      "raster"
+    ],
+    "agregacoes": [
+      "por_chave",
+      "media_area",
+      "soma_pontos",
+      "media_raster"
+    ],
+    "regra": "Definir campo, unidade, transformação e chave/agregação. Informar peso em cada cenário; ausência de peso equivale a zero. Usar camada de vizinhanças no TECO. Falhas de esquema interrompem a execução. Outros tipos de dados exigem ampliar anexar_variavel."
+  }
+}

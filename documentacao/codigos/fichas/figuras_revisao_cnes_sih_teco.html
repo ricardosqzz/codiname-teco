@@ -1,0 +1,201 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/figuras_revisao_cnes_sih_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/figuras_revisao_cnes_sih_teco.py</h2>
+<p>Figuras revisao cnes sih teco. Cartografia/apresentação. A organização passa por salvar.</p>
+<p><strong>Papel.</strong> Cartografia/apresentação. <strong>Fonte inspecionada.</strong> E:\teco\codigo\figuras_revisao_cnes_sih_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>ast</td><td>Inspeção/transformação da sintaxe Python sem executar o processamento científico.</td></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>geopandas</td><td>Camadas vetoriais com referência espacial, reprojeção, recorte e interseção de geometrias.</td></tr><tr><td>idioma_cartografico_teco</td><td>Módulo autoral local; sua ficha está neste relatório.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>matplotlib</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.dates</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.lines</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.patches</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.pyplot</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.text</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.ticker</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>numpy</td><td>Matrizes numéricas, máscaras de validade, transformações, percentis e estatísticas vetorizadas.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>pyproj</td><td>Dependência importada; conferir as chamadas efetivas abaixo e a instalação do ambiente correspondente.</td></tr><tr><td>shapely.geometry</td><td>Operações geométricas usadas nas áreas, distâncias, limites e relações espaciais.</td></tr><tr><td>shutil</td><td>Cópia e movimentação de arquivos, inclusive preservação de versões geradas.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:/teco/entrega_final/01_entradas/01_bacias/bacias.shp — chamada gpd.read_file, linha 69.</li>
+<li>E:/teco/entrega_final/01_entradas/02_reservatorios/reservatorios.shp — chamada gpd.read_file, linha 70.</li>
+<li>E:/teco/entrega_final/01_entradas/05_hidrografia/hidrografia.shp — chamada gpd.read_file, linha 71.</li>
+<li>E:/teco/entrega_final/01_entradas/06_vias_contexto/vias_contexto.shp — chamada gpd.read_file, linha 72.</li>
+<li>E:/teco/config/encartes_teco.json — chamada .read_text, linha 74.</li>
+<li>E:/teco/codigo/figuras_multivariada_teco.py — chamada .read_text, linha 76.</li>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/02_camadas/01_cnes_bacias/cnes_2026.shp — chamada gpd.read_file, linha 93.</li>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/02_camadas/02_selecao_sih/sih_atual.shp — chamada gpd.read_file, linha 94.</li>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/02_camadas/03_bordas/sih_bordas.shp — chamada gpd.read_file, linha 95.</li>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/01_tabelas/Internacoes_gerais_selecionados_mensal.csv — chamada pd.read_csv, linha 116.</li>
+<li>E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/01_tabelas/Internacoes_gerais_selecionados_anual.csv — chamada pd.read_csv, linha 117.</li>
+<li>E:/teco/entrega_final/00_documentacao/manifesto.json — chamada mp.read_text, linha 138.</li>
+<li>E:/teco/entrega_final/index.html — chamada p.read_text, linha 145.</li>
+<p><strong>Saídas.</strong></p>
+<li>{fig} — chamada savefig, linha 90.</li>
+<li>E:/teco/tmp/figuras_cnes_2026/figuras/{slug}.{ext} — chamada fig.savefig, linha 134.</li>
+<li>E:/teco/entrega_final/00_documentacao/manifesto.json — chamada mp.write_text, linha 144.</li>
+<li>E:/teco/entrega_final/index.html — chamada p.write_text, linha 149.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>.loc: ibirite_regap, pampulha, vargem_flores.</li>
+<li>allc: BACIA.</li>
+<li>sel: BACIA.</li>
+<li>near: BACIA.</li>
+<li>monthly: CNES.</li>
+<li>annual: CNES.</li>
+<li>ax.spines: right, top.</li>
+<li>r: arquivo, slug, titulo, vetorial.</li>
+<li>m: mapas.</li>
+<p><strong>Campos e chaves gerados.</strong></p>
+<li>m: mapas.</li>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>salvar(fig, *args, **kwargs)</td><td>82-90</td><td>grava produtos Retorno: savefig(fig, *args, **kwargs).</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/figuras_revisao_cnes_sih_teco.py, linhas 82-90.</p>
+<pre><code>def salvar(fig,*args,**kwargs):
+    from matplotlib.text import Text
+    for t in fig.findobj(Text):
+        value=en(t.get_text())
+        if value.startswith(&#x27;Datum: SIRGAS 2000&#x27;):
+            value=&#x27;Datum: SIRGAS 2000\nUTM 23S · EPSG:31983\nScale 1:225,000\nBrentano, M. C. B.&#x27;
+            t.set_fontsize(5.1)
+        t.set_text(value)
+    return savefig(fig,*args,**kwargs)</code></pre>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:/teco/entrega_final/01_entradas/01_bacias/bacias.shp | gpd.read_file.
+    5  # Entrada: E:/teco/entrega_final/01_entradas/02_reservatorios/reservatorios.shp | gpd.read_file.
+    6  # Entrada: E:/teco/entrega_final/01_entradas/05_hidrografia/hidrografia.shp | gpd.read_file.
+    7  # Entrada: E:/teco/entrega_final/01_entradas/06_vias_contexto/vias_contexto.shp | gpd.read_file.
+    8  # Entrada: E:/teco/config/encartes_teco.json | .read_text.
+    9  # Entrada: E:/teco/codigo/figuras_multivariada_teco.py | .read_text.
+   10  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/02_camadas/01_cnes_bacias/cnes_2026.shp | gpd.read_file.
+   11  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/02_camadas/02_selecao_sih/sih_atual.shp | gpd.read_file.
+   12  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/02_camadas/03_bordas/sih_bordas.shp | gpd.read_file.
+   13  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/01_tabelas/Internacoes_gerais_selecionados_mensal.csv | pd.read_csv.
+   14  # Entrada: E:/teco/entrega_final/01_entradas/17_estabelecimentos_2026/01_tabelas/Internacoes_gerais_selecionados_anual.csv | pd.read_csv.
+   15  # Entrada: E:/teco/entrega_final/00_documentacao/manifesto.json | mp.read_text.
+   16  # Entrada: E:/teco/entrega_final/index.html | p.read_text.
+   17  # Campos/chaves em .loc: ibirite_regap, pampulha, vargem_flores.
+   18  # Campos/chaves em allc: BACIA.
+   19  # Campos/chaves em sel: BACIA.
+   20  # Campos/chaves em near: BACIA.
+   21  # Campos/chaves em monthly: CNES.
+   22  # Campos/chaves em annual: CNES.
+   23  # Campos/chaves em ax.spines: right, top.
+   24  # Campos/chaves em r: arquivo, slug, titulo, vetorial.
+   25  # Campos/chaves em m: mapas.
+   26  # Saída: {fig} | savefig.
+   27  # Saída: E:/teco/tmp/figuras_cnes_2026/figuras/{slug}.{ext} | fig.savefig.
+   28  # Saída: E:/teco/entrega_final/00_documentacao/manifesto.json | mp.write_text.
+   29  # Saída: E:/teco/entrega_final/index.html | p.write_text.
+   30  # Campos/chaves gerados em m: mapas.
+   31  # CNES: identificador do estabelecimento de saúde.
+   32  # BACIA: identificador da bacia.
+   33  # CÓDIGO DO PROCESSAMENTO
+   34  
+   35  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   36  import sys as _cp_sys
+   37  from pathlib import Path as _cp_Path
+   38  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   39  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   40      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   41      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   42          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   43          break
+   44  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   45  # FIM DOS CAMINHOS PORTÁTEIS
+   46  
+   47  from pathlib import Path
+   48  import ast
+   49  import json
+   50  import shutil
+   51  import numpy as np
+   52  import pandas as pd
+   53  import geopandas as gpd
+   54  import matplotlib
+   55  matplotlib.use(&#x27;Agg&#x27;)
+   56  import matplotlib.pyplot as plt
+   57  from matplotlib.lines import Line2D
+   58  from matplotlib.patches import Patch,Rectangle
+   59  from matplotlib.ticker import FuncFormatter
+   60  import matplotlib.dates as mdates
+   61  from pyproj import Transformer
+   62  from shapely.geometry import box
+   63  from idioma_cartografico_teco import en
+   64  
+   65  R=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;));F=R/&#x27;entrega_final&#x27;;P=F/&#x27;01_entradas/17_estabelecimentos_2026&#x27;
+   66  O=R/&#x27;tmp/figuras_cnes_2026&#x27;;(O/&#x27;figuras&#x27;).mkdir(parents=True,exist_ok=True)
+   67  DEST=F/&#x27;03_mapas/17_cnes_sih_2026&#x27;;DEST.mkdir(parents=True,exist_ok=True)
+   68  plt.rcParams.update({&#x27;font.family&#x27;:&#x27;Arial&#x27;,&#x27;font.size&#x27;:9,&#x27;svg.fonttype&#x27;:&#x27;none&#x27;})
+   69  b=gpd.read_file(F/&#x27;01_entradas/01_bacias/bacias.shp&#x27;).set_index(&#x27;id&#x27;).loc[[&#x27;pampulha&#x27;,&#x27;vargem_flores&#x27;,&#x27;ibirite_regap&#x27;]].reset_index()
+   70  av=b.rename(columns={&#x27;id&#x27;:&#x27;bas_id&#x27;});water=gpd.read_file(F/&#x27;01_entradas/02_reservatorios/reservatorios.shp&#x27;)
+   71  hyd=gpd.read_file(F/&#x27;01_entradas/05_hidrografia/hidrografia.shp&#x27;);mun=gpd.GeoDataFrame(geometry=[],crs=31983)
+   72  roads=gpd.read_file(F/&#x27;01_entradas/06_vias_contexto/vias_contexto.shp&#x27;)
+   73  names={&#x27;pampulha&#x27;:&#x27;Pampulha&#x27;,&#x27;vargem_flores&#x27;:&#x27;Vargem das Flores&#x27;,&#x27;ibirite_regap&#x27;:&#x27;Ibirité / REGAP&#x27;}
+   74  MAP_VIEWS=json.loads((R/&#x27;config/encartes_teco.json&#x27;).read_text(&#x27;utf8&#x27;))
+   75  span=18225.;scale=225000;trans=Transformer.from_crs(31983,4326,always_xy=True);gallery=[]
+   76  source=(R/&#x27;codigo/figuras_multivariada_teco.py&#x27;).read_text(&#x27;utf8&#x27;).replace(&quot;color=&#x27;#a8cedd&#x27;,edgecolor=&#x27;#567e8c&#x27;,lw=.45&quot;,&quot;color=&#x27;#45a8cf&#x27;,edgecolor=&#x27;#155777&#x27;,lw=.8&quot;)
+   77  tree=ast.parse(source);keep={&#x27;start&#x27;,&#x27;finish&#x27;,&#x27;legend&#x27;,&#x27;legend_small&#x27;}
+   78  exec(compile(ast.Module(body=[n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in keep],type_ignores=[]),&#x27;&lt;composicao_encartes&gt;&#x27;,&#x27;exec&#x27;))
+   79  savefig=plt.Figure.savefig
+   80  
+   81  # Salvar
+   82  def salvar(fig,*args,**kwargs):
+   83      from matplotlib.text import Text
+   84      for t in fig.findobj(Text):
+   85          value=en(t.get_text())
+   86          if value.startswith(&#x27;Datum: SIRGAS 2000&#x27;):
+   87              value=&#x27;Datum: SIRGAS 2000\nUTM 23S · EPSG:31983\nScale 1:225,000\nBrentano, M. C. B.&#x27;
+   88              t.set_fontsize(5.1)
+   89          t.set_text(value)
+   90      return savefig(fig,*args,**kwargs)
+   91  plt.Figure.savefig=salvar
+   92  
+   93  allc=gpd.read_file(P/&#x27;02_camadas/01_cnes_bacias/cnes_2026.shp&#x27;)
+   94  sel=gpd.read_file(P/&#x27;02_camadas/02_selecao_sih/sih_atual.shp&#x27;)
+   95  near=gpd.read_file(P/&#x27;02_camadas/03_bordas/sih_bordas.shp&#x27;)
+   96  fig,axs=start(&#x27;Healthcare inventory and recent hospital production&#x27;,sectors=False)
+   97  for ax,r in zip(axs,b.itertuples()):
+   98      frame=box(ax.get_xlim()[0],ax.get_ylim()[0],ax.get_xlim()[1],ax.get_ylim()[1])
+   99      rr=roads[roads.intersects(frame)]
+  100      for category,color,width in [(&#x27;Sem classe cadastrada&#x27;,&#x27;#bdc6c5&#x27;,.11),(&#x27;Local&#x27;,&#x27;#aebbb9&#x27;,.15),(&#x27;Secundária / coletora&#x27;,&#x27;#9daca9&#x27;,.23),(&#x27;Principal&#x27;,&#x27;#879894&#x27;,.34)]:
+  101          part=rr[rr.TIPO_VIA.eq(category)]
+  102          if len(part):part.plot(ax=ax,color=color,lw=width,zorder=1.8)
+  103      allc[allc.BACIA.eq(r.id)].plot(ax=ax,color=&#x27;#287b95&#x27;,markersize=7,alpha=.78,edgecolor=&#x27;white&#x27;,linewidth=.12,zorder=9)
+  104      q=sel[sel.BACIA.eq(r.id)]
+  105      if len(q):
+  106          q.plot(ax=ax,color=&#x27;#bd3658&#x27;,marker=&#x27;*&#x27;,markersize=100,edgecolor=&#x27;white&#x27;,linewidth=.6,zorder=18)
+  107          numbering={&#x27;2191164&#x27;:(&#x27;1&#x27;,(-14,16)),&#x27;2200473&#x27;:(&#x27;2&#x27;,(15,-16)),&#x27;6892256&#x27;:(&#x27;3&#x27;,(10,10))}
+  108          for point in q.itertuples():
+  109              code,offset=numbering[point.CNES]
+  110              ax.annotate(code,xy=(point.geometry.x,point.geometry.y),xytext=offset,textcoords=&#x27;offset points&#x27;,fontsize=8,fontweight=&#x27;bold&#x27;,ha=&#x27;center&#x27;,va=&#x27;center&#x27;,color=&#x27;white&#x27;,bbox={&#x27;boxstyle&#x27;:&#x27;circle,pad=.22&#x27;,&#x27;fc&#x27;:&#x27;#bd3658&#x27;,&#x27;ec&#x27;:&#x27;white&#x27;,&#x27;lw&#x27;:.5},arrowprops={&#x27;arrowstyle&#x27;:&#x27;-&#x27;,&#x27;color&#x27;:&#x27;#742f48&#x27;,&#x27;lw&#x27;:.6},zorder=21)
+  111      q=near[near.BACIA.eq(r.id)]
+  112      if len(q):q.plot(ax=ax,color=&#x27;#d49b31&#x27;,marker=&#x27;^&#x27;,markersize=38,edgecolor=&#x27;#705522&#x27;,linewidth=.5,zorder=17)
+  113  handles=[Line2D([],[],marker=&#x27;o&#x27;,ls=&#x27;&#x27;,color=&#x27;#287b95&#x27;,label=&#x27;CNES Sep 2026 · all facility types&#x27;),Line2D([],[],marker=&#x27;*&#x27;,ls=&#x27;&#x27;,color=&#x27;#bd3658&#x27;,markersize=10,label=&#x27;SIH production · Jan 2024–Sep 2026&#x27;),Line2D([],[],marker=&#x27;^&#x27;,ls=&#x27;&#x27;,color=&#x27;#d49b31&#x27;,label=&#x27;Outside-boundary review&#x27;),Line2D([],[],ls=&#x27;&#x27;,label=&#x27;1  Centro Materno Infantil&#x27;),Line2D([],[],ls=&#x27;&#x27;,label=&#x27;2  Hospital Municipal de Contagem&#x27;),Line2D([],[],ls=&#x27;&#x27;,label=&#x27;3  Hospital Regional de Ibirité&#x27;)]
+  114  finish(fig,axs,&#x27;healthcare_cnes_sih_2026&#x27;,&#x27;Healthcare inventory and recent hospital production&#x27;,&#x27;Healthcare audit&#x27;,handles=handles)
+  115  
+  116  monthly=pd.read_csv(P/&#x27;01_tabelas/Internacoes_gerais_selecionados_mensal.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str})
+  117  annual=pd.read_csv(P/&#x27;01_tabelas/Internacoes_gerais_selecionados_anual.csv&#x27;,sep=&#x27;;&#x27;,dtype={&#x27;CNES&#x27;:str})
+  118  fig,axs=plt.subplots(3,2,figsize=(12,9),gridspec_kw={&#x27;width_ratios&#x27;:[2.5,1]})
+  119  colors=[&#x27;#297c97&#x27;,&#x27;#459681&#x27;,&#x27;#9a5984&#x27;]
+  120  for j,r in enumerate(sel.sort_values([&#x27;BACIA&#x27;,&#x27;CNES&#x27;]).itertuples()):
+  121      q=monthly[monthly.CNES.eq(r.CNES)].sort_values(&#x27;ANO_MES&#x27;);d=pd.to_datetime(q.ANO_MES+&#x27;-01&#x27;);ax=axs[j,0]
+  122      ax.plot(d,q.INTERNACOES,lw=1.25,color=colors[j]);ax.fill_between(d,q.INTERNACOES.to_numpy(float),0,color=colors[j],alpha=.09)
+  123      ax.axvspan(pd.Timestamp(&#x27;2024-01-01&#x27;),pd.Timestamp(&#x27;2026-10-01&#x27;),color=&#x27;#e5c990&#x27;,alpha=.18)
+  124      ax.set_title(r.NOME_CNES+&#x27; · CNES &#x27;+r.CNES,loc=&#x27;left&#x27;,fontsize=9.2,pad=8)
+  125      ax.set_xlim(pd.Timestamp(&#x27;2015-01-01&#x27;),pd.Timestamp(&#x27;2026-10-01&#x27;));ax.set_ylim(bottom=0);ax.grid(axis=&#x27;y&#x27;,alpha=.15);ax.xaxis.set_major_locator(mdates.YearLocator(2));ax.xaxis.set_major_formatter(mdates.DateFormatter(&#x27;%Y&#x27;));ax.set_ylabel(&#x27;Admissions / month&#x27;,labelpad=10)
+  126      a=annual[annual.CNES.eq(r.CNES)];ax=axs[j,1];barcolors=[colors[j] if y!=2026 else &#x27;#d3a24b&#x27; for y in a.ANO]
+  127      ax.bar(a.ANO,a.INTERNACOES,color=barcolors,width=.8);ax.set_ylim(bottom=0);ax.set_title(&#x27;Annual total · 2026 Jan–Sep&#x27;,fontsize=9,pad=8);ax.set_xticks([2015,2020,2025]);ax.grid(axis=&#x27;y&#x27;,alpha=.15)
+  128  for ax in axs.ravel():
+  129      ax.spines[[&#x27;top&#x27;,&#x27;right&#x27;]].set_visible(False);ax.tick_params(labelsize=8);ax.yaxis.set_major_formatter(FuncFormatter(lambda x,p:f&#x27;{x:,.0f}&#x27;))
+  130  fig.suptitle(&#x27;General SUS hospital admissions by care date · all diagnoses&#x27;,fontsize=14,y=.99,color=&#x27;#244853&#x27;,fontweight=&#x27;bold&#x27;)
+  131  fig.legend(handles=[Patch(color=&#x27;#e5c990&#x27;,alpha=.4,label=&#x27;Operational recent window: Jan 2024–Sep 2026&#x27;),Patch(color=&#x27;#d3a24b&#x27;,label=&#x27;Partial year: Jan–Sep 2026&#x27;)],loc=&#x27;lower center&#x27;,ncol=2,frameon=False,fontsize=9)
+  132  fig.tight_layout(rect=[0,.045,1,.965],h_pad=2.3,w_pad=2)
+  133  slug=&#x27;healthcare_sih_series_2015_2026&#x27;
+  134  for ext in [&#x27;png&#x27;,&#x27;svg&#x27;]:fig.savefig(O/&#x27;figuras&#x27;/f&#x27;{slug}.{ext}&#x27;,dpi=350,facecolor=&#x27;white&#x27;)
+  135  plt.close(fig)
+  136  gallery.append({&#x27;slug&#x27;:slug,&#x27;titulo&#x27;:&#x27;General SUS hospital admissions by care date · 2015–Sep 2026&#x27;,&#x27;grupo&#x27;:&#x27;Healthcare audit&#x27;,&#x27;tipo&#x27;:&#x27;chart&#x27;})
+  137  
+  138  mp=F/&#x27;00_documentacao/manifesto.json&#x27;;m=json.loads(mp.read_text(&#x27;utf8&#x27;))
+  139  slugs={r[&#x27;slug&#x27;] for r in gallery};m[&#x27;mapas&#x27;]=[r for r in m[&#x27;mapas&#x27;] if r[&#x27;slug&#x27;] not in slugs]
+  140  for r in gallery:
+  141      for ext in [&#x27;png&#x27;,&#x27;svg&#x27;]:shutil.copy2(O/&#x27;figuras&#x27;/f&quot;{r[&#x27;slug&#x27;]}.{ext}&quot;,DEST/f&quot;{r[&#x27;slug&#x27;]}.{ext}&quot;)
+  142      r.update(arquivo=(DEST/f&quot;{r[&#x27;slug&#x27;]}.png&quot;).relative_to(F).as_posix(),vetorial=(DEST/f&quot;{r[&#x27;slug&#x27;]}.svg&quot;).relative_to(F).as_posix())
+  143      m[&#x27;mapas&#x27;].append(r)
+  144  mp.write_text(json.dumps(m,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;)
+  145  p=F/&#x27;index.html&#x27;;s=p.read_text(&#x27;utf8&#x27;)
+  146  if &#x27;Relatorio_revisao_CNES_SIH.html&#x27; not in s:
+  147      cards=&#x27;&#x27;.join(&#x27;&lt;article&gt;&lt;a href=&quot;&#x27;+r[&#x27;arquivo&#x27;]+&#x27;&quot;&gt;&lt;img loading=&quot;lazy&quot; src=&quot;&#x27;+r[&#x27;arquivo&#x27;]+&#x27;&quot; alt=&quot;&#x27;+r[&#x27;titulo&#x27;]+&#x27;&quot;&gt;&lt;/a&gt;&lt;h3&gt;&#x27;+r[&#x27;titulo&#x27;]+&#x27;&lt;/h3&gt;&lt;a href=&quot;&#x27;+r[&#x27;vetorial&#x27;]+&#x27;&quot;&gt;SVG&lt;/a&gt;&lt;/article&gt;&#x27; for r in gallery)
+  148      block=&#x27;&lt;section&gt;&lt;h2&gt;Revisão CNES e produção SIH · 2026&lt;/h2&gt;&lt;p&gt;&lt;a href=&quot;01_entradas/17_estabelecimentos_2026/04_documentacao/Relatorio_revisao_CNES_SIH.html&quot;&gt;Relatório da conferência&lt;/a&gt; · &lt;a href=&quot;01_entradas/17_estabelecimentos_2026/01_tabelas/Selecionados_nas_bacias.csv&quot;&gt;Lista selecionada&lt;/a&gt; · &lt;a href=&quot;01_entradas/17_estabelecimentos_2026/01_tabelas/CNES_nas_bacias.csv&quot;&gt;Todos os CNES internos&lt;/a&gt;&lt;/p&gt;&lt;div class=&quot;gallery&quot;&gt;&#x27;+cards+&#x27;&lt;/div&gt;&lt;/section&gt;&#x27;
+  149      s=s.replace(&#x27;&lt;/main&gt;&#x27;,block+&#x27;&lt;/main&gt;&#x27;);p.write_text(s,encoding=&#x27;utf8&#x27;)
+  150  print(&#x27;Figuras CNES/SIH e índice atualizados&#x27;,flush=True)</code></pre></article></html>

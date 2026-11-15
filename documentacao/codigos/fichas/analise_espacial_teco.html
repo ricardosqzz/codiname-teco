@@ -1,0 +1,674 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>codigo/analise_espacial_teco.py</title><style>body{font:16px/1.6 Arial,sans-serif;max-width:1250px;margin:auto;padding:30px;color:#173445;background:#f5f8fa}a{color:#126781}header,article,section{background:white;padding:24px;margin:18px 0;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #d2dfe4;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf1f4}pre{overflow:auto;background:#112e3f;color:#ecf5fb;padding:18px;font:13px/1.6 Consolas,monospace}code{overflow-wrap:anywhere}h1,h2,h3{line-height:1.25;overflow-wrap:anywhere}input{padding:13px;width:80%;font-size:16px}li{margin:7px 0}</style><header><a href="../index.html">Voltar ao índice</a></header><article><h2>codigo/analise_espacial_teco.py</h2>
+<p>Fornece os métodos numéricos de apoio, indicadores censitários, relevo e roteamento topográfico. Seu programa principal guarda a análise setorial anterior; as funções são reutilizadas pela grade de 500 m.</p>
+<p><strong>Papel.</strong> Processamento ou módulo de apoio. <strong>Fonte inspecionada.</strong> E:\teco\codigo\analise_espacial_teco.py.</p>
+<p><strong>Bibliotecas e dependências.</strong></p>
+<table><tr><th>Importação</th><th>Uso na implementação</th></tr><tr><td>caminhos_teco</td><td>Configuração local dos caminhos, independente dos cálculos.</td></tr><tr><td>collections</td><td>Estruturas de contagem, agrupamento e coleções auxiliares.</td></tr><tr><td>datetime</td><td>Calendários, datas e duração dos períodos avaliados.</td></tr><tr><td>geopandas</td><td>Camadas vetoriais com referência espacial, reprojeção, recorte e interseção de geometrias.</td></tr><tr><td>hashlib</td><td>Assinaturas SHA-256 para identificar alterações de arquivos; não é validação do conteúdo científico.</td></tr><tr><td>json</td><td>Configurações, metadados e registros estruturados de auditoria.</td></tr><tr><td>math</td><td>Funções matemáticas escalares.</td></tr><tr><td>matplotlib</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.colors</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.lines</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.patches</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.pyplot</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>matplotlib.ticker</td><td>Construção de gráficos, mapas, barras de cores e exportação vetorial/raster.</td></tr><tr><td>numpy</td><td>Matrizes numéricas, máscaras de validade, transformações, percentis e estatísticas vetorizadas.</td></tr><tr><td>pandas</td><td>Leitura tabular, chaves de junção, agrupamento por período e exportação de indicadores.</td></tr><tr><td>pathlib</td><td>Caminhos de arquivos independentes da concatenação manual de separadores.</td></tr><tr><td>pyproj</td><td>Dependência importada; conferir as chamadas efetivas abaixo e a instalação do ambiente correspondente.</td></tr><tr><td>rasterio</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>rasterio.features</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>rasterio.windows</td><td>Leitura e escrita de rasters, transformação entre pixel e coordenada e amostragem por geometria.</td></tr><tr><td>scipy.cluster.vq</td><td>Agrupamento, matrizes esparsas, distâncias, interpolação e estatísticas; conferir as chamadas na ficha.</td></tr><tr><td>scipy.sparse</td><td>Agrupamento, matrizes esparsas, distâncias, interpolação e estatísticas; conferir as chamadas na ficha.</td></tr><tr><td>scipy.spatial</td><td>Agrupamento, matrizes esparsas, distâncias, interpolação e estatísticas; conferir as chamadas na ficha.</td></tr><tr><td>scipy.stats</td><td>Agrupamento, matrizes esparsas, distâncias, interpolação e estatísticas; conferir as chamadas na ficha.</td></tr><tr><td>shapely.geometry</td><td>Operações geométricas usadas nas áreas, distâncias, limites e relações espaciais.</td></tr><tr><td>shutil</td><td>Cópia e movimentação de arquivos, inclusive preservação de versões geradas.</td></tr><tr><td>sys</td><td>Argumentos, interpretador Python e caminhos de importação.</td></tr><tr><td>warnings</td><td>Controle de avisos de bibliotecas sem alterar a definição do estimador.</td></tr></table>
+<p><strong>Entradas.</strong></p>
+<li>E:/teco/output/01_integracao_territorial/integracao_territorial_teco.gpkg [camada &#x27;setores_bacias&#x27;] — chamada gpd.read_file, linha 140.</li>
+<li>E:/teco/sub_bacia/shapefiles_v6_20261109_141015/sub_bacias_exclusivas.shp — chamada gpd.read_file, linha 141.</li>
+<li>E:/teco/dados_publicos/cnes/estabelecimentos_ativos_municipios.json — chamada f.read_text, linha 166.</li>
+<li>E:/teco/dados_publicos/cnes/tipos.json — chamada .read_text, linha 167.</li>
+<li>E:/teco/teco_base/mg_mun/ide_1103_mg_municipios_pol.shp — chamada gpd.read_file, linha 185.</li>
+<li>E:/teco/sub_bacia/br.id/dem_utm_30m.tif — chamada rasterio.open, linha 214.</li>
+<li>E:/teco/sub_bacia/br.id/direcao_d8.tif — chamada rasterio.open, linha 216.</li>
+<li>E:/teco/reservatorio/{lakefile}.shp — chamada gpd.read_file, linha 220.</li>
+<li>E:/teco/reservatorio/{k}.shp — chamada gpd.read_file, linha 432.</li>
+<li>E:/teco/hidrografia/hidrografia.shp — chamada gpd.read_file, linha 433.</li>
+<li>E:/teco/vias/malha_viaria.shp — chamada gpd.read_file, linha 434.</li>
+<li>E:/teco/teco_base/uso_terra/uso_terra-reservatorio.tif — chamada rasterio.open, linha 531.</li>
+<li>E:/teco/output/02_avaliacao_espacial/tabelas/selecao_kmeans.csv — chamada pd.read_csv, linha 544.</li>
+<li>E:/teco/output/02_avaliacao_espacial/tabelas/sensibilidade_pesos.csv — chamada pd.read_csv, linha 545.</li>
+<p><strong>Saídas.</strong></p>
+<li>E:/teco/output/02_avaliacao_espacial/tabelas/{name} — chamada df.to_csv, linha 108.</li>
+<li>E:/teco/output/02_avaliacao_espacial/teco_avaliacao.gpkg [camada name] — chamada g.to_file, linha 112.</li>
+<li>E:/teco/output/02_avaliacao_espacial/shapefiles/{name}.shp — chamada g.to_file, linha 113.</li>
+<li>E:/teco/output/02_avaliacao_espacial/rasters/{name} — chamada rasterio.open, linha 119.</li>
+<li>E:/teco/output/02_avaliacao_espacial/figuras/{slug}.{fmt} — chamada fig.savefig, linha 473.</li>
+<li>E:/teco/output/02_avaliacao_espacial/figuras/17_diagnostico_agrupamentos.{fmt} — chamada fig.savefig, linha 547.</li>
+<li>E:/teco/output/02_avaliacao_espacial/figuras/18_correlacoes_variaveis.{fmt} — chamada fig.savefig, linha 555.</li>
+<li>E:/teco/output/02_avaliacao_espacial/auditoria/galeria.json — chamada .write_text, linha 557.</li>
+<li>E:/teco/output/02_avaliacao_espacial/index.html — chamada .write_text, linha 564.</li>
+<li>E:/teco/output/02_avaliacao_espacial/auditoria/auditoria.json — chamada .write_text, linha 571.</li>
+<p><strong>Campos e chaves lidos.</strong></p>
+<li>whole: geometry, pop_2022, setor_id.</li>
+<li>clipped: bas_id, dom_a_est, geometry, pct_rede, pop_a_est, red_a_est, setor_id.</li>
+<li>x: codigo_tipo_unidade, descricao_tipo_unidade.</li>
+<li>d: lat, latitude_estabelecimento_decimo_grau, lon, longitude_estabelecimento_decimo_grau.</li>
+<li>d.loc: lat, lon.</li>
+<li>b: geometry, id.</li>
+<li>g: CNES, codigo_municipio, geometry.</li>
+<li>muni: geocodigo, geometry.</li>
+<li>c: bas_id, geometry, setor_id.</li>
+<li>AUD: analise, cnes.</li>
+<li>a.loc: def_rede, dens_pop, pressao, quintil, setor_id.</li>
+<li>r: silhouette, slug, titulo.</li>
+<li>best: k.</li>
+<li>loc: lisa, q_fdr.</li>
+<li>a: bas_id, cluster, d8_cob_pct, dist_hid_km, geometry, lisa, pressao, q_fdr, quintil, setor_id.</li>
+<li>l: t.</li>
+<li>routes: bacia.</li>
+<li>mouths: bacia, proxy_nr.</li>
+<li>km: k, silhouette.</li>
+<li>ss: mantem_P80_pct, peso_pop.</li>
+<li>ax.spines: right, top.</li>
+<p><strong>Campos e chaves gerados.</strong></p>
+<li>AUD: analise, bases, cartografia, cnes, d8.</li>
+<li>d: lat, lon.</li>
+<li>g: ANO_ATUAL, CNES, COORD_DUP, GRUPO, QA_MUN, TIPO.</li>
+<li>qa: QA_MUN.</li>
+<li>c: hosp_urg_n, saude_n.</li>
+<li>a: cluster, def_rede, lisa, lisa_biv, pressao, prioridade, proxy_nr, q_fdr, quintil.</li>
+<li>lookup: ND.</li>
+<p><strong>Etapas e interfaces.</strong> As funções abaixo são apresentadas na ordem do arquivo. A existência de uma função não significa que seja chamada em toda execução.</p>
+<table><tr><th>Função/interface</th><th>Linhas</th><th>Operação e retorno</th></tr><tr><td>log(*x)</td><td>105-105</td><td>Chamadas efetivas: print</td></tr><tr><td>csv(df, name)</td><td>108-108</td><td>grava produtos</td></tr><tr><td>gp(g, name, shp=False)</td><td>111-113</td><td>grava produtos</td></tr><tr><td>raster(a, profile, name, nodata=-9999, dtype=&#x27;float32&#x27;)</td><td>116-119</td><td>Chamadas efetivas: profile.copy, p.update, p.pop, rasterio.open, d.write, .astype, np.where, np.isfinite</td></tr><tr><td>hashgeom(g)</td><td>122-122</td><td>Chamadas efetivas: .hexdigest, hashlib.sha256, .join, g.geometry.to_wkb Retorno: hashlib.sha256(b&#x27;&#x27;.join(g.geometry.to_wkb())).hexdigest().</td></tr><tr><td>rank01(a)</td><td>125-129</td><td>Chamadas efetivas: np.asarray, np.isfinite, np.full, len, v.sum, rankdata Retorno: o.</td></tr><tr><td>quint(a)</td><td>132-135</td><td>Quantil da amostra fornecida. O eixo e o conjunto de dados da chamada definem se o quantil é temporal ou espacial. Retorno: o.</td></tr><tr><td>bases()</td><td>138-161</td><td>lê dados Retorno: (whole, clipped, b).</td></tr><tr><td>cnes(b, c)</td><td>164-205</td><td>lê dados Retorno: (g, c), &#x27;Administrativo / móvel / outros&#x27;.</td></tr><tr><td>terrain_routing(b, c)</td><td>210-293</td><td>lê dados Retorno: (c, layers, routes, mouths).</td></tr><tr><td>ari(a, b)</td><td>296-301</td><td>Chamadas efetivas: np.unique, len, .reshape, comb, .sum, tab.sum, np.bincount, a.max Retorno: (x - e) / den if den else 1.0.</td></tr><tr><td>fitkm(x, k, seed, starts=12)</td><td>304-313</td><td>Ajusta centroides pelo k-means. A matriz de entrada, a inicialização ++, a semente e as repetições determinam a solução reproduzida. Retorno: best.</td></tr><tr><td>silhouette(x, l)</td><td>316-323</td><td>Chamadas efetivas: distance.cdist, enumerate, float, same.sum, min, s.append, np.mean, .sum Retorno: float(np.mean(s)).</td></tr><tr><td>weights(xy, k)</td><td>326-330</td><td>Chamadas efetivas: len, np.repeat, idx.ravel, csr_matrix, w.maximum, w.setdiag, w.eliminate_zeros, .tocsr Retorno: w.multiply(1 / np.asarray(w.sum(1))).tocsr().</td></tr><tr><td>bh(p)</td><td>333-334</td><td>Chamadas efetivas: np.asarray, np.argsort, np.empty, np.minimum, np.minimum.accumulate, len, np.arange Retorno: o.</td></tr><tr><td>moran(x, xy, k=8, seed=SEED, local=False, y=None)</td><td>337-368</td><td>Chamadas efetivas: len, weights, float, np.random.default_rng, np.empty, range, bh, np.where Retorno: (rec, {&#x27;Ii&#x27;: Ii, &#x27;p_local&#x27;: pvlocal, &#x27;q_fdr&#x27;: q, &#x27;lisa&#x27;: label, &#x27;lag&#x27;: lag}), (rec, None).</td></tr><tr><td>analysis(c)</td><td>371-428</td><td>Calcula ln(1+x), reduzindo assimetria e preservando zero. O resultado transformado não mantém a unidade física original.; Associação por postos. Mede ordenação conjunta, não igualdade de magnitude nem desempenho frente a observações ausentes. Retorno: a.</td></tr><tr><td>maps(a, b, health, layers, routes, mouths)</td><td>431-558</td><td>lê dados; grava produtos; Quantil da amostra fornecida. O eixo e o conjunto de dados da chamada definem se o quantil é temporal ou espacial. Retorno: gallery, (fig, axs).</td></tr><tr><td>index(gallery)</td><td>561-564</td><td>grava produtos</td></tr><tr><td>main()</td><td>567-572</td><td>grava produtos</td></tr></table>
+<p><strong>Trechos citados do código.</strong> A numeração corresponde ao arquivo inspecionado nesta edição. São citações do processamento, não instruções para executar fragmentos isolados.</p>
+<p>Trecho de codigo/analise_espacial_teco.py, linhas 133-139.</p>
+<pre><code>    a=np.asarray(a,float);o=np.zeros(len(a),int);v=np.isfinite(a)
+    if v.sum():o[v]=np.searchsorted(np.quantile(a[v],[.2,.4,.6,.8]),a[v],side=&#x27;left&#x27;)+1
+    return o
+
+# Bases
+def bases():
+    whole=gpd.read_file(SOURCE,layer=&#x27;setores_inteiros&#x27;).sort_values(&#x27;setor_id&#x27;).reset_index(drop=True)</code></pre>
+<p>Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</p>
+<p>Quantil da amostra fornecida. O eixo e o conjunto de dados da chamada definem se o quantil é temporal ou espacial.</p>
+<p>Trecho de codigo/analise_espacial_teco.py, linhas 204-210.</p>
+<pre><code>    AUD[&#x27;cnes&#x27;]={&#x27;consultados&#x27;:len(d),&#x27;dentro_bacias&#x27;:len(g),&#x27;coordenadas_invalidas&#x27;:int((~ok).sum()),&#x27;municipio_incompativel&#x27;:int((g.QA_MUN==0).sum()),&#x27;pontos_com_coordenada_compartilhada&#x27;:int((g.COORD_DUP&gt;1).sum()),&#x27;hospitais_urgencia&#x27;:len(hp),&#x27;usados_contagem_setores&#x27;:len(q),&#x27;natureza&#x27;:&#x27;cadastro ativo atual, não série de 2016-2025; coordenadas cadastrais não validadas em campo; divergentes de município não entram nas contagens&#x27;}
+    log(&#x27;CNES&#x27;,AUD[&#x27;cnes&#x27;]);return g,c
+
+D8={1:(-1,1),2:(-1,0),3:(-1,-1),4:(0,-1),5:(1,-1),6:(1,0),7:(1,1),8:(0,1)}
+
+# Terrain routing
+def terrain_routing(b,c):</code></pre>
+<p>Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</p>
+<p>Logaritmo natural. Na função de risco, β=ln(RR)/10 converte um risco relativo por 10 µg/m³ para a escala de 1 µg/m³.</p>
+<p><strong>Cálculos a observar nesta rotina.</strong></p>
+<li>sum: Soma no eixo definido. Em suportes sobrepostos, uma soma entre vizinhanças pode contar o mesmo local repetidas vezes.</li>
+<li>quantile: Quantil da amostra fornecida. O eixo e o conjunto de dados da chamada definem se o quantil é temporal ou espacial.</li>
+<li>log: Logaritmo natural. Na função de risco, β=ln(RR)/10 converte um risco relativo por 10 µg/m³ para a escala de 1 µg/m³.</li>
+<li>gradient: Derivadas nas direções do raster. A declividade depende também do tamanho físico do pixel e da unidade de elevação.</li>
+<li>digitize: Associa valores a intervalos definidos pelos cortes do código, inclusive classes de relevo ou faixas de distância.</li>
+<li>bincount: Conta ocorrências ou soma pesos por identificador inteiro. O vetor weights define se há contagem ou acumulação ponderada.</li>
+<li>kmeans2: Ajusta centroides pelo k-means. A matriz de entrada, a inicialização ++, a semente e as repetições determinam a solução reproduzida.</li>
+<li>cdist: Matriz de distâncias entre observações. É usada no agrupamento, na silhouette ou na comparação entre centroides.</li>
+<li>mean: Média no eixo explicitado. Não representa automaticamente média anual ou diária sem a seleção temporal correspondente.</li>
+<li>std: Desvio-padrão. Na padronização z, coloca colunas em escala comparável; conferir ddof no trecho.</li>
+<li>log1p: Calcula ln(1+x), reduzindo assimetria e preservando zero. O resultado transformado não mantém a unidade física original.</li>
+<li>spearmanr: Associação por postos. Mede ordenação conjunta, não igualdade de magnitude nem desempenho frente a observações ausentes.</li>
+<li>nanpercentile: Percentil que ignora NaN. O número e o período de valores válidos continuam definindo sua representatividade.</li>
+<li>sqrt: Raiz quadrada. No ajuste ponderado do k-means, multiplicar a coluna por √peso faz o peso entrar uma única vez na distância ao quadrado.</li>
+<p><strong>Reutilização e limites.</strong> Alterar arquivos pelo JSON de caminhos e preservar nomes de campos/chaves, tipos e unidades citados. Antes de trocar a entrada, verificar a cobertura, o sistema de referência e a unicidade das chaves. Um teste ou auditoria confere consistência dentro do recorte previsto; não substitui a justificativa científica do método. </p>
+<h3>Código integral numerado</h3>
+<pre><code>    1  # CONFIGURAÇÃO DE ENTRADAS E SAÍDAS
+    2  # Configuração editável: codigo/caminhos_projeto.json
+    3  # Raiz dos dados: raiz_projeto; pastas e arquivos admitem caminhos próprios.
+    4  # Entrada: E:/teco/output/01_integracao_territorial/integracao_territorial_teco.gpkg | gpd.read_file | camada=&#x27;setores_bacias&#x27;.
+    5  # Entrada: E:/teco/sub_bacia/shapefiles_v6_20261109_141015/sub_bacias_exclusivas.shp | gpd.read_file.
+    6  # Entrada: E:/teco/dados_publicos/cnes/estabelecimentos_ativos_municipios.json | f.read_text.
+    7  # Entrada: E:/teco/dados_publicos/cnes/tipos.json | .read_text.
+    8  # Entrada: E:/teco/teco_base/mg_mun/ide_1103_mg_municipios_pol.shp | gpd.read_file.
+    9  # Entrada: E:/teco/sub_bacia/br.id/dem_utm_30m.tif | rasterio.open.
+   10  # Entrada: E:/teco/sub_bacia/br.id/direcao_d8.tif | rasterio.open.
+   11  # Entrada: E:/teco/reservatorio/{lakefile}.shp | gpd.read_file.
+   12  # Entrada: E:/teco/reservatorio/{k}.shp | gpd.read_file.
+   13  # Entrada: E:/teco/hidrografia/hidrografia.shp | gpd.read_file.
+   14  # Entrada: E:/teco/vias/malha_viaria.shp | gpd.read_file.
+   15  # Entrada: E:/teco/teco_base/uso_terra/uso_terra-reservatorio.tif | rasterio.open.
+   16  # Entrada: E:/teco/output/02_avaliacao_espacial/tabelas/selecao_kmeans.csv | pd.read_csv.
+   17  # Entrada: E:/teco/output/02_avaliacao_espacial/tabelas/sensibilidade_pesos.csv | pd.read_csv.
+   18  # Campos/chaves em whole: geometry, pop_2022, setor_id.
+   19  # Campos/chaves em clipped: bas_id, dom_a_est, geometry, pct_rede, pop_a_est, red_a_est, setor_id.
+   20  # Campos/chaves em x: codigo_tipo_unidade, descricao_tipo_unidade.
+   21  # Campos/chaves em d: lat, latitude_estabelecimento_decimo_grau, lon, longitude_estabelecimento_decimo_grau.
+   22  # Campos/chaves em d.loc: lat, lon.
+   23  # Campos/chaves em b: geometry, id.
+   24  # Campos/chaves em g: CNES, codigo_municipio, geometry.
+   25  # Campos/chaves em muni: geocodigo, geometry.
+   26  # Campos/chaves em c: bas_id, geometry, setor_id.
+   27  # Campos/chaves em AUD: analise, cnes.
+   28  # Campos/chaves em a.loc: def_rede, dens_pop, pressao, quintil, setor_id.
+   29  # Campos/chaves em r: silhouette, slug, titulo.
+   30  # Campos/chaves em best: k.
+   31  # Campos/chaves em loc: lisa, q_fdr.
+   32  # Campos/chaves em a: bas_id, cluster, d8_cob_pct, dist_hid_km, geometry, lisa, pressao, q_fdr, quintil, setor_id.
+   33  # Campos/chaves em l: t.
+   34  # Campos/chaves em routes: bacia.
+   35  # Campos/chaves em mouths: bacia, proxy_nr.
+   36  # Campos/chaves em km: k, silhouette.
+   37  # Campos/chaves em ss: mantem_P80_pct, peso_pop.
+   38  # Campos/chaves em ax.spines: right, top.
+   39  # Saída: E:/teco/output/02_avaliacao_espacial/tabelas/{name} | df.to_csv.
+   40  # Saída: E:/teco/output/02_avaliacao_espacial/teco_avaliacao.gpkg | g.to_file.
+   41  # Saída: E:/teco/output/02_avaliacao_espacial/shapefiles/{name}.shp | g.to_file.
+   42  # Saída: E:/teco/output/02_avaliacao_espacial/rasters/{name} | rasterio.open.
+   43  # Saída: E:/teco/output/02_avaliacao_espacial/figuras/{slug}.{fmt} | fig.savefig.
+   44  # Saída: E:/teco/output/02_avaliacao_espacial/figuras/17_diagnostico_agrupamentos.{fmt} | fig.savefig.
+   45  # Saída: E:/teco/output/02_avaliacao_espacial/figuras/18_correlacoes_variaveis.{fmt} | fig.savefig.
+   46  # Saída: E:/teco/output/02_avaliacao_espacial/auditoria/galeria.json | .write_text.
+   47  # Saída: E:/teco/output/02_avaliacao_espacial/index.html | .write_text.
+   48  # Saída: E:/teco/output/02_avaliacao_espacial/auditoria/auditoria.json | .write_text.
+   49  # Campos/chaves gerados em AUD: analise, bases, cartografia, cnes, d8.
+   50  # Campos/chaves gerados em d: lat, lon.
+   51  # Campos/chaves gerados em g: ANO_ATUAL, CNES, COORD_DUP, GRUPO, QA_MUN, TIPO.
+   52  # Campos/chaves gerados em qa: QA_MUN.
+   53  # Campos/chaves gerados em c: hosp_urg_n, saude_n.
+   54  # Campos/chaves gerados em a: cluster, def_rede, lisa, lisa_biv, pressao, prioridade, proxy_nr, q_fdr, quintil.
+   55  # Campos/chaves gerados em lookup: ND.
+   56  # CNES: identificador do estabelecimento de saúde.
+   57  # Novas variáveis: config/analise_extensivel.json; definir origem, campo, agregação, transformação e peso.
+   58  # CÓDIGO DO PROCESSAMENTO
+   59  
+   60  # INÍCIO DOS CAMINHOS PORTÁTEIS
+   61  import sys as _cp_sys
+   62  from pathlib import Path as _cp_Path
+   63  _cp_file = _cp_Path(globals().get(&#x27;__file__&#x27;, _cp_Path.cwd() / &#x27;codigo&#x27; / &#x27;script.py&#x27;)).resolve()
+   64  for _cp_parent in [_cp_file.parent, *_cp_file.parents]:
+   65      _cp_code = _cp_parent if (_cp_parent / &#x27;caminhos_teco.py&#x27;).is_file() else _cp_parent / &#x27;codigo&#x27;
+   66      if (_cp_code / &#x27;caminhos_teco.py&#x27;).is_file():
+   67          if str(_cp_code) not in _cp_sys.path: _cp_sys.path.insert(0, str(_cp_code))
+   68          break
+   69  from caminhos_teco import raiz_projeto as _cp_raiz, texto_caminho as _cp_texto, externo as _cp_externo, adaptar_texto as _cp_adaptar
+   70  # FIM DOS CAMINHOS PORTÁTEIS
+   71  
+   72  from pathlib import Path
+   73  import json, math, hashlib, datetime, shutil, warnings
+   74  from collections import deque
+   75  import numpy as np
+   76  import pandas as pd
+   77  import geopandas as gpd
+   78  import rasterio
+   79  from rasterio.features import rasterize, shapes
+   80  from rasterio.windows import from_bounds, Window
+   81  from shapely.geometry import LineString, shape
+   82  from scipy.spatial import cKDTree, distance
+   83  from scipy.cluster.vq import kmeans2
+   84  from scipy.stats import rankdata, spearmanr
+   85  from scipy.sparse import csr_matrix
+   86  import matplotlib
+   87  matplotlib.use(&#x27;Agg&#x27;)
+   88  import matplotlib.pyplot as plt
+   89  from matplotlib.colors import ListedColormap, BoundaryNorm
+   90  from matplotlib.patches import Patch
+   91  from matplotlib.lines import Line2D
+   92  from matplotlib.ticker import FuncFormatter, MaxNLocator
+   93  from pyproj import Transformer
+   94  
+   95  ROOT=Path(_cp_texto(&#x27;&#x27;, &#x27;posix&#x27;)); OUT=ROOT/&#x27;output/02_avaliacao_espacial&#x27;
+   96  GPKG=OUT/&#x27;teco_avaliacao.gpkg&#x27;; CRS=31983
+   97  SOURCE=ROOT/&#x27;output/01_integracao_territorial/integracao_territorial_teco.gpkg&#x27;
+   98  BPATH=ROOT/&#x27;sub_bacia/shapefiles_v6_20261109_141015/sub_bacias_exclusivas.shp&#x27;
+   99  SEED=20261111; PERM=999
+  100  AUD={&#x27;gerado_em&#x27;:datetime.datetime.now().astimezone().isoformat(),&#x27;semente&#x27;:SEED,&#x27;permutacoes&#x27;:PERM}
+  101  for f in [&#x27;shapefiles&#x27;,&#x27;rasters&#x27;,&#x27;figuras&#x27;,&#x27;tabelas&#x27;,&#x27;auditoria&#x27;]:(OUT/f).mkdir(parents=True,exist_ok=True)
+  102  plt.rcParams.update({&#x27;font.family&#x27;:&#x27;Arial&#x27;,&#x27;font.size&#x27;:9,&#x27;svg.fonttype&#x27;:&#x27;none&#x27;,&#x27;axes.titleweight&#x27;:&#x27;bold&#x27;})
+  103  
+  104  # Log
+  105  def log(*x):print(*x,flush=True)
+  106  
+  107  # Csv
+  108  def csv(df,name):df.to_csv(OUT/&#x27;tabelas&#x27;/name,index=False,encoding=&#x27;utf-8-sig&#x27;,sep=&#x27;;&#x27;,decimal=&#x27;,&#x27;)
+  109  
+  110  # Gp
+  111  def gp(g,name,shp=False):
+  112      g.to_file(GPKG,layer=name,driver=&#x27;GPKG&#x27;)
+  113      if shp:g.to_file(OUT/&#x27;shapefiles&#x27;/f&#x27;{name}.shp&#x27;,driver=&#x27;ESRI Shapefile&#x27;,encoding=&#x27;UTF-8&#x27;)
+  114  
+  115  # Raster
+  116  def raster(a,profile,name,nodata=-9999,dtype=&#x27;float32&#x27;):
+  117      p=profile.copy();p.update(driver=&#x27;GTiff&#x27;,count=1,dtype=dtype,nodata=nodata,compress=&#x27;deflate&#x27;)
+  118      p.pop(&#x27;photometric&#x27;,None)
+  119      with rasterio.open(OUT/&#x27;rasters&#x27;/name,&#x27;w&#x27;,**p) as d:d.write(np.where(np.isfinite(a),a,nodata).astype(dtype),1)
+  120  
+  121  # Hashgeom
+  122  def hashgeom(g):return hashlib.sha256(b&#x27;&#x27;.join(g.geometry.to_wkb())).hexdigest()
+  123  
+  124  # Rank01
+  125  def rank01(a):
+  126      a=np.asarray(a,float);v=np.isfinite(a);o=np.full(len(a),np.nan)
+  127      if v.sum()&gt;1:o[v]=(rankdata(a[v],method=&#x27;average&#x27;)-1)/(v.sum()-1)
+  128      elif v.sum():o[v]=0.5
+  129      return o
+  130  
+  131  # Quint
+  132  def quint(a):
+  133      a=np.asarray(a,float);o=np.zeros(len(a),int);v=np.isfinite(a)
+  134      if v.sum():o[v]=np.searchsorted(np.quantile(a[v],[.2,.4,.6,.8]),a[v],side=&#x27;left&#x27;)+1
+  135      return o
+  136  
+  137  # Bases
+  138  def bases():
+  139      whole=gpd.read_file(SOURCE,layer=&#x27;setores_inteiros&#x27;).sort_values(&#x27;setor_id&#x27;).reset_index(drop=True)
+  140      clipped=gpd.read_file(SOURCE,layer=&#x27;setores_bacias&#x27;).sort_values([&#x27;bas_id&#x27;,&#x27;setor_id&#x27;]).reset_index(drop=True)
+  141      b=gpd.read_file(BPATH).sort_values(&#x27;id&#x27;).reset_index(drop=True)
+  142  
+  143      pop=whole[[&#x27;setor_id&#x27;,&#x27;pop_2022&#x27;,&#x27;geometry&#x27;]].rename(columns={&#x27;setor_id&#x27;:&#x27;CD_SETOR&#x27;,&#x27;pop_2022&#x27;:&#x27;POP_TOT&#x27;})
+  144      cols=[&#x27;setor_id&#x27;,&#x27;dom_set&#x27;,&#x27;rede_set&#x27;,&#x27;pct_rede&#x27;,&#x27;V00309&#x27;,&#x27;V00310&#x27;,&#x27;V00311&#x27;,&#x27;V00312&#x27;,&#x27;V00313&#x27;,&#x27;V00314&#x27;,&#x27;V00315&#x27;,&#x27;V00316&#x27;,&#x27;geometry&#x27;]
+  145      rename={&#x27;setor_id&#x27;:&#x27;CD_SETOR&#x27;,&#x27;dom_set&#x27;:&#x27;DOM_TOT&#x27;,&#x27;rede_set&#x27;:&#x27;DOM_REDE&#x27;,&#x27;pct_rede&#x27;:&#x27;PCT_REDE&#x27;,&#x27;V00309&#x27;:&#x27;REDE_DIR&#x27;,&#x27;V00310&#x27;:&#x27;FOSS_REDE&#x27;,&#x27;V00311&#x27;:&#x27;FOSS_SREDE&#x27;,&#x27;V00312&#x27;:&#x27;FOSSA_RUD&#x27;,&#x27;V00313&#x27;:&#x27;VALA&#x27;,&#x27;V00314&#x27;:&#x27;RIO_LAGO&#x27;,&#x27;V00315&#x27;:&#x27;OUTRO&#x27;,&#x27;V00316&#x27;:&#x27;SEM_BANH&#x27;}
+  146      san=whole[cols].rename(columns=rename)
+  147      gp(pop,&#x27;populacao_setores&#x27;,True);gp(san,&#x27;esgotamento_setores&#x27;,True)
+  148      pc=clipped[[&#x27;setor_id&#x27;,&#x27;bas_id&#x27;,&#x27;pop_a_est&#x27;,&#x27;geometry&#x27;]].rename(columns={&#x27;setor_id&#x27;:&#x27;CD_SETOR&#x27;,&#x27;bas_id&#x27;:&#x27;BACIA&#x27;,&#x27;pop_a_est&#x27;:&#x27;POP_EST&#x27;})
+  149      sc=clipped[[&#x27;setor_id&#x27;,&#x27;bas_id&#x27;,&#x27;dom_a_est&#x27;,&#x27;red_a_est&#x27;,&#x27;pct_rede&#x27;,&#x27;geometry&#x27;]].rename(columns={&#x27;setor_id&#x27;:&#x27;CD_SETOR&#x27;,&#x27;bas_id&#x27;:&#x27;BACIA&#x27;,&#x27;dom_a_est&#x27;:&#x27;DOM_EST&#x27;,&#x27;red_a_est&#x27;:&#x27;REDE_EST&#x27;,&#x27;pct_rede&#x27;:&#x27;PCT_REDE&#x27;})
+  150      gp(pc,&#x27;populacao_recorte_estimado&#x27;,True);gp(sc,&#x27;esgoto_recorte_estimado&#x27;,True)
+  151      assert hashgeom(pop)==hashgeom(san) and pop.CD_SETOR.equals(san.CD_SETOR)
+  152      assert hashgeom(pc)==hashgeom(sc) and len(pop)==1838 and len(clipped)==1877
+  153      assert whole.setor_id.is_unique and (whole.pop_2022.dropna()&gt;=0).all()
+  154      valid=whole.pct_rede.dropna();assert valid.between(0,100).all()
+  155      AUD[&#x27;bases&#x27;]={&#x27;setores_inteiros&#x27;:len(whole),&#x27;recortes_setor_bacia&#x27;:len(clipped),&#x27;hash_geometria_igual&#x27;:hashgeom(pop),&#x27;populacao_nulos&#x27;:int(whole.pop_2022.isna().sum()),&#x27;esgoto_percentual_nulos&#x27;:int(whole.pct_rede.isna().sum()),&#x27;crs&#x27;:&#x27;EPSG:31983&#x27;,&#x27;fracao_area_max&#x27;:float(clipped.groupby(&#x27;setor_id&#x27;).frac_area.sum().max())}
+  156      csv(pd.DataFrame([{&#x27;arquivo&#x27;:n,&#x27;campo&#x27;:c,&#x27;descricao&#x27;:desc} for n,c,desc in [
+  157          (&#x27;populacao_setores&#x27;,&#x27;CD_SETOR&#x27;,&#x27;Identificador IBGE; texto com 15 dígitos.&#x27;),(&#x27;populacao_setores&#x27;,&#x27;POP_TOT&#x27;,&#x27;Total oficial de pessoas do setor inteiro (v0001), Censo 2022. Não soma variáveis sobrepostas.&#x27;),
+  158          (&#x27;esgotamento_setores&#x27;,&#x27;DOM_TOT&#x27;,&#x27;Domicílios particulares permanentes ocupados, V00001; denominador do tema esgoto.&#x27;),(&#x27;esgotamento_setores&#x27;,&#x27;DOM_REDE&#x27;,&#x27;V00309 + V00310, somente se ambas publicadas.&#x27;),(&#x27;esgotamento_setores&#x27;,&#x27;PCT_REDE&#x27;,&#x27;100 × DOM_REDE/DOM_TOT. Nulo quando sigilo, ausência ou denominador zero.&#x27;),
+  159          (&#x27;esgotamento_setores&#x27;,&#x27;REDE_DIR&#x27;,&#x27;Rede geral OU pluvial, V00309; não comprova tratamento.&#x27;),(&#x27;esgotamento_setores&#x27;,&#x27;FOSS_REDE&#x27;,&#x27;Fossa séptica/filtro ligada à rede, V00310.&#x27;),(&#x27;esgotamento_setores&#x27;,&#x27;FOSS_SREDE&#x27;,&#x27;Fossa séptica/filtro não ligada à rede; não equivale a lançamento sem tratamento.&#x27;),(&#x27;esgotamento_setores&#x27;,&#x27;FOSSA_RUD&#x27;,&#x27;Fossa rudimentar/buraco.&#x27;),(&#x27;esgotamento_setores&#x27;,&#x27;VALA&#x27;,&#x27;Vala.&#x27;),(&#x27;esgotamento_setores&#x27;,&#x27;RIO_LAGO&#x27;,&#x27;Rio, lago, córrego ou mar.&#x27;),(&#x27;esgotamento_setores&#x27;,&#x27;OUTRO&#x27;,&#x27;Outro destino.&#x27;),(&#x27;esgotamento_setores&#x27;,&#x27;SEM_BANH&#x27;,&#x27;Sem banheiro/sanitário.&#x27;),
+  160          (&#x27;populacao_recorte_estimado&#x27;,&#x27;POP_EST&#x27;,&#x27;POP_TOT × fração de área; estimativa uniforme no recorte, não contagem censitária da bacia.&#x27;),(&#x27;esgoto_recorte_estimado&#x27;,&#x27;DOM_EST / REDE_EST&#x27;,&#x27;Contagens do setor multiplicadas pela mesma fração de área. Percentual herda o setor inteiro.&#x27;)]]),&#x27;dicionario_bases.csv&#x27;)
+  161      gp(b,&#x27;bacias_estudo&#x27;);return whole,clipped,b
+  162  
+  163  # Cnes
+  164  def cnes(b,c):
+  165      f=ROOT/&#x27;dados_publicos/cnes/estabelecimentos_ativos_municipios.json&#x27;
+  166      d=pd.DataFrame(json.loads(f.read_text(encoding=&#x27;utf8&#x27;)))
+  167      types=json.loads((f.parent/&#x27;tipos.json&#x27;).read_text(encoding=&#x27;utf8&#x27;))[&#x27;tipos_unidade&#x27;]
+  168      td={x[&#x27;codigo_tipo_unidade&#x27;]:x[&#x27;descricao_tipo_unidade&#x27;] for x in types}
+  169      d[&#x27;lon&#x27;]=pd.to_numeric(d.longitude_estabelecimento_decimo_grau,errors=&#x27;coerce&#x27;);d[&#x27;lat&#x27;]=pd.to_numeric(d.latitude_estabelecimento_decimo_grau,errors=&#x27;coerce&#x27;)
+  170      ok=d.lon.between(-50,-35)&amp;d.lat.between(-25,-10)
+  171      csv(d.loc[~ok,[&#x27;codigo_cnes&#x27;,&#x27;nome_fantasia&#x27;,&#x27;lat&#x27;,&#x27;lon&#x27;]],&#x27;cnes_coordenadas_invalidas.csv&#x27;)
+  172      g=gpd.GeoDataFrame(d.loc[ok].copy(),geometry=gpd.points_from_xy(d.loc[ok,&#x27;lon&#x27;],d.loc[ok,&#x27;lat&#x27;]),crs=4326).to_crs(CRS)
+  173      g=gpd.sjoin(g,b[[&#x27;id&#x27;,&#x27;geometry&#x27;]],predicate=&#x27;intersects&#x27;).drop(columns=&#x27;index_right&#x27;).rename(columns={&#x27;id&#x27;:&#x27;bacia&#x27;})
+  174      assert g.codigo_cnes.is_unique
+  175      g[&#x27;CNES&#x27;]=g.codigo_cnes.astype(str).str.zfill(7);g[&#x27;TIPO&#x27;]=g.codigo_tipo_unidade.map(td)
+  176      def group(t):
+  177          if t in [5,7,15,62]:return &#x27;Hospital / hospital-dia&#x27;
+  178          if t in [20,21,73]:return &#x27;Urgência / pronto atendimento&#x27;
+  179          if t in [1,2]:return &#x27;Atenção básica&#x27;
+  180          if t==43:return &#x27;Farmácia (cadastro CNES)&#x27;
+  181          if t in [4,22,36,39,61,69,70,72,78,80,67]:return &#x27;Outros serviços assistenciais&#x27;
+  182          return &#x27;Administrativo / móvel / outros&#x27;
+  183      g[&#x27;GRUPO&#x27;]=g.codigo_tipo_unidade.map(group)
+  184      g[&#x27;COORD_DUP&#x27;]=g.groupby([&#x27;lon&#x27;,&#x27;lat&#x27;]).CNES.transform(&#x27;size&#x27;)
+  185      muni=gpd.read_file(ROOT/&#x27;teco_base/mg_mun/ide_1103_mg_municipios_pol.shp&#x27;,where=&quot;geocodigo IN (&#x27;3106200&#x27;,&#x27;3118601&#x27;,&#x27;3106705&#x27;,&#x27;3129806&#x27;,&#x27;3165537&#x27;,&#x27;3109006&#x27;,&#x27;3154606&#x27;,&#x27;3124104&#x27;)&quot;).to_crs(CRS)
+  186      qa=gpd.sjoin(g[[&#x27;CNES&#x27;,&#x27;codigo_municipio&#x27;,&#x27;geometry&#x27;]],muni[[&#x27;geocodigo&#x27;,&#x27;geometry&#x27;]],how=&#x27;left&#x27;,predicate=&#x27;intersects&#x27;).drop_duplicates(&#x27;CNES&#x27;)
+  187      qa[&#x27;QA_MUN&#x27;]=(qa.codigo_municipio.astype(str).str[:6]==qa.geocodigo.astype(str).str[:6]).astype(int)
+  188      csv(pd.DataFrame(qa.drop(columns=&#x27;geometry&#x27;)),&#x27;cnes_conferencia_municipio.csv&#x27;)
+  189      qmap=qa.set_index(&#x27;CNES&#x27;).QA_MUN;g[&#x27;QA_MUN&#x27;]=g.CNES.map(qmap).fillna(0).astype(int)
+  190      g[&#x27;ANO_ATUAL&#x27;]=g.data_atualizacao.str[:4]
+  191  
+  192      keep=[&#x27;CNES&#x27;,&#x27;nome_fantasia&#x27;,&#x27;TIPO&#x27;,&#x27;GRUPO&#x27;,&#x27;codigo_municipio&#x27;,&#x27;bacia&#x27;,&#x27;numero_cnpj&#x27;,&#x27;data_atualizacao&#x27;,&#x27;COORD_DUP&#x27;,&#x27;QA_MUN&#x27;,&#x27;lon&#x27;,&#x27;lat&#x27;,&#x27;geometry&#x27;]
+  193      g=g[keep].rename(columns={&#x27;nome_fantasia&#x27;:&#x27;NOME&#x27;,&#x27;codigo_municipio&#x27;:&#x27;MUNICIPIO&#x27;,&#x27;numero_cnpj&#x27;:&#x27;CNPJ&#x27;,&#x27;data_atualizacao&#x27;:&#x27;ATUALIZADO&#x27;})
+  194      gp(g,&#x27;saude_cnes_ativos&#x27;);gp(g.rename(columns={&#x27;MUNICIPIO&#x27;:&#x27;MUN_IBGE&#x27;,&#x27;ATUALIZADO&#x27;:&#x27;DT_ATUAL&#x27;}),&#x27;saude_cnes_ativos_shape&#x27;,True)
+  195      csv(pd.DataFrame(g.drop(columns=&#x27;geometry&#x27;)),&#x27;cnes_ativos_bacias.csv&#x27;)
+  196      csv(g.groupby([&#x27;bacia&#x27;,&#x27;GRUPO&#x27;]).size().rename(&#x27;quantidade&#x27;).reset_index(),&#x27;cnes_resumo_bacias.csv&#x27;)
+  197  
+  198      q=gpd.sjoin(g.loc[g.QA_MUN==1,[&#x27;CNES&#x27;,&#x27;GRUPO&#x27;,&#x27;geometry&#x27;]],c[[&#x27;setor_id&#x27;,&#x27;bas_id&#x27;,&#x27;geometry&#x27;]],predicate=&#x27;intersects&#x27;).sort_values([&#x27;CNES&#x27;,&#x27;setor_id&#x27;]).drop_duplicates(&#x27;CNES&#x27;)
+  199      n=q.groupby([&#x27;bas_id&#x27;,&#x27;setor_id&#x27;]).size()
+  200      c=c.copy();c[&#x27;saude_n&#x27;]=[n.get((r.bas_id,r.setor_id),0) for r in c.itertuples()]
+  201      hp=g[g.GRUPO.isin([&#x27;Hospital / hospital-dia&#x27;,&#x27;Urgência / pronto atendimento&#x27;])]
+  202      nh=q[q.GRUPO.isin([&#x27;Hospital / hospital-dia&#x27;,&#x27;Urgência / pronto atendimento&#x27;])].groupby([&#x27;bas_id&#x27;,&#x27;setor_id&#x27;]).size()
+  203      c[&#x27;hosp_urg_n&#x27;]=[nh.get((r.bas_id,r.setor_id),0) for r in c.itertuples()]
+  204      AUD[&#x27;cnes&#x27;]={&#x27;consultados&#x27;:len(d),&#x27;dentro_bacias&#x27;:len(g),&#x27;coordenadas_invalidas&#x27;:int((~ok).sum()),&#x27;municipio_incompativel&#x27;:int((g.QA_MUN==0).sum()),&#x27;pontos_com_coordenada_compartilhada&#x27;:int((g.COORD_DUP&gt;1).sum()),&#x27;hospitais_urgencia&#x27;:len(hp),&#x27;usados_contagem_setores&#x27;:len(q),&#x27;natureza&#x27;:&#x27;cadastro ativo atual, não série de 2016-2025; coordenadas cadastrais não validadas em campo; divergentes de município não entram nas contagens&#x27;}
+  205      log(&#x27;CNES&#x27;,AUD[&#x27;cnes&#x27;]);return g,c
+  206  
+  207  D8={1:(-1,1),2:(-1,0),3:(-1,-1),4:(0,-1),5:(1,-1),6:(1,0),7:(1,1),8:(0,1)}
+  208  
+  209  # Terrain routing
+  210  def terrain_routing(b,c):
+  211      rows=[];paths=[];mouths=[];layers={};sector_rows=[]
+  212      for br in b.itertuples():
+  213          key=br.id;folder=ROOT/&#x27;sub_bacia&#x27;/key
+  214          with rasterio.open(folder/&#x27;dem_utm_30m.tif&#x27;) as ds:dem=ds.read(1).astype(float);p=ds.profile;t=ds.transform;nod=ds.nodata
+  215          if nod is not None:dem[dem==nod]=np.nan
+  216          with rasterio.open(folder/&#x27;direcao_d8.tif&#x27;) as ds:dr=ds.read(1);assert ds.transform==t and ds.shape==dem.shape
+  217          h,w=dem.shape
+  218          mask=rasterize([(br.geometry,1)],out_shape=dem.shape,transform=t,dtype=&#x27;uint8&#x27;).astype(bool)
+  219          lakefile={&#x27;pampulha&#x27;:&#x27;pampulha&#x27;,&#x27;vargem_flores&#x27;:&#x27;vargem_flores&#x27;,&#x27;ibirite_regap&#x27;:&#x27;ibirite_regap&#x27;}[key]
+  220          lake=gpd.read_file(ROOT/&#x27;reservatorio&#x27;/f&#x27;{lakefile}.shp&#x27;).to_crs(CRS)
+  221          lm=rasterize([(x,1) for x in lake.geometry],out_shape=dem.shape,transform=t,all_touched=True,dtype=&#x27;uint8&#x27;).astype(bool)
+  222          gy,gx=np.gradient(dem,30.,30.);slope=100*np.hypot(gx,gy)
+  223          slclass=np.digitize(slope,[3,8,20,45,75])+1
+  224          raster(np.where(mask,dem,np.nan),p,f&#x27;{key}_hipsometria.tif&#x27;)
+  225          raster(np.where(mask,slope,np.nan),p,f&#x27;{key}_declividade_pct.tif&#x27;)
+  226          raster(np.where(mask,slclass,0),p,f&#x27;{key}_declividade_embrapa.tif&#x27;,nodata=0,dtype=&#x27;uint8&#x27;)
+  227  
+  228          dest=np.full(h*w,-1,np.int64);flatidx=np.arange(h*w).reshape(h,w)
+  229          for code,(dy,dx) in D8.items():
+  230              yy,xx=np.where(dr==code);ny=yy+dy;nx=xx+dx;ok=(ny&gt;=0)&amp;(ny&lt;h)&amp;(nx&gt;=0)&amp;(nx&lt;w)
+  231              dest[yy[ok]*w+xx[ok]]=ny[ok]*w+nx[ok]
+  232  
+  233          dest[lm.ravel()]=-1
+  234          status=np.zeros(h*w,np.int8);dist=np.full(h*w,np.nan);target=np.full(h*w,-1,np.int64)
+  235          status[lm.ravel()]=1;dist[lm.ravel()]=0;target[lm.ravel()]=np.flatnonzero(lm)
+  236          starts=np.flatnonzero(mask.ravel())
+  237          for start in starts:
+  238              if status[start]:continue
+  239              track=[];seen=set();j=int(start)
+  240              while j&gt;=0 and status[j]==0 and j not in seen:
+  241                  seen.add(j);track.append(j);j=int(dest[j])
+  242              if j&gt;=0 and status[j]==1:
+  243                  last=j
+  244                  for a in reversed(track):
+  245                      ay,ax=divmod(a,w);ly,lx=divmod(last,w)
+  246                      dist[a]=dist[last]+30*math.hypot(ay-ly,ax-lx);status[a]=1;target[a]=target[last];last=a
+  247              else:
+  248                  for a in track:status[a]=2
+  249          conn=status.reshape(h,w)==1
+  250          raster(np.where(mask,dist.reshape(h,w)/1000,np.nan),p,f&#x27;{key}_distancia_hidrologica_km.tif&#x27;)
+  251          raster(np.where(mask,conn.astype(int)+1,0),p,f&#x27;{key}_conexao_lago.tif&#x27;,nodata=0,dtype=&#x27;uint8&#x27;)
+  252          sub=c[c.bas_id==key].copy()
+  253          lab=rasterize([(geom,i+1) for i,geom in enumerate(sub.geometry)],out_shape=(h,w),transform=t,dtype=&#x27;int32&#x27;)
+  254  
+  255          deficit=sub.dens_pop.to_numpy(float)*(1-sub.pct_rede.to_numpy(float)/100)
+  256          fullpop=sub.dens_pop.to_numpy(float)
+  257          dep=np.r_[0,deficit][lab]*.0009
+  258          total=np.r_[0,fullpop][lab]*.0009
+  259          source_known=np.isfinite(dep)&amp;(lab&gt;0)&amp;mask
+  260          dep=np.where(source_known,dep,0);total=np.where(mask&amp;(lab&gt;0)&amp;np.isfinite(total),total,0)
+  261          raster(np.where(source_known,dep/.0009,np.nan),p,f&#x27;{key}_densidade_proxy_sem_rede.tif&#x27;)
+  262          mouth=target.reshape(h,w)
+  263          hit=mask&amp;conn&amp;source_known&amp;~lm
+  264          sums=np.bincount(mouth[hit],weights=dep[hit],minlength=h*w)
+  265          land_connected=mask&amp;conn&amp;~lm
+  266          sums_total=np.bincount(mouth[land_connected],weights=total[land_connected],minlength=h*w)
+  267          for j in np.flatnonzero(sums_total&gt;0):
+  268              yy,xx=divmod(int(j),w);x,y=rasterio.transform.xy(t,yy,xx)
+  269              from shapely.geometry import Point
+  270              mouths.append({&#x27;bacia&#x27;:key,&#x27;proxy_nr&#x27;:sums[j],&#x27;pop_a_est&#x27;:sums_total[j],&#x27;geometry&#x27;:Point(x,y)})
+  271  
+  272          chosen=np.flatnonzero((mask&amp;conn&amp;~lm).ravel())
+  273          chosen=chosen[::max(1,len(chosen)//160)]
+  274          for start in chosen:
+  275              track=[];j=int(start)
+  276              while j&gt;=0 and not lm.ravel()[j] and len(track)&lt;10000:
+  277                  yy,xx=divmod(j,w);track.append(rasterio.transform.xy(t,yy,xx));j=int(dest[j])
+  278              if j&gt;=0:
+  279                  yy,xx=divmod(j,w);track.append(rasterio.transform.xy(t,yy,xx))
+  280              if len(track)&gt;1:paths.append({&#x27;bacia&#x27;:key,&#x27;dist_km&#x27;:dist[start]/1000,&#x27;geometry&#x27;:LineString(track)})
+  281          nlabels=len(sub)+1;cnt=np.bincount(lab[mask],minlength=nlabels)[1:]
+  282          con=np.bincount(lab[mask&amp;conn],minlength=nlabels)[1:]
+  283          for i,r in enumerate(sub.itertuples()):
+  284              z=mask&amp;(lab==i+1);vals=dist.reshape(h,w)[z];sl=slope[z]
+  285              sector_rows.append({&#x27;bas_id&#x27;:key,&#x27;setor_id&#x27;:r.setor_id,&#x27;d8_cob_pct&#x27;:100*con[i]/cnt[i] if cnt[i] else np.nan,&#x27;dist_hid_km&#x27;:np.nanmedian(vals)/1000 if np.isfinite(vals).any() else np.nan,&#x27;decliv_med&#x27;:np.nanmedian(sl) if len(sl) else np.nan})
+  286          rows.append({&#x27;bacia&#x27;:key,&#x27;pixels_bacia&#x27;:int(mask.sum()),&#x27;conectados_lago_pct&#x27;:100*(mask&amp;conn).sum()/mask.sum(),&#x27;pixels_sem_d8_lago&#x27;:int((mask&amp;~conn).sum()),&#x27;pixels_esgoto_conhecido_pct&#x27;:100*source_known.sum()/mask.sum(),&#x27;alt_min_m&#x27;:float(np.nanmin(dem[mask])),&#x27;alt_max_m&#x27;:float(np.nanmax(dem[mask])),&#x27;decliv_med_pct&#x27;:float(np.nanmedian(slope[mask])),&#x27;dist_med_km&#x27;:float(np.nanmedian(dist.reshape(h,w)[mask])/1000)})
+  287          layers[key]={&#x27;dem&#x27;:np.where(mask,dem,np.nan),&#x27;slope_class&#x27;:np.where(mask,slclass,np.nan),&#x27;conn&#x27;:np.where(mask,conn.astype(float),np.nan),&#x27;dist&#x27;:np.where(mask,dist.reshape(h,w)/1000,np.nan),&#x27;t&#x27;:t,&#x27;mask&#x27;:mask}
+  288          log(&#x27;RELEVO/D8&#x27;,rows[-1])
+  289      csv(pd.DataFrame(rows),&#x27;auditoria_relevo_d8.csv&#x27;);AUD[&#x27;d8&#x27;]=rows
+  290      routes=gpd.GeoDataFrame(paths,crs=CRS);gp(routes,&#x27;rotas_d8_candidatas&#x27;,True)
+  291      mouths=gpd.GeoDataFrame(mouths,crs=CRS);gp(mouths,&#x27;entradas_lago_proxy&#x27;,True)
+  292      c=c.merge(pd.DataFrame(sector_rows),on=[&#x27;bas_id&#x27;,&#x27;setor_id&#x27;],how=&#x27;left&#x27;,validate=&#x27;one_to_one&#x27;)
+  293      return c,layers,routes,mouths
+  294  
+  295  # Ari
+  296  def ari(a,b):
+  297      _,a=np.unique(a,return_inverse=True);_,b=np.unique(b,return_inverse=True);n=len(a)
+  298      tab=np.bincount(a*(b.max()+1)+b,minlength=(a.max()+1)*(b.max()+1)).reshape(a.max()+1,b.max()+1)
+  299      comb=lambda x:(x*(x-1)/2).sum()
+  300      x=comb(tab);r=comb(tab.sum(0));s=comb(tab.sum(1));e=r*s/(n*(n-1)/2);den=(r+s)/2-e
+  301      return (x-e)/den if den else 1.
+  302  
+  303  # Fitkm
+  304  def fitkm(x,k,seed,starts=12):
+  305      best=None
+  306      for r in range(starts):
+  307          with warnings.catch_warnings():
+  308              warnings.simplefilter(&#x27;ignore&#x27;);cent,l=kmeans2(x,k,iter=100,minit=&#x27;++&#x27;,rng=np.random.default_rng(seed+r))
+  309          if len(np.unique(l))!=k:continue
+  310          loss=np.sum((x-cent[l])**2)
+  311          if best is None or loss&lt;best[0]:best=(loss,cent,l)
+  312      if best is None:raise RuntimeError(&#x27;K-means sem todos os grupos&#x27;)
+  313      return best
+  314  
+  315  # Silhouette
+  316  def silhouette(x,l):
+  317      d=distance.cdist(x,x);s=[]
+  318      for i,cl in enumerate(l):
+  319          same=l==cl;n=same.sum()
+  320          if n&lt;=1:s.append(0);continue
+  321          a=d[i,same].sum()/(n-1);b=min(d[i,l==k].mean() for k in np.unique(l) if k!=cl)
+  322          s.append((b-a)/max(a,b) if max(a,b) else 0)
+  323      return float(np.mean(s))
+  324  
+  325  # Weights
+  326  def weights(xy,k):
+  327      n=len(xy);idx=cKDTree(xy).query(xy,k=min(k+1,n))[1][:,1:]
+  328      r=np.repeat(np.arange(n),idx.shape[1]);co=idx.ravel()
+  329      w=csr_matrix((np.ones(len(r)),(r,co)),shape=(n,n));w=w.maximum(w.T);w.setdiag(0);w.eliminate_zeros()
+  330      return w.multiply(1/np.asarray(w.sum(1))).tocsr()
+  331  
+  332  # Bh
+  333  def bh(p):
+  334      p=np.asarray(p);order=np.argsort(p);q=np.minimum.accumulate((p[order]*len(p)/np.arange(1,len(p)+1))[::-1])[::-1];o=np.empty(len(p));o[order]=np.minimum(q,1);return o
+  335  
+  336  # Moran
+  337  def moran(x,xy,k=8,seed=SEED,local=False,y=None):
+  338      n=len(x);z=(x-x.mean())/x.std(ddof=0);w=weights(xy,k)
+  339      zy=z if y is None else (y-y.mean())/y.std(ddof=0)
+  340      lag=w@zy;obs=float(z@lag/(z@z));rng=np.random.default_rng(seed)
+  341      if y is None:
+  342  
+  343          sims=[]
+  344          for _ in range(PERM):
+  345              zp=rng.permutation(z);sims.append(zp@(w@zp)/(zp@zp))
+  346          sim=np.asarray(sims)
+  347      else:
+  348          sim=np.array([z@(w@rng.permutation(zy))/(z@z) for _ in range(PERM)])
+  349      expected=-1/(n-1) if y is None else 0.
+  350      pv=(1+np.sum(np.abs(sim-expected)&gt;=abs(obs-expected)))/(PERM+1)
+  351      rec={&#x27;n&#x27;:n,&#x27;vizinhos_knn&#x27;:k,&#x27;I&#x27;:obs,&#x27;p_mc_bilateral&#x27;:pv,&#x27;esperado&#x27;:expected,&#x27;permutacoes&#x27;:PERM}
+  352      if not local:return rec,None
+  353      Ii=z*lag;pvlocal=np.empty(n)
+  354  
+  355      for i in range(n):
+  356          st,en=w.indptr[i:i+2];nn=w.indices[st:en];ww=w.data[st:en];m=len(nn)
+  357          draws=rng.integers(0,n-1,size=(PERM,m))
+  358          for col in range(1,m):
+  359              bad=(draws[:,col,None]==draws[:,:col]).any(1)
+  360              while bad.any():
+  361                  draws[bad,col]=rng.integers(0,n-1,size=bad.sum());bad=(draws[:,col,None]==draws[:,:col]).any(1)
+  362          draws+=draws&gt;=i
+  363          s=z[i]*(zy[draws]@ww);ex=-z[i]**2/(n-1) if y is None else -z[i]*zy[i]/(n-1)
+  364          pvlocal[i]=(1+(np.abs(s-ex)&gt;=abs(Ii[i]-ex)).sum())/(PERM+1)
+  365      q=bh(pvlocal)
+  366      label=np.where((z&gt;=0)&amp;(lag&gt;=0),&#x27;HH&#x27;,np.where((z&lt;0)&amp;(lag&lt;0),&#x27;LL&#x27;,np.where(z&gt;=0,&#x27;HL&#x27;,&#x27;LH&#x27;)))
+  367      label=np.where(q&lt;=.05,label,&#x27;NS&#x27;)
+  368      return rec,{&#x27;Ii&#x27;:Ii,&#x27;p_local&#x27;:pvlocal,&#x27;q_fdr&#x27;:q,&#x27;lisa&#x27;:label,&#x27;lag&#x27;:lag}
+  369  
+  370  # Analysis
+  371  def analysis(c):
+  372      a=c.copy();a[&#x27;def_rede&#x27;]=100-a.pct_rede
+  373      a[&#x27;pressao&#x27;]=np.nan;a[&#x27;quintil&#x27;]=0;a[&#x27;cluster&#x27;]=0;a[&#x27;lisa&#x27;]=&#x27;ND&#x27;;a[&#x27;q_fdr&#x27;]=np.nan
+  374      results=[];kms=[];profiles=[];biv=[];corr=[]
+  375  
+  376      valid=a.dens_pop.notna()&amp;a.def_rede.notna()&amp;(a.dom_set&gt;0)
+  377      fit=valid &amp; ~a.setor_id.duplicated()
+  378      fitids=a.loc[fit,&#x27;setor_id&#x27;]
+  379      rankp=rank01(np.log1p(a.loc[fit,&#x27;dens_pop&#x27;]));ranks=rank01(a.loc[fit,&#x27;def_rede&#x27;])
+  380      scores=(rankp+ranks)/2
+  381      scoremap=dict(zip(fitids,scores));qmap=dict(zip(fitids,quint(scores)))
+  382      a.loc[valid,&#x27;pressao&#x27;]=a.loc[valid,&#x27;setor_id&#x27;].map(scoremap)
+  383      a.loc[valid,&#x27;quintil&#x27;]=a.loc[valid,&#x27;setor_id&#x27;].map(qmap)
+  384      a[&#x27;proxy_nr&#x27;]=a.dens_pop*(1-a.pct_rede/100)
+  385      features=[&#x27;dens_pop&#x27;,&#x27;def_rede&#x27;]
+  386      x=np.column_stack([np.log1p(a.loc[fit,&#x27;dens_pop&#x27;]),a.loc[fit,&#x27;def_rede&#x27;]]);means=x.mean(0);std=x.std(0);x=(x-means)/std
+  387      for k in range(2,7):
+  388          loss,ce,lab=fitkm(x,k,SEED);sc=silhouette(x,lab)
+  389          stability=[ari(lab,fitkm(x,k,SEED+100+10*s,starts=3)[2]) for s in range(8)]
+  390          kms.append({&#x27;k&#x27;:k,&#x27;silhouette&#x27;:sc,&#x27;soma_quadrados&#x27;:loss,&#x27;ARI_med&#x27;:np.median(stability),&#x27;ARI_min&#x27;:min(stability)})
+  391      best=max(kms,key=lambda r:r[&#x27;silhouette&#x27;]);loss,cent,lab=fitkm(x,best[&#x27;k&#x27;],SEED)
+  392  
+  393      vals=a.loc[fit,&#x27;pressao&#x27;].to_numpy();order=sorted(np.unique(lab),key=lambda z:vals[lab==z].mean());mapping={l:i+1 for i,l in enumerate(order)}
+  394      cmap=dict(zip(fitids,[mapping[l] for l in lab]));a.loc[valid,&#x27;cluster&#x27;]=a.loc[valid,&#x27;setor_id&#x27;].map(cmap)
+  395      for cl,g in a.loc[fit].groupby(&#x27;cluster&#x27;):
+  396          profiles.append({&#x27;cluster&#x27;:cl,&#x27;setores_unicos&#x27;:len(g),&#x27;dens_pop_med&#x27;:g.dens_pop.median(),&#x27;def_rede_med_pct&#x27;:g.def_rede.median(),&#x27;pressao_med&#x27;:g.pressao.median()})
+  397      for br,g in a[valid].groupby(&#x27;bas_id&#x27;):
+  398          xy=np.c_[g.geometry.representative_point().x,g.geometry.representative_point().y]
+  399          v=g.pressao.to_numpy(float)
+  400          for k in [4,8,12]:
+  401              r,loc=moran(v,xy,k,local=(k==8));results.append({&#x27;bacia&#x27;:br,&#x27;variavel&#x27;:&#x27;indice_exploratorio&#x27;,**r})
+  402              if loc is not None:
+  403                  a.loc[g.index,&#x27;lisa&#x27;]=loc[&#x27;lisa&#x27;];a.loc[g.index,&#x27;q_fdr&#x27;]=loc[&#x27;q_fdr&#x27;]
+  404          r,loc=moran(np.log1p(g.dens_pop.to_numpy()),xy,8,y=g.def_rede.to_numpy(),local=True);biv.append({&#x27;bacia&#x27;:br,&#x27;X&#x27;:&#x27;log1p_densidade_populacional&#x27;,&#x27;W_Y&#x27;:&#x27;deficit_rede_vizinhos&#x27;,**r})
+  405          a.loc[g.index,&#x27;lisa_biv&#x27;]=loc[&#x27;lisa&#x27;];a.loc[g.index,&#x27;qbiv_fdr&#x27;]=loc[&#x27;q_fdr&#x27;]
+  406          for vv,xx in [(&#x27;log1p_dens_pop&#x27;,np.log1p(g.dens_pop.to_numpy())),(&#x27;sem_rede_pct&#x27;,g.def_rede.to_numpy())]:
+  407              r,_=moran(xx,xy,8);results.append({&#x27;bacia&#x27;:br,&#x27;variavel&#x27;:vv,**r})
+  408          cols=[&#x27;dens_pop&#x27;,&#x27;def_rede&#x27;,&#x27;pct_urb&#x27;,&#x27;saude_n&#x27;,&#x27;decliv_med&#x27;,&#x27;dist_hid_km&#x27;]
+  409          for i,ca in enumerate(cols):
+  410              for cb in cols[i+1:]:
+  411                  pair=g[[ca,cb]].dropna();rho=float(spearmanr(pair[ca],pair[cb]).statistic) if len(pair)&gt;3 and pair.nunique().min()&gt;1 else np.nan
+  412                  corr.append({&#x27;bacia&#x27;:br,&#x27;X&#x27;:ca,&#x27;Y&#x27;:cb,&#x27;n&#x27;:len(pair),&#x27;rho_spearman&#x27;:rho})
+  413  
+  414      p=rankp;s=ranks;base=a.loc[fit,&#x27;quintil&#x27;].to_numpy()
+  415      stability=[]
+  416      for wp in [.25,.4,.5,.6,.75]:
+  417          idx=wp*p+(1-wp)*s;q=quint(idx)
+  418          stability.append({&#x27;peso_pop&#x27;:wp,&#x27;peso_deficit&#x27;:1-wp,&#x27;rho_base&#x27;:spearmanr(idx,a.loc[fit,&#x27;pressao&#x27;]).statistic,&#x27;mesmo_quintil_pct&#x27;:100*np.mean(q==base),&#x27;mantem_P80_pct&#x27;:100*np.mean((q==5)[base==5])})
+  419      a[&#x27;prioridade&#x27;]=&#x27;Informação incompleta&#x27;
+  420      a.loc[valid,&#x27;prioridade&#x27;]=&#x27;Contexto complementar&#x27;
+  421      a.loc[valid&amp;(a.quintil&gt;=4),&#x27;prioridade&#x27;]=&#x27;Pressão relativa elevada&#x27;
+  422      a.loc[valid&amp;(a.quintil&gt;=4)&amp;(a.d8_cob_pct&gt;=90),&#x27;prioridade&#x27;]=&#x27;Investigar conexão superficial&#x27;
+  423  
+  424      a[&#x27;lisa_biv&#x27;]=a.lisa_biv.fillna(&#x27;ND&#x27;)
+  425      gp(a,&#x27;analise_setores&#x27;);gp(a[[&#x27;setor_id&#x27;,&#x27;bas_id&#x27;,&#x27;pressao&#x27;,&#x27;quintil&#x27;,&#x27;cluster&#x27;,&#x27;lisa&#x27;,&#x27;q_fdr&#x27;,&#x27;d8_cob_pct&#x27;,&#x27;dist_hid_km&#x27;,&#x27;geometry&#x27;]].rename(columns={&#x27;setor_id&#x27;:&#x27;CD_SETOR&#x27;,&#x27;bas_id&#x27;:&#x27;BACIA&#x27;,&#x27;pressao&#x27;:&#x27;IND_EXP&#x27;,&#x27;quintil&#x27;:&#x27;QUINTIL&#x27;,&#x27;cluster&#x27;:&#x27;KMEANS&#x27;,&#x27;lisa&#x27;:&#x27;MORAN&#x27;,&#x27;q_fdr&#x27;:&#x27;Q_FDR&#x27;,&#x27;d8_cob_pct&#x27;:&#x27;D8_COB_PCT&#x27;,&#x27;dist_hid_km&#x27;:&#x27;DIST_D8_KM&#x27;}),&#x27;agrupamentos_setores&#x27;,True)
+  426      csv(pd.DataFrame(a.drop(columns=&#x27;geometry&#x27;)),&#x27;analise_setores.csv&#x27;);csv(pd.DataFrame(results),&#x27;moran_global_sensibilidade.csv&#x27;);csv(pd.DataFrame(biv),&#x27;moran_bivariado.csv&#x27;);csv(pd.DataFrame(kms),&#x27;selecao_kmeans.csv&#x27;);csv(pd.DataFrame(profiles),&#x27;perfis_kmeans.csv&#x27;);csv(pd.DataFrame(corr),&#x27;correlacoes_spearman.csv&#x27;);csv(pd.DataFrame(stability),&#x27;sensibilidade_pesos.csv&#x27;)
+  427      AUD[&#x27;analise&#x27;]={&#x27;unidades&#x27;:len(a),&#x27;com_indice&#x27;:int(valid.sum()),&#x27;setores_unicos_com_indice&#x27;:int(fit.sum()),&#x27;sem_indice&#x27;:int((~valid).sum()),&#x27;variaveis_indice&#x27;:features,&#x27;ajuste_kmeans_percentis&#x27;:&#x27;Cada setor único entra uma vez no ajuste; rótulos e percentis são transferidos a seus recortes. Moran é calculado nas unidades de cada bacia.&#x27;,&#x27;peso&#x27;:&#x27;.5 para percentil de log1p densidade e .5 para percentil déficit de rede&#x27;,&#x27;kmeans_escolhido&#x27;:best,&#x27;FDR&#x27;:&#x27;Benjamini-Hochberg dentro de cada bacia; q&lt;=.05; 999 randomizações condicionais; referência kNN8 simetrizado&#x27;,&#x27;saude_uso_solo&#x27;:&#x27;contexto e correlações; não incluídos como pesos no cenário base&#x27;,&#x27;inferencias&#x27;:&#x27;associações exploratórias; não estima carga, concentração, risco ou probabilidade de ARG&#x27;}
+  428      log(&#x27;ANALISE&#x27;,AUD[&#x27;analise&#x27;]);return a
+  429  
+  430  # Maps
+  431  def maps(a,b,health,layers,routes,mouths):
+  432      water=gpd.GeoDataFrame(pd.concat([gpd.read_file(ROOT/&#x27;reservatorio&#x27;/f&#x27;{k}.shp&#x27;).to_crs(CRS) for k in [&#x27;pampulha&#x27;,&#x27;vargem_flores&#x27;,&#x27;ibirite_regap&#x27;]],ignore_index=True),crs=CRS)
+  433      hydro=gpd.read_file(ROOT/&#x27;hidrografia/hidrografia.shp&#x27;).to_crs(CRS);hydro=gpd.clip(hydro,b)
+  434      roads=gpd.read_file(ROOT/&#x27;vias/malha_viaria.shp&#x27;).to_crs(CRS);roads=gpd.clip(roads,b)
+  435      gp(hydro,&#x27;hidrografia_bacias&#x27;);gp(roads,&#x27;vias_bacias&#x27;)
+  436      names={&#x27;pampulha&#x27;:&#x27;Pampulha&#x27;,&#x27;vargem_flores&#x27;:&#x27;Vargem das Flores&#x27;,&#x27;ibirite_regap&#x27;:&#x27;Ibirité / REGAP&#x27;}
+  437      trans=Transformer.from_crs(CRS,4326,always_xy=True)
+  438  
+  439      span=max(max(r.geometry.bounds[2]-r.geometry.bounds[0],r.geometry.bounds[3]-r.geometry.bounds[1]) for r in b.itertuples())*1.12
+  440      scale=math.ceil(span/.081/25000)*25000;span=scale*.081
+  441      AUD[&#x27;cartografia&#x27;]={&#x27;escala_impressao&#x27;:scale,&#x27;largura_eixo_cm&#x27;:8.1,&#x27;lado_quadro_m&#x27;:span,&#x27;figura_cm&#x27;:[30,14]}
+  442      gallery=[]
+  443      def start(title):
+  444          fig=plt.figure(figsize=(30/2.54,14/2.54));axs=[]
+  445          fig.suptitle(title,x=.5,y=.975,fontsize=13,color=&#x27;#163d4d&#x27;,fontweight=&#x27;bold&#x27;)
+  446          for j,r in enumerate(b.itertuples()):
+  447              ax=fig.add_axes([.055+j*.321,.235,.27,8.1/14]);axs.append(ax)
+  448              cx,cy=r.geometry.centroid.coords[0];ax.set_xlim(cx-span/2,cx+span/2);ax.set_ylim(cy-span/2,cy+span/2);ax.set_aspect(&#x27;equal&#x27;)
+  449              sub=a[a.bas_id==r.id];sub.plot(ax=ax,facecolor=&#x27;#f2f2ef&#x27;,edgecolor=&#x27;#a6afad&#x27;,linewidth=.12,zorder=1)
+  450              hydro.plot(ax=ax,color=&#x27;#88b9cc&#x27;,linewidth=.35,zorder=3)
+  451              ax.set_title(names[r.id],fontsize=10,pad=6)
+  452              ax.xaxis.set_major_locator(MaxNLocator(3));ax.yaxis.set_major_locator(MaxNLocator(3));ax.tick_params(labelsize=8,pad=2)
+  453              ax.xaxis.set_major_formatter(FuncFormatter(lambda x,pos,cy=cy:f&#x27;{abs(trans.transform(x,cy)[0]):.2f}°O&#x27;.replace(&#x27;.&#x27;,&#x27;,&#x27;)))
+  454              ax.yaxis.set_major_formatter(FuncFormatter(lambda y,pos,cx=cx:f&#x27;{abs(trans.transform(cx,y)[1]):.2f}°S&#x27;.replace(&#x27;.&#x27;,&#x27;,&#x27;)))
+  455              for tick in ax.get_yticklabels():tick.set_rotation(90);tick.set_va(&#x27;center&#x27;)
+  456              ax.annotate(&#x27;&#x27;,xy=(.944,.944),xytext=(.944,.875),xycoords=&#x27;axes fraction&#x27;,arrowprops={&#x27;arrowstyle&#x27;:&#x27;-|&gt;&#x27;,&#x27;color&#x27;:&#x27;#173e4b&#x27;,&#x27;lw&#x27;:1.1})
+  457              ax.text(.944,.958,&#x27;N&#x27;,transform=ax.transAxes,ha=&#x27;center&#x27;,va=&#x27;bottom&#x27;,fontsize=9,fontweight=&#x27;bold&#x27;)
+  458  
+  459              length=5000 if span&gt;16000 else 2000;x=cx-span*.43;y=cy-span*.43
+  460              ax.plot([x,x+length/2],[y,y],lw=3,color=&#x27;#183b45&#x27;,solid_capstyle=&#x27;butt&#x27;,zorder=10);ax.plot([x+length/2,x+length],[y,y],lw=3,color=&#x27;white&#x27;,solid_capstyle=&#x27;butt&#x27;,zorder=10)
+  461              ax.plot([x,x+length],[y,y],lw=.5,color=&#x27;#183b45&#x27;,zorder=11)
+  462              for xx,lab in [(x,&#x27;0&#x27;),(x+length,f&#x27;{length/1000:g} km&#x27;)]:ax.text(xx,y+span*.016,lab,fontsize=7,ha=&#x27;center&#x27;,zorder=12,bbox=dict(facecolor=&#x27;white&#x27;,edgecolor=&#x27;none&#x27;,pad=.2,alpha=.8))
+  463              ax.text(.975,.027,f&#x27;SIRGAS 2000 / UTM 23S\nEscala 1:{scale:,.0f}&#x27;.replace(&#x27;,&#x27;,&#x27;.&#x27;),transform=ax.transAxes,ha=&#x27;right&#x27;,va=&#x27;bottom&#x27;,fontsize=6.6,bbox=dict(boxstyle=&#x27;round,pad=.3&#x27;,facecolor=&#x27;white&#x27;,edgecolor=&#x27;#b3b9b9&#x27;,lw=.4,alpha=.92),zorder=15)
+  464              ax.set_xlabel(&#x27;&#x27;);ax.set_ylabel(&#x27;&#x27;)
+  465          return fig,axs
+  466      def finish(fig,axs,slug,legend=None,colorbar=None):
+  467          for ax,r in zip(axs,b.itertuples()):
+  468              water[water.intersects(r.geometry)].plot(ax=ax,facecolor=&#x27;#a9d6e5&#x27;,edgecolor=&#x27;#326b83&#x27;,linewidth=.55,zorder=7)
+  469              b[b.id==r.id].boundary.plot(ax=ax,color=&#x27;#244853&#x27;,linewidth=.85,zorder=8)
+  470          if legend:fig.legend(handles=legend,loc=&#x27;lower center&#x27;,bbox_to_anchor=(.52,.065),ncol=3 if len(legend) in [5,6] else min(len(legend),4),frameon=False,fontsize=8.5,columnspacing=1.4,handletextpad=.45)
+  471          if colorbar:
+  472              sm,label=colorbar;cax=fig.add_axes([.27,.09,.5,.027]);cb=fig.colorbar(sm,cax=cax,orientation=&#x27;horizontal&#x27;);cb.set_label(label,fontsize=9,labelpad=3);cb.ax.tick_params(labelsize=8)
+  473          for fmt,dpi in [(&#x27;png&#x27;,350),(&#x27;svg&#x27;,None)]:fig.savefig(OUT/&#x27;figuras&#x27;/f&#x27;{slug}.{fmt}&#x27;,dpi=dpi,facecolor=&#x27;white&#x27;)
+  474          plt.close(fig);gallery.append({&#x27;slug&#x27;:slug,&#x27;titulo&#x27;:slug.replace(&#x27;_&#x27;,&#x27; &#x27;)})
+  475      for col,title,label,cmap,slug in [
+  476          (&#x27;dens_pop&#x27;,&#x27;População por setor censitário&#x27;,&#x27;Habitantes por km² (setor inteiro)&#x27;,&#x27;YlOrRd&#x27;,&#x27;01_populacao_densidade&#x27;),
+  477          (&#x27;pct_rede&#x27;,&#x27;Domicílios com rede geral/pluvial ou fossa ligada à rede&#x27;,&#x27;Domicílios do setor (%)&#x27;,&#x27;YlGnBu&#x27;,&#x27;02_esgotamento_rede&#x27;),
+  478          (&#x27;def_rede&#x27;,&#x27;Domicílios sem rede declarada&#x27;,&#x27;Domicílios do setor (%)&#x27;,&#x27;YlOrRd&#x27;,&#x27;03_deficit_rede&#x27;),
+  479          (&#x27;proxy_nr&#x27;,&#x27;Proxy demográfico associado à ausência de rede&#x27;,&#x27;Habitantes-equivalentes por km² · alocação uniforme&#x27;,&#x27;YlOrRd&#x27;,&#x27;15_proxy_demografico_sem_rede&#x27;),
+  480          (&#x27;pct_urb&#x27;,&#x27;Uso e ocupação do solo - área urbanizada&#x27;,&#x27;Área urbanizada nos pixels válidos (%)&#x27;,&#x27;YlOrBr&#x27;,&#x27;04_area_urbanizada&#x27;)]:
+  481          fig,axs=start(title);vals=a[col].to_numpy();maxv=np.nanpercentile(vals,98) if col==&#x27;dens_pop&#x27; else 100
+  482          if col==&#x27;proxy_nr&#x27;:maxv=max(1,np.nanpercentile(vals,98))
+  483          norm=matplotlib.colors.Normalize(0,maxv);cm=plt.get_cmap(cmap)
+  484          for ax,r in zip(axs,b.itertuples()):a[a.bas_id==r.id].plot(ax=ax,column=col,cmap=cm,norm=norm,linewidth=.13,edgecolor=&#x27;#697d7d&#x27;,missing_kwds={&#x27;color&#x27;:&#x27;#d4d4d4&#x27;,&#x27;hatch&#x27;:&#x27;///&#x27;},zorder=2)
+  485          sm=plt.cm.ScalarMappable(norm=norm,cmap=cm);finish(fig,axs,slug,colorbar=(sm,label+(&#x27; · cor limitada ao P98&#x27; if col==&#x27;dens_pop&#x27; else &#x27;&#x27;)))
+  486      fig,axs=start(&#x27;Estabelecimentos de saúde - cadastro ativo CNES&#x27;)
+  487      categories=[(&#x27;Atenção básica&#x27;,&#x27;#007b9e&#x27;,&#x27;o&#x27;),(&#x27;Hospital / hospital-dia&#x27;,&#x27;#b11f38&#x27;,&#x27;s&#x27;),(&#x27;Urgência / pronto atendimento&#x27;,&#x27;#e17823&#x27;,&#x27;^&#x27;),(&#x27;Outros serviços assistenciais&#x27;,&#x27;#6d589d&#x27;,&#x27;o&#x27;),(&#x27;Farmácia (cadastro CNES)&#x27;,&#x27;#278b70&#x27;,&#x27;D&#x27;),(&#x27;Administrativo / móvel / outros&#x27;,&#x27;#777777&#x27;,&#x27;x&#x27;)]
+  488      for ax,r in zip(axs,b.itertuples()):
+  489          for cat,color,marker in categories:
+  490              g=health[(health.bacia==r.id)&amp;(health.GRUPO==cat)&amp;(health.QA_MUN==1)]
+  491              if len(g):g.plot(ax=ax,color=color,marker=marker,markersize=22 if &#x27;Hospital&#x27; in cat else 11,alpha=.8,zorder=6)
+  492          suspect=health[(health.bacia==r.id)&amp;(health.QA_MUN==0)]
+  493          if len(suspect):suspect.plot(ax=ax,color=&#x27;#252525&#x27;,marker=&#x27;+&#x27;,markersize=16,zorder=7)
+  494      finish(fig,axs,&#x27;05_estabelecimentos_saude&#x27;,legend=[Line2D([],[],marker=m,color=&#x27;none&#x27;,markerfacecolor=co,markeredgecolor=co,label=ca,markersize=5) for ca,co,m in categories]+[Line2D([],[],marker=&#x27;+&#x27;,color=&#x27;none&#x27;,markeredgecolor=&#x27;#252525&#x27;,label=&#x27;Coordenada a revisar&#x27;,markersize=6)])
+  495      for typ,title,cmap,label,slug in [(&#x27;dem&#x27;,&#x27;Hipsometria&#x27;,&#x27;terrain&#x27;,&#x27;Elevação (m)&#x27;,&#x27;06_hipsometria&#x27;),(&#x27;slope_class&#x27;,&#x27;Declividade - classes de relevo Embrapa&#x27;,None,None,&#x27;07_declividade_embrapa&#x27;),(&#x27;dist&#x27;,&#x27;Conectividade topográfica com o reservatório&#x27;,&#x27;YlGnBu&#x27;,&#x27;Distância D8 até a margem (km)&#x27;,&#x27;08_distancia_hidrologica&#x27;)]:
+  496          fig,axs=start(title)
+  497          vals=np.concatenate([l[typ][np.isfinite(l[typ])] for l in layers.values()]);norm=matplotlib.colors.Normalize(np.quantile(vals,.01),np.quantile(vals,.99))
+  498          cm=plt.get_cmap(cmap) if cmap else ListedColormap([&#x27;#e8f0c6&#x27;,&#x27;#b8d381&#x27;,&#x27;#77b36a&#x27;,&#x27;#ffca70&#x27;,&#x27;#e78650&#x27;,&#x27;#b84b43&#x27;])
+  499          if typ==&#x27;slope_class&#x27;:norm=BoundaryNorm(np.arange(.5,7.5),6)
+  500          for ax,r in zip(axs,b.itertuples()):
+  501              l=layers[r.id];t=l[&#x27;t&#x27;];h,w=l[typ].shape
+  502              ax.imshow(l[typ],extent=(t.c,t.c+w*t.a,t.f+h*t.e,t.f),cmap=cm,norm=norm,interpolation=&#x27;nearest&#x27;,zorder=2)
+  503          if typ==&#x27;slope_class&#x27;:finish(fig,axs,slug,legend=[Patch(color=cm(i),label=s) for i,s in enumerate([&#x27;Plano &lt;3%&#x27;,&#x27;Suave ondulado 3-8%&#x27;,&#x27;Ondulado 8-20%&#x27;,&#x27;Forte ondulado 20-45%&#x27;,&#x27;Montanhoso 45-75%&#x27;,&#x27;Escarpado ≥75%&#x27;])])
+  504          else:finish(fig,axs,slug,colorbar=(plt.cm.ScalarMappable(norm=norm,cmap=cm),label))
+  505      for col,title,pal,labels,slug in [
+  506          (&#x27;quintil&#x27;,&#x27;Pressão antrópica relativa - cenário de pesos iguais&#x27;,[&#x27;#cadfe8&#x27;,&#x27;#8fc5b1&#x27;,&#x27;#e6d276&#x27;,&#x27;#e8a96e&#x27;,&#x27;#b94445&#x27;],[&#x27;≤P20&#x27;,&#x27;P20-P40&#x27;,&#x27;P40-P60&#x27;,&#x27;P60-P80&#x27;,&#x27;&gt;P80&#x27;],&#x27;09_pressao_quintis&#x27;),
+  507          (&#x27;cluster&#x27;,&#x27;Tipologias multivariadas - k-means&#x27;,[&#x27;#7198b1&#x27;,&#x27;#b9cda2&#x27;,&#x27;#deaf6f&#x27;,&#x27;#b36d85&#x27;,&#x27;#7b6c9d&#x27;,&#x27;#3a8979&#x27;],None,&#x27;10_kmeans&#x27;),
+  508          (&#x27;lisa&#x27;,&#x27;Associação espacial da pressão relativa - Moran local&#x27;,[&#x27;#b93348&#x27;,&#x27;#539cae&#x27;,&#x27;#efaf7f&#x27;,&#x27;#9b7cab&#x27;,&#x27;#dfe3df&#x27;],[&#x27;HH&#x27;,&#x27;LL&#x27;,&#x27;HL&#x27;,&#x27;LH&#x27;,&#x27;NS&#x27;],&#x27;11_moran_local&#x27;),
+  509          (&#x27;lisa_biv&#x27;,&#x27;Moran bivariado - população e ausência de rede nos vizinhos&#x27;,[&#x27;#b93348&#x27;,&#x27;#539cae&#x27;,&#x27;#efaf7f&#x27;,&#x27;#9b7cab&#x27;,&#x27;#dfe3df&#x27;],[&#x27;HH&#x27;,&#x27;LL&#x27;,&#x27;HL&#x27;,&#x27;LH&#x27;,&#x27;NS&#x27;],&#x27;16_moran_bivariado&#x27;)]:
+  510          fig,axs=start(title);legend=[]
+  511          if col.startswith(&#x27;lisa&#x27;):lookup=dict(zip(labels,pal));lookup[&#x27;ND&#x27;]=&#x27;#bfc4c5&#x27;;legend=[Patch(color=co,label={&#x27;HH&#x27;:&#x27;HH · alto-alto&#x27;,&#x27;LL&#x27;:&#x27;LL · baixo-baixo&#x27;,&#x27;HL&#x27;:&#x27;HL · alto-baixo&#x27;,&#x27;LH&#x27;:&#x27;LH · baixo-alto&#x27;,&#x27;NS&#x27;:&#x27;Sem associação significativa&#x27;,&#x27;ND&#x27;:&#x27;Informação incompleta&#x27;}[v]) for v,co in lookup.items()]
+  512          else:
+  513              cats=sorted(a.loc[a[col]&gt;0,col].unique());lookup={v:pal[int(v)-1] for v in cats};lookup[0]=&#x27;#bfc4c5&#x27;;legend=[Patch(color=co,label=(labels[int(v)-1] if labels and v else (f&#x27;Perfil {v}&#x27; if v else &#x27;Informação incompleta&#x27;))) for v,co in lookup.items()]
+  514          for ax,r in zip(axs,b.itertuples()):
+  515              g=a[a.bas_id==r.id];g.plot(ax=ax,color=g[col].map(lookup),edgecolor=&#x27;#647779&#x27;,linewidth=.13,zorder=2)
+  516          finish(fig,axs,slug,legend=legend)
+  517      fig,axs=start(&#x27;Trajetórias superficiais candidatas - direção D8&#x27;)
+  518      for ax,r in zip(axs,b.itertuples()):
+  519          rr=routes[routes.bacia==r.id];rr.plot(ax=ax,color=&#x27;#328c94&#x27;,linewidth=.35,alpha=.7,zorder=4)
+  520          m=mouths[(mouths.bacia==r.id)&amp;(mouths.proxy_nr&gt;0)].nlargest(15,&#x27;proxy_nr&#x27;);ss=5+24*np.sqrt(m.proxy_nr/max(1,m.proxy_nr.max()));m.plot(ax=ax,color=&#x27;#bd4b45&#x27;,markersize=ss,edgecolor=&#x27;white&#x27;,linewidth=.2,alpha=.85,zorder=8)
+  521      finish(fig,axs,&#x27;12_rotas_candidatas&#x27;,legend=[Line2D([],[],color=&#x27;#328c94&#x27;,label=&#x27;Trajetória topográfica amostrada&#x27;),Line2D([],[],marker=&#x27;o&#x27;,color=&#x27;none&#x27;,markerfacecolor=&#x27;#bd4b45&#x27;,markeredgecolor=&#x27;none&#x27;,label=&#x27;15 maiores entradas do proxy sem rede por bacia&#x27;,markersize=6)])
+  522  
+  523      fig,axs=start(&#x27;Rede viária e hidrografia - contexto territorial&#x27;)
+  524      for ax,r in zip(axs,b.itertuples()):
+  525          ax.collections[0].set_visible(False);roads[roads.intersects(r.geometry)].plot(ax=ax,color=&#x27;#8d9499&#x27;,linewidth=.25,zorder=2)
+  526      finish(fig,axs,&#x27;13_vias_hidrografia&#x27;,legend=[Line2D([],[],color=&#x27;#8d9499&#x27;,lw=1,label=&#x27;Vias cadastradas&#x27;),Line2D([],[],color=&#x27;#88b9cc&#x27;,lw=1,label=&#x27;Curso hídrico&#x27;)])
+  527  
+  528      fig,axs=start(&#x27;Uso e ocupação do solo - 2025 informado no projeto&#x27;)
+  529      codes={24:1,1:2,3:2,4:2,5:2,11:2,12:2,9:3,15:3,19:3,21:3,36:3,30:4,31:5,33:5,25:6,29:6}
+  530      colors=[&#x27;#d57c74&#x27;,&#x27;#6b9d78&#x27;,&#x27;#d6bd74&#x27;,&#x27;#9f88a3&#x27;,&#x27;#76b8d0&#x27;,&#x27;#c8c2b5&#x27;]
+  531      with rasterio.open(ROOT/&#x27;teco_base/uso_terra/uso_terra-reservatorio.tif&#x27;) as ds:
+  532          for ax,r in zip(axs,b.itertuples()):
+  533              ax.collections[0].set_visible(False);ww=from_bounds(*r.geometry.bounds,transform=ds.transform).round_offsets().round_lengths();arr=ds.read(1,window=ww);t=ds.window_transform(ww)
+  534              mapped=np.full(arr.shape,np.nan)
+  535              for code,group in codes.items():mapped[arr==code]=group
+  536              m=rasterize([(r.geometry,1)],out_shape=arr.shape,transform=t).astype(bool);mapped[~m]=np.nan
+  537              ax.imshow(mapped,extent=(t.c,t.c+arr.shape[1]*t.a,t.f+arr.shape[0]*t.e,t.f),cmap=ListedColormap(colors),norm=BoundaryNorm(np.arange(.5,7.5),6),interpolation=&#x27;nearest&#x27;,zorder=2)
+  538      finish(fig,axs,&#x27;14_uso_solo_categorias&#x27;,legend=[Patch(color=co,label=la) for co,la in zip(colors,[&#x27;Área urbanizada&#x27;,&#x27;Vegetação natural&#x27;,&#x27;Agropecuária / silvicultura&#x27;,&#x27;Mineração&#x27;,&#x27;Água / aquicultura&#x27;,&#x27;Outras superfícies&#x27;])])
+  539  
+  540      fig,axs=plt.subplots(1,3,figsize=(12,3.6),layout=&#x27;constrained&#x27;)
+  541      g=a[a.cluster&gt;0].drop_duplicates(&#x27;setor_id&#x27;);colors=[&#x27;#7198b1&#x27;,&#x27;#deaf6f&#x27;,&#x27;#b36d85&#x27;,&#x27;#7b6c9d&#x27;,&#x27;#3a8979&#x27;,&#x27;#537b65&#x27;]
+  542      for k,gg in g.groupby(&#x27;cluster&#x27;):axs[0].scatter(gg.dens_pop,gg.def_rede,s=9,c=colors[int(k)-1],alpha=.6,label=f&#x27;Perfil {k}&#x27;)
+  543      axs[0].set_xscale(&#x27;log&#x27;);axs[0].set_xlabel(&#x27;Habitantes por km² · escala log&#x27;);axs[0].set_ylabel(&#x27;Domicílios sem rede (%)&#x27;);axs[0].legend(frameon=False);axs[0].set_title(&#x27;Tipologias dos setores&#x27;)
+  544      km=pd.read_csv(OUT/&#x27;tabelas/selecao_kmeans.csv&#x27;,sep=&#x27;;&#x27;,decimal=&#x27;,&#x27;);axs[1].plot(km.k,km.silhouette,&#x27;o-&#x27;,color=&#x27;#287f88&#x27;);axs[1].set_xlabel(&#x27;Número de grupos (k)&#x27;);axs[1].set_ylabel(&#x27;Silhouette&#x27;);axs[1].set_title(&#x27;Escolha exploratória de k&#x27;)
+  545      ss=pd.read_csv(OUT/&#x27;tabelas/sensibilidade_pesos.csv&#x27;,sep=&#x27;;&#x27;,decimal=&#x27;,&#x27;);axs[2].plot(ss.peso_pop,ss.mantem_P80_pct,&#x27;o-&#x27;,color=&#x27;#b1594e&#x27;);axs[2].set_ylim(0,105);axs[2].set_xlabel(&#x27;Peso da densidade populacional&#x27;);axs[2].set_ylabel(&#x27;P80 original mantido (%)&#x27;);axs[2].set_title(&#x27;Sensibilidade da prioridade relativa&#x27;)
+  546      for ax in axs:ax.spines[[&#x27;top&#x27;,&#x27;right&#x27;]].set_visible(False);ax.grid(alpha=.15)
+  547      for fmt in [&#x27;png&#x27;,&#x27;svg&#x27;]:fig.savefig(OUT/&#x27;figuras&#x27;/f&#x27;17_diagnostico_agrupamentos.{fmt}&#x27;,dpi=350)
+  548      plt.close(fig);gallery.append({&#x27;slug&#x27;:&#x27;17_diagnostico_agrupamentos&#x27;,&#x27;titulo&#x27;:&#x27;Diagnóstico e sensibilidade dos agrupamentos&#x27;})
+  549      fig,axs=plt.subplots(1,3,figsize=(12,4),layout=&#x27;constrained&#x27;);variables=[&#x27;dens_pop&#x27;,&#x27;def_rede&#x27;,&#x27;pct_urb&#x27;,&#x27;saude_n&#x27;,&#x27;decliv_med&#x27;,&#x27;dist_hid_km&#x27;];vlabels=[&#x27;Adensamento&#x27;,&#x27;Sem rede&#x27;,&#x27;Urbanização&#x27;,&#x27;Saúde CNES&#x27;,&#x27;Declividade&#x27;,&#x27;Distância D8&#x27;]
+  550      for ax,r in zip(axs,b.itertuples()):
+  551          corr=a[(a.bas_id==r.id)&amp;(a.cluster&gt;0)][variables].corr(method=&#x27;spearman&#x27;);im=ax.imshow(corr,vmin=-1,vmax=1,cmap=&#x27;BrBG&#x27;);ax.set_xticks(range(6),vlabels,rotation=55,ha=&#x27;right&#x27;);ax.set_yticks(range(6),vlabels);ax.set_title(names[r.id])
+  552          for i in range(6):
+  553              for j in range(6):ax.text(j,i,f&#x27;{corr.iloc[i,j]:.2f}&#x27;,ha=&#x27;center&#x27;,va=&#x27;center&#x27;,fontsize=7,color=&#x27;white&#x27; if abs(corr.iloc[i,j])&gt;.6 else &#x27;#18393f&#x27;)
+  554      fig.colorbar(im,ax=list(axs),shrink=.65,label=&#x27;Correlação de Spearman (descritiva)&#x27;)
+  555      for fmt in [&#x27;png&#x27;,&#x27;svg&#x27;]:fig.savefig(OUT/&#x27;figuras&#x27;/f&#x27;18_correlacoes_variaveis.{fmt}&#x27;,dpi=350)
+  556      plt.close(fig);gallery.append({&#x27;slug&#x27;:&#x27;18_correlacoes_variaveis&#x27;,&#x27;titulo&#x27;:&#x27;Associação descritiva entre variáveis&#x27;})
+  557      (OUT/&#x27;auditoria/galeria.json&#x27;).write_text(json.dumps(gallery,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;)
+  558      return gallery
+  559  
+  560  # Index
+  561  def index(gallery):
+  562      cards=&#x27;&#x27;.join(f&#x27;&lt;article&gt;&lt;h2&gt;{r[&quot;titulo&quot;]}&lt;/h2&gt;&lt;a href=&quot;figuras/{r[&quot;slug&quot;]}.svg&quot;&gt;&lt;img loading=&quot;lazy&quot; src=&quot;figuras/{r[&quot;slug&quot;]}.png&quot;&gt;&lt;/a&gt;&lt;p&gt;&lt;a href=&quot;figuras/{r[&quot;slug&quot;]}.svg&quot;&gt;Abrir versão vetorial&lt;/a&gt;&lt;/p&gt;&lt;/article&gt;&#x27; for r in gallery)
+  563      text=&#x27;&#x27;&#x27;&lt;!doctype html&gt;&lt;html lang=&quot;pt-BR&quot;&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width&quot;&gt;&lt;title&gt;TECO | avaliação espacial&lt;/title&gt;&lt;style&gt;body{font:16px Arial;background:#edf2f2;color:#193c48;margin:0}header,main{max-width:1220px;margin:auto;padding:28px}header{background:white}h1{font-size:30px}p{line-height:1.6}article{background:white;border:1px solid #d3dfdf;border-radius:12px;margin:20px 0;padding:18px}img{width:100%;height:auto}h2{font-size:19px}a{color:#176987}&lt;/style&gt;&lt;header&gt;&lt;h1&gt;TECO · fontes potenciais e conectividade&lt;/h1&gt;&lt;p&gt;Produtos exploratórios das bacias Pampulha, Vargem das Flores e Ibirité/REGAP. As classificações não representam concentração, carga de genes ou probabilidade de contaminação.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;Relatorio_TECO.pdf&quot;&gt;Relatório de métodos e avaliação&lt;/a&gt; · &lt;a href=&quot;tabelas/dicionario_bases.csv&quot;&gt;Dicionário das bases&lt;/a&gt;&lt;/p&gt;&lt;/header&gt;&lt;main&gt;&#x27;&#x27;&#x27;+cards+&#x27;&lt;/main&gt;&lt;/html&gt;&#x27;
+  564      (OUT/&#x27;index.html&#x27;).write_text(text,encoding=&#x27;utf8&#x27;)
+  565  
+  566  # Main
+  567  def main():
+  568  
+  569      whole,c,b=bases();health,c=cnes(b,c);c,layers,routes,mouths=terrain_routing(b,c);a=analysis(c)
+  570      gallery=maps(a,b,health,layers,routes,mouths);index(gallery)
+  571      (OUT/&#x27;auditoria/auditoria.json&#x27;).write_text(json.dumps(AUD,ensure_ascii=False,indent=2,default=lambda x:x.item() if isinstance(x,np.generic) else str(x)),encoding=&#x27;utf8&#x27;)
+  572      log(&#x27;CONCLUIDO&#x27;,OUT)
+  573  if __name__==&#x27;__main__&#x27;:main()</code></pre></article></html>
