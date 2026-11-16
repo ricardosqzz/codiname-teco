@@ -1,0 +1,28 @@
+<!doctype html><meta charset="utf-8"><style>body{max-width:1100px;margin:30px auto;font:16px/1.65 Arial;color:#254851}pre{white-space:pre;overflow:auto;background:#eef3f4;padding:18px}a{color:#156e80}</style><h1>reproduzir_microplasticos.py</h1><p><a href="https://ricardosqzz.github.io/codiname-teco/microplasticos/Guia_codigos_microplasticos.html">Guia metodológico completo deste módulo</a></p><h2>Entradas e saídas</h2><pre># ENTRADA: dados/microplasticos/grade_microplasticos.geojson; MP_VALID, POP_DENS, SEWER_DENS, WASTE_DENS, ROAD_DENS, I_S0, K_S0 e geometry.
+# CONFIGURAÇÃO: config/microplasticos.json; mesmos critérios, transformações, pesos, K e semente do produto consolidado.
+# SAÍDA: output/repro_microplasticos; classificação, normalização, k-means, sensibilidade e Moran reproduzidos a partir dos derivados públicos.
+# LIMITE: este atalho não refaz as fontes censitárias, as consultas públicas ou os caminhos D8; usar microplasticos_teco.py para a cadeia completa.
+import json
+import numpy as np
+import geopandas as gpd
+from caminhos_teco import raiz_projeto
+import microplasticos_teco as engine</pre><h2>Funções</h2><ul><li>main - linha 13</li></ul><h2>Código integral</h2><pre># ENTRADA: dados/microplasticos/grade_microplasticos.geojson; MP_VALID, POP_DENS, SEWER_DENS, WASTE_DENS, ROAD_DENS, I_S0, K_S0 e geometry.
+# CONFIGURAÇÃO: config/microplasticos.json; mesmos critérios, transformações, pesos, K e semente do produto consolidado.
+# SAÍDA: output/repro_microplasticos; classificação, normalização, k-means, sensibilidade e Moran reproduzidos a partir dos derivados públicos.
+# LIMITE: este atalho não refaz as fontes censitárias, as consultas públicas ou os caminhos D8; usar microplasticos_teco.py para a cadeia completa.
+import json
+import numpy as np
+import geopandas as gpd
+from caminhos_teco import raiz_projeto
+import microplasticos_teco as engine
+R=raiz_projeto();O=R/&#x27;output/repro_microplasticos&#x27;;(O/&#x27;tabelas&#x27;).mkdir(parents=True,exist_ok=True)
+
+# Reprodução dos derivados publicados
+def main():
+    g=gpd.read_file(R/&#x27;dados/microplasticos/grade_microplasticos.geojson&#x27;);expected=g.MP_INDEX.copy();engine.O=O
+    g,meta=engine.classify(g);g=engine.spatial(g);diff=float(np.nanmax(abs(g.MP_INDEX-expected)))
+    assert diff&lt;1e-8,&#x27;Índice divergente do produto publicado&#x27;
+    g.to_file(O/&#x27;classificacao_reproduzida.gpkg&#x27;,layer=&#x27;microplastic_pressure&#x27;,driver=&#x27;GPKG&#x27;)
+    report={**meta,&#x27;max_abs_difference&#x27;:diff,&#x27;sources_reprocessed&#x27;:False};(O/&#x27;validacao.json&#x27;).write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(json.dumps({&#x27;records&#x27;:len(g),&#x27;eligible&#x27;:meta[&#x27;n_valid&#x27;],&#x27;max_abs_difference&#x27;:diff},ensure_ascii=True))
+if __name__==&#x27;__main__&#x27;:main()
+</pre>

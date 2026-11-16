@@ -1,0 +1,7 @@
+basin;theme;n;isolados;I;p;permutacoes;neighbors;FDR
+ibirite_regap;microplastics;176;0;0.6646934985492094;0.001;999;8;BH_0.05_within_basin_theme
+ibirite_regap;ARG_baseline;176;0;0.47293204514224685;0.001;999;8;BH_0.05_within_basin_theme
+pampulha;microplastics;180;0;0.5483227350653852;0.001;999;8;BH_0.05_within_basin_theme
+pampulha;ARG_baseline;180;0;0.32127463853511756;0.001;999;8;BH_0.05_within_basin_theme
+vargem_flores;microplastics;232;0;0.571833626437942;0.001;999;8;BH_0.05_within_basin_theme
+vargem_flores;ARG_baseline;232;0;0.409849409324193;0.001;999;8;BH_0.05_within_basin_theme

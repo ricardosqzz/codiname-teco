@@ -1,0 +1,8 @@
+REC_ID;TYPE;MUNICIPAL;STATUS;SHARED;BACIA;IN_BASIN;CHECK
+ate0001;aterros_sanitarios;Betim;Regularizado;Sim;;0;acceptance_and_status_unverified
+ate0002;aterros_sanitarios;Brumadinho;Regularizado;Não;;0;acceptance_and_status_unverified
+ate0003;aterros_sanitarios;Contagem;Regularizado;Não;pampulha;1;acceptance_and_status_unverified
+ate0004;aterros_sanitarios;Itabirito;Não Regularizado;Não;;0;acceptance_and_status_unverified
+ate0005;aterros_sanitarios;Sabará;Regularizado;Sim;;0;acceptance_and_status_unverified
+ate0006;aterros_sanitarios;Santa Luzia;Não Regularizado;Sim;;0;acceptance_and_status_unverified
+tra0001;transbordo;Pedro Leopoldo;Regularizado;;;0;acceptance_and_status_unverified

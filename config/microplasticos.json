@@ -1,0 +1,25 @@
+{
+  "base_grade": "output/04_grade_500m/teco_grade_500m.gpkg",
+  "base_setores": "output/02_avaliacao_espacial/teco_avaliacao.gpkg",
+  "ibge_lixo": "saneamento_ibge/Agregados_por_setores_caracteristicas_domicilio2_BR_20250417.csv",
+  "originais": "dados_publicos/residuos_licenciamento/originais",
+  "saida": "output/07_microplasticos",
+  "semente": 20261116,
+  "variaveis": [
+    {"campo":"POP_DENS","transformacao":"log1p","unidade":"inhabitants/km2"},
+    {"campo":"SEWER_DENS","transformacao":"log1p","unidade":"households without general sewer/stormwater connection/km2"},
+    {"campo":"WASTE_DENS","transformacao":"log1p","unidade":"households without collected waste/km2"},
+    {"campo":"ROAD_DENS","transformacao":"log1p","unidade":"km of mapped roads/km2"}
+  ],
+  "cenarios": {
+    "S0":[1,1,1,1],
+    "S1":[1,1,3,1],
+    "S2":[1,1,1,3],
+    "S3":[1,3,1,1],
+    "S4":[0,1,1,1]
+  },
+  "k_testados":[2,3,4,5,6],
+  "permutacoes":999,
+  "vizinhos":8,
+  "adicionar_variavel":"Definir campo, unidade, transformação e agregação no preparador; acrescentar um peso em todos os cenários. Licenciamento não recebe peso até validação da cobertura municipal e da atividade operacional."
+}

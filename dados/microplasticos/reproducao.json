@@ -1,0 +1,40 @@
+{
+  "n_valid": 588,
+  "n_total": 598,
+  "k_reference": 2,
+  "silhouette": 0.4413797604988191,
+  "quintile_cuts": [
+    23.28802283480135,
+    33.69123618199529,
+    48.19005350875131,
+    57.22023316496361
+  ],
+  "parameters": [
+    {
+      "campo": "POP_DENS",
+      "transformacao": "log1p",
+      "min": 0.7732489692679448,
+      "max": 9.691135588762497
+    },
+    {
+      "campo": "SEWER_DENS",
+      "transformacao": "log1p",
+      "min": 0.0,
+      "max": 6.624799971132407
+    },
+    {
+      "campo": "WASTE_DENS",
+      "transformacao": "log1p",
+      "min": 0.0,
+      "max": 6.854411906059512
+    },
+    {
+      "campo": "ROAD_DENS",
+      "transformacao": "log1p",
+      "min": 0.0,
+      "max": 3.641481690322389
+    }
+  ],
+  "max_abs_difference": 0.0,
+  "sources_reprocessed": false
+}

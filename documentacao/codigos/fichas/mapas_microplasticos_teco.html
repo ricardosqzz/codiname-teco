@@ -1,0 +1,122 @@
+<!doctype html><meta charset="utf-8"><style>body{max-width:1100px;margin:30px auto;font:16px/1.65 Arial;color:#254851}pre{white-space:pre;overflow:auto;background:#eef3f4;padding:18px}a{color:#156e80}</style><h1>mapas_microplasticos_teco.py</h1><p><a href="https://ricardosqzz.github.io/codiname-teco/microplasticos/Guia_codigos_microplasticos.html">Guia metodológico completo deste módulo</a></p><h2>Entradas e saídas</h2><pre># ENTRADAS: config/encartes_teco.json; output/07_microplasticos/microplasticos.gpkg, camadas microplastic_pressure, waste_census, licensing_screening, waste_management, basins.
+# CONTEXTO: vias/malha_viaria.shp (hier_legal); hidrografia_bacias no GPKG territorial; reservatorio/{bacia}.shp.
+# CAMPOS: MP_INDEX, MP_CLASS, MP_K, MP_MORAN, MP_STAB, MP_QUINT, WASTE_PCT, ROAD_DENS; BACIA e GRID_ID identificam cada fragmento.
+# SAÍDAS: output/07_microplasticos/figuras; PNG 350 dpi, SVG vetorial e galeria.json; três bacias, escala de impressão 1:225000.
+# CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; parâmetros da análise em config/microplasticos.json.
+from pathlib import Path
+import json
+import numpy as np
+import pandas as pd</pre><h2>Funções</h2><ul><li>start - linha 35</li><li>finish - linha 55</li><li>continuous - linha 70</li><li>categories - linha 79</li><li>main - linha 89</li></ul><h2>Código integral</h2><pre># ENTRADAS: config/encartes_teco.json; output/07_microplasticos/microplasticos.gpkg, camadas microplastic_pressure, waste_census, licensing_screening, waste_management, basins.
+# CONTEXTO: vias/malha_viaria.shp (hier_legal); hidrografia_bacias no GPKG territorial; reservatorio/{bacia}.shp.
+# CAMPOS: MP_INDEX, MP_CLASS, MP_K, MP_MORAN, MP_STAB, MP_QUINT, WASTE_PCT, ROAD_DENS; BACIA e GRID_ID identificam cada fragmento.
+# SAÍDAS: output/07_microplasticos/figuras; PNG 350 dpi, SVG vetorial e galeria.json; três bacias, escala de impressão 1:225000.
+# CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; parâmetros da análise em config/microplasticos.json.
+from pathlib import Path
+import json
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+import rasterio
+from rasterio.plot import plotting_extent
+import matplotlib
+matplotlib.use(&#x27;Agg&#x27;)
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap,Normalize,ListedColormap
+from matplotlib.patches import Patch,Rectangle
+from matplotlib.lines import Line2D
+from matplotlib.ticker import FuncFormatter
+from pyproj import Transformer
+from shapely.geometry import box
+from caminhos_teco import raiz_projeto
+R=raiz_projeto();O=R/&#x27;output/07_microplasticos&#x27;;G=O/&#x27;microplasticos.gpkg&#x27;;F=O/&#x27;figuras&#x27;;F.mkdir(exist_ok=True)
+b=gpd.read_file(G,layer=&#x27;basins&#x27;).set_index(&#x27;id&#x27;).loc[[&#x27;pampulha&#x27;,&#x27;vargem_flores&#x27;,&#x27;ibirite_regap&#x27;]].reset_index()
+a=gpd.read_file(G,layer=&#x27;microplastic_pressure&#x27;);waste=gpd.read_file(G,layer=&#x27;waste_census&#x27;);lic=gpd.read_file(G,layer=&#x27;licensing_screening&#x27;);fac=gpd.read_file(G,layer=&#x27;waste_management&#x27;)
+roads=gpd.read_file(R/&#x27;vias/malha_viaria.shp&#x27;).to_crs(31983);hyd=gpd.read_file(R/&#x27;output/02_avaliacao_espacial/teco_avaliacao.gpkg&#x27;,layer=&#x27;hidrografia_bacias&#x27;)
+water={key:gpd.read_file(R/&#x27;reservatorio&#x27;/f&#x27;{key}.shp&#x27;).to_crs(31983) for key in b.id}
+views=json.loads((R/&#x27;config/encartes_teco.json&#x27;).read_text(&#x27;utf8&#x27;));T=Transformer.from_crs(31983,4326,always_xy=True)
+names={&#x27;pampulha&#x27;:&#x27;Pampulha&#x27;,&#x27;vargem_flores&#x27;:&#x27;Vargem das Flores&#x27;,&#x27;ibirite_regap&#x27;:&#x27;Ibirité / REGAP&#x27;}
+palette=[&#x27;#a8d9e6&#x27;,&#x27;#68b7a0&#x27;,&#x27;#e2d17d&#x27;,&#x27;#df995c&#x27;,&#x27;#b94854&#x27;];CM=LinearSegmentedColormap.from_list(&#x27;pressure&#x27;,palette);gallery=[]
+plt.rcParams.update({&#x27;font.family&#x27;:&#x27;Arial&#x27;,&#x27;font.size&#x27;:9,&#x27;svg.fonttype&#x27;:&#x27;none&#x27;})
+roads[&#x27;TYPE&#x27;]=roads.hier_legal.fillna(&#x27;&#x27;).str.upper().map(lambda s:0 if &#x27;PRIMARIA&#x27; in s or &#x27;EXPRESSA&#x27; in s else 1 if &#x27;ARTERIAL&#x27; in s or &#x27;COLETORA&#x27; in s else 2)
+
+# Encarte triplo
+def start(title):
+    fig=plt.figure(figsize=(30/2.54,12.7/2.54));fig.suptitle(title,y=.975,fontsize=12.3,fontweight=&#x27;bold&#x27;,color=&#x27;#244853&#x27;);axes=[]
+    for j,r in enumerate(b.itertuples()):
+        ax=fig.add_axes([.05+j*.325,.23,.27,8.1/12.7]);axes.append(ax);v=views.get(r.id,{})
+        cx=(r.geometry.bounds[0]+r.geometry.bounds[2])/2+v.get(&#x27;dx&#x27;,0);cy=(r.geometry.bounds[1]+r.geometry.bounds[3])/2+v.get(&#x27;dy&#x27;,0);span=v.get(&#x27;span&#x27;,18225)
+        assert abs(span/(.27*(30/100))-225000)&lt;1
+        ax.set_xlim(cx-span/2,cx+span/2);ax.set_ylim(cy-span/2,cy+span/2);ax.set_aspect(&#x27;equal&#x27;);ax.set_facecolor(&#x27;#f5f6f3&#x27;);frame=box(cx-span/2,cy-span/2,cx+span/2,cy+span/2)
+        for typ,col,lw in [(0,&#x27;#827564&#x27;,.4),(1,&#x27;#a49a8c&#x27;,.25),(2,&#x27;#b5b8b1&#x27;,.15)]:
+            rr=roads[(roads.TYPE==typ)&amp;roads.intersects(frame)]
+            if len(rr):rr.plot(ax=ax,color=col,linewidth=lw,zorder=3,alpha=.75)
+        hh=hyd[hyd.intersects(frame)]
+        if len(hh):hh.plot(ax=ax,color=&#x27;#7eafc2&#x27;,linewidth=.23,zorder=4)
+        ax.set_title(names[r.id],fontsize=10,pad=6,fontweight=&#x27;bold&#x27;,color=&#x27;#244853&#x27;)
+        ax.xaxis.set_major_formatter(FuncFormatter(lambda x,pos,cy=cy:f&#x27;{abs(T.transform(x,cy)[0]):.2f}°W&#x27;))
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda y,pos,cx=cx:f&#x27;{abs(T.transform(cx,y)[1]):.2f}°S&#x27;))
+        ax.set_xticks(np.linspace(cx-span*.38,cx+span*.38,3));ax.set_yticks(np.linspace(cy-span*.38,cy+span*.38,3));ax.tick_params(labelsize=7.8,pad=2);ax.tick_params(axis=&#x27;y&#x27;,labelrotation=90)
+        for sp in ax.spines.values():sp.set_visible(True);sp.set_linewidth(.7);sp.set_zorder(30)
+    return fig,axes
+
+# Elementos comuns e exportação
+def finish(fig,axes,key,title,bar=None,handles=None):
+    for ax,r in zip(axes,b.itertuples()):
+        water[r.id].boundary.plot(ax=ax,color=&#x27;white&#x27;,linewidth=2.4,zorder=8);water[r.id].plot(ax=ax,facecolor=&#x27;#45a8cf&#x27;,edgecolor=&#x27;#155777&#x27;,linewidth=.8,zorder=9)
+        gpd.GeoSeries([r.geometry],crs=31983).boundary.plot(ax=ax,color=&#x27;#35413d&#x27;,linewidth=.9,zorder=10)
+        ax.text(.965,.956,&#x27;N&#x27;,ha=&#x27;center&#x27;,va=&#x27;bottom&#x27;,transform=ax.transAxes,fontsize=8,zorder=20);ax.annotate(&#x27;&#x27;,xy=(.965,.95),xytext=(.965,.865),xycoords=&#x27;axes fraction&#x27;,arrowprops={&#x27;facecolor&#x27;:&#x27;#244853&#x27;,&#x27;width&#x27;:1.0,&#x27;headwidth&#x27;:4.5,&#x27;headlength&#x27;:6},zorder=20)
+        ax.text(.965,.025,&#x27;SIRGAS 2000 / UTM 23S\nEPSG:31983 · Scale 1:225000\nBrentano, M. C. B.&#x27;,transform=ax.transAxes,ha=&#x27;right&#x27;,va=&#x27;bottom&#x27;,fontsize=5.1,linespacing=1.05,bbox={&#x27;facecolor&#x27;:&#x27;white&#x27;,&#x27;edgecolor&#x27;:&#x27;#bfc9c7&#x27;,&#x27;alpha&#x27;:.95,&#x27;pad&#x27;:2},zorder=20)
+        x0=ax.get_xlim()[0]+18225*.055;y0=ax.get_ylim()[0]+18225*.065
+        for j in range(2):ax.add_patch(Rectangle((x0+j*2500,y0),2500,180,facecolor=&#x27;#263d42&#x27; if j==0 else &#x27;white&#x27;,edgecolor=&#x27;#263d42&#x27;,linewidth=.5,zorder=20))
+        for j,s in enumerate([&#x27;0&#x27;,&#x27;2.5&#x27;,&#x27;5 km&#x27;]):ax.text(x0+j*2500,y0+230,s,fontsize=5.5,ha=&#x27;center&#x27;,va=&#x27;bottom&#x27;,zorder=20)
+    if bar:
+        cmap,norm,label=bar;cax=fig.add_axes([.29,.105,.46,.025]);cb=fig.colorbar(plt.cm.ScalarMappable(norm=norm,cmap=cmap),cax=cax,orientation=&#x27;horizontal&#x27;);cb.set_label(label,fontsize=9,labelpad=3);cb.ax.tick_params(labelsize=8,length=3)
+    if handles:fig.legend(handles=handles,loc=&#x27;lower center&#x27;,bbox_to_anchor=(.5,.047),ncol=min(3,len(handles)),fontsize=8,frameon=False,columnspacing=1.5,handletextpad=.55,labelspacing=.7)
+    fig.savefig(F/(key+&#x27;.png&#x27;),dpi=350);fig.savefig(F/(key+&#x27;.svg&#x27;));plt.close(fig);gallery.append({&#x27;id&#x27;:key,&#x27;title&#x27;:title,&#x27;png&#x27;:key+&#x27;.png&#x27;,&#x27;svg&#x27;:key+&#x27;.svg&#x27;})
+
+# Mapas contínuos
+def continuous(field,title,key,vmin=0,vmax=100,source=a):
+    fig,axes=start(title);norm=Normalize(vmin,vmax)
+    for ax,r in zip(axes,b.itertuples()):
+        g=source[source.BACIA==r.id];valid=g[field].notna();g[~valid].plot(ax=ax,facecolor=&#x27;#dde2df&#x27;,edgecolor=&#x27;#b4bbb7&#x27;,linewidth=.13,zorder=1) if (~valid).any() else None
+        g[valid].plot(ax=ax,column=field,cmap=CM,vmin=vmin,vmax=vmax,linewidth=.15,edgecolor=&#x27;#64726b&#x27;,zorder=2)
+    label=&#x27;Households/km²&#x27; if field in [&#x27;WASTE_DENS&#x27;,&#x27;SEWER_DENS&#x27;] else &#x27;Households (%)&#x27; if &#x27;WASTE&#x27; in field else &#x27;Agreement with S0 (%)&#x27; if field==&#x27;MP_STAB&#x27; else &#x27;Mapped roads (km/km²)&#x27; if field==&#x27;ROAD_DENS&#x27; else &#x27;Index (0–100)&#x27;
+    finish(fig,axes,key,title,bar=(CM,norm,label))
+
+# Mapas categóricos
+def categories(field,title,key,labels,colors):
+    fig,axes=start(title)
+    for ax,r in zip(axes,b.itertuples()):
+        g=a[a.BACIA==r.id]
+        for value,color in colors.items():
+            q=g[g[field]==value]
+            if len(q):q.plot(ax=ax,facecolor=color,edgecolor=&#x27;#596a62&#x27;,linewidth=.16,zorder=2)
+    handles=[Patch(facecolor=colors[x],edgecolor=&#x27;#68776c&#x27;,linewidth=.4,label=label) for x,label in labels.items()];finish(fig,axes,key,title,handles=handles)
+
+# Produtos
+def main():
+    continuous(&#x27;WASTE_PCT&#x27;,&#x27;Household waste collection deficit · Census 2022&#x27;,&#x27;01_waste&#x27;,0,100,waste)
+    continuous(&#x27;ROAD_DENS&#x27;,&#x27;Mapped road density · 500 m neighbourhoods&#x27;,&#x27;02_roads&#x27;,0,float(a.ROAD_DENS.max()))
+    continuous(&#x27;ARG_INDEX&#x27;,&#x27;ARG-related anthropogenic pressure · preserved baseline&#x27;,&#x27;03_arg&#x27;)
+    continuous(&#x27;MP_INDEX&#x27;,&#x27;Exploratory microplastic source pressure · equal weights&#x27;,&#x27;04_mp_index&#x27;)
+    categories(&#x27;MP_CLASS&#x27;,&#x27;Microplastic source pressure · fixed score classes&#x27;,&#x27;05_mp_classes&#x27;,{0:&#x27;Insufficient inputs&#x27;,1:&#x27;Very low (0–20)&#x27;,2:&#x27;Low (&gt;20–40)&#x27;,3:&#x27;Moderate (&gt;40–60)&#x27;,4:&#x27;High (&gt;60–80)&#x27;,5:&#x27;Very high (&gt;80–100)&#x27;},{0:&#x27;#dbe1dd&#x27;,**{i+1:col for i,col in enumerate(palette)}})
+    categories(&#x27;MP_QUINT&#x27;,&#x27;Microplastic source pressure · relative quintiles&#x27;,&#x27;06_mp_quintiles&#x27;,{0:&#x27;Insufficient inputs&#x27;,**{i+1:label for i,label in enumerate([&#x27;≤P20&#x27;,&#x27;&gt;P20–P40&#x27;,&#x27;&gt;P40–P60&#x27;,&#x27;&gt;P60–P80&#x27;,&#x27;&gt;P80&#x27;])}},{0:&#x27;#dbe1dd&#x27;,**{i+1:col for i,col in enumerate(palette)}})
+    k=int(a.MP_K.max());kc={i+1:c for i,c in enumerate([&#x27;#72b8bb&#x27;,&#x27;#cd7866&#x27;,&#x27;#d9bf65&#x27;,&#x27;#8f8dbb&#x27;,&#x27;#8eab67&#x27;,&#x27;#b76f94&#x27;][:k])};categories(&#x27;MP_K&#x27;,f&#x27;Microplastic source profiles · k-means K={k}&#x27;,&#x27;07_mp_kmeans&#x27;,{0:&#x27;Insufficient inputs&#x27;,**{i:f&#x27;Profile {i}&#x27; for i in range(1,k+1)}},{0:&#x27;#dbe1dd&#x27;,**kc})
+    continuous(&#x27;MP_STAB&#x27;,&#x27;Microplastic profiles · sensitivity to weighting&#x27;,&#x27;08_mp_stability&#x27;)
+    categories(&#x27;MP_MORAN&#x27;,&#x27;Microplastic source pressure · local Moran (FDR 5%)&#x27;,&#x27;09_mp_moran&#x27;,{&#x27;HH&#x27;:&#x27;High–high&#x27;,&#x27;LL&#x27;:&#x27;Low–low&#x27;,&#x27;HL&#x27;:&#x27;High–low&#x27;,&#x27;LH&#x27;:&#x27;Low–high&#x27;,&#x27;NS&#x27;:&#x27;Not significant&#x27;,&#x27;ND&#x27;:&#x27;Insufficient inputs&#x27;},{&#x27;HH&#x27;:&#x27;#bf555b&#x27;,&#x27;LL&#x27;:&#x27;#5b91b2&#x27;,&#x27;HL&#x27;:&#x27;#e4b278&#x27;,&#x27;LH&#x27;:&#x27;#a5ced3&#x27;,&#x27;NS&#x27;:&#x27;#dfe5de&#x27;,&#x27;ND&#x27;:&#x27;#c2c8c5&#x27;})
+    fig,axes=start(&#x27;Documented licensing and solid-waste management · screening&#x27;)
+    for ax,r in zip(axes,b.itertuples()):
+        q=lic[lic.BACIA.str.contains(r.id,na=False)];q[q.MP_CAND==0].plot(ax=ax,facecolor=&#x27;#b1aeb3&#x27;,edgecolor=&#x27;white&#x27;,markersize=14,zorder=11)
+        if (q.MP_CAND==1).any():q[q.MP_CAND==1].plot(ax=ax,marker=&#x27;D&#x27;,facecolor=&#x27;#b84969&#x27;,edgecolor=&#x27;white&#x27;,markersize=38,zorder=12)
+        f=fac[fac.intersects(box(ax.get_xlim()[0],ax.get_ylim()[0],ax.get_xlim()[1],ax.get_ylim()[1]))]
+        if len(f):f.plot(ax=ax,marker=&#x27;s&#x27;,facecolor=&#x27;#6c8773&#x27;,edgecolor=&#x27;white&#x27;,markersize=32,zorder=12)
+    finish(fig,axes,&#x27;10_licensing&#x27;,&#x27;Documented licensing and solid-waste management · screening&#x27;,handles=[Line2D([],[],linestyle=&#x27;&#x27;,marker=&#x27;o&#x27;,color=&#x27;#b1aeb3&#x27;,label=&#x27;Other licensed activities&#x27;),Line2D([],[],linestyle=&#x27;&#x27;,marker=&#x27;D&#x27;,color=&#x27;#b84969&#x27;,label=&#x27;Plastic-related activity: verify operation&#x27;),Line2D([],[],linestyle=&#x27;&#x27;,marker=&#x27;s&#x27;,color=&#x27;#6c8773&#x27;,label=&#x27;Management facility: contextual record&#x27;)])
+    fig,axes=start(&#x27;Microplastic pressure · topographic upstream mean&#x27;)
+    for ax,r in zip(axes,b.itertuples()):
+        with rasterio.open(O/&#x27;rasters&#x27;/f&#x27;{r.id}_upstream_pressure.tif&#x27;) as d:data=d.read(1,masked=True);ax.imshow(data,extent=plotting_extent(d),cmap=CM,vmin=0,vmax=100,zorder=2,interpolation=&#x27;nearest&#x27;)
+    finish(fig,axes,&#x27;11_upstream&#x27;,&#x27;Microplastic pressure · topographic upstream mean&#x27;,bar=(CM,Normalize(0,100),&#x27;Mean upstream index (0–100)&#x27;))
+    continuous(&#x27;WASTE_DENS&#x27;,&#x27;Uncollected household waste · estimated source density&#x27;,&#x27;12_waste_density&#x27;,vmax=float(a.WASTE_DENS.max()))
+    continuous(&#x27;SEWER_DENS&#x27;,&#x27;Households without general sewer connection · estimated density&#x27;,&#x27;13_sewer_density&#x27;,vmax=float(a.SEWER_DENS.max()))
+    (F/&#x27;galeria.json&#x27;).write_text(json.dumps(gallery,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(&#x27;Mapas&#x27;,len(gallery),flush=True)
+if __name__==&#x27;__main__&#x27;:main()
+</pre>

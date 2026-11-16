@@ -1,0 +1,61 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Guia dos scripts | Microplásticos</title><style>body{font:16px/1.65 Arial,sans-serif;color:#203e49;margin:0;background:#f0f4f3}main{max-width:1140px;margin:auto;padding:28px}h1{font-size:32px;line-height:1.2}h2{margin-top:35px;color:#185b64}h3{color:#395962}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;border-bottom:1px solid #cedcdb;text-align:left;vertical-align:top}th{background:#e0eeee}img{width:100%;height:auto;background:white}figure{margin:25px 0}figcaption{font-size:14px}a{color:#146d7f}pre{padding:18px;background:#173641;color:#eef5f5;overflow:auto;white-space:pre-wrap}section{background:white;padding:22px;margin:20px 0;border-radius:10px}p{margin:12px 0}nav{display:flex;gap:12px;flex-wrap:wrap}.muted{color:#637a81}</style><main><h1>Guia dos scripts | Complementação microplásticos</h1>
+<p>Os caminhos são relativos à raiz do TECO, configurável por TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json. A configuração de critérios e pesos fica em config/microplasticos.json. Os grandes arquivos de base não acompanham o repositório público. A reprodução exige fornecer as entradas descritas no cabeçalho de cada script.</p>
+<h2>obter_residuos_licenciamento.py</h2>
+<p>Baixa os sete serviços WFS e as exportações SINIR. Requests aplica tempo limite e tentativas; a consulta usa bbox em EPSG:31983 e paginação. SHA-256 documenta integridade. O RAR exige tar disponível. Originais de licenciamento ficam locais, pois podem conter CPF.</p>
+<p>Trecho do arquivo, a partir da linha 33.</p><pre><code>    while True:
+        params={&#x27;service&#x27;:&#x27;WFS&#x27;,&#x27;version&#x27;:&#x27;2.0.0&#x27;,&#x27;request&#x27;:&#x27;GetFeature&#x27;,&#x27;typeNames&#x27;:name,&#x27;srsName&#x27;:&#x27;EPSG:31983&#x27;,&#x27;outputFormat&#x27;:&#x27;application/json&#x27;,&#x27;bbox&#x27;:&#x27;,&#x27;.join(map(str,bounds))+&#x27;,EPSG:31983&#x27;,&#x27;count&#x27;:5000,&#x27;startIndex&#x27;:offset}
+        r=get(WFS,params);data=r.json();features=data.get(&#x27;features&#x27;)
+        if features is None:raise ValueError(r.text[:200])
+        urls.append(r.url);records.extend(features);matched=data.get(&#x27;totalFeatures&#x27;,data.get(&#x27;numberMatched&#x27;))
+</code></pre><h2>microplasticos_teco.py</h2>
+<p>GeoPandas recorta e agrega geometrias; Pandas lê o CSV censitário em blocos. Os limites UNC_LO/UNC_HI preservam o sigilo. NumPy transforma critérios e calcula o índice. SciPy executa k-means e distâncias; moran_w e BH vêm do módulo estatístico anterior. Rasterio rasteriza o índice e deque percorre o grafo D8 sem ciclos.</p>
+<p>Trecho do arquivo, a partir da linha 128.</p><pre><code>    for code,ww in C[&#x27;cenarios&#x27;].items():
+        w=np.asarray(ww);wx=x*np.sqrt(w/w.sum());score=100*(x@w)/w.sum();scores[code]=score;g[&#x27;MP_&#x27;+code]=np.nan;g.loc[idx,&#x27;MP_&#x27;+code]=score
+        for k in C[&#x27;k_testados&#x27;]:
+            loss,cent,lab=fitkm(wx,k,SEED+100*int(code[1:]),starts=20);sil=silhouette(wx,lab);sizes=np.bincount(lab,minlength=k)
+            ks.append({&#x27;scenario&#x27;:code,&#x27;k&#x27;:k,&#x27;silhouette&#x27;:sil,&#x27;min_n&#x27;:int(sizes.min()),&#x27;inertia&#x27;:loss});models[code,k]=(cent,lab)
+</code></pre><p>Os pesos são aplicados à média do índice e, pela raiz quadrada, à distância do k-means. O Moran local não usa os grupos do k-means como entrada: usa o índice e a matriz de vizinhança. O teste local tem 999 permutações condicionais sem reposição por vizinho; os p-valores são corrigidos por BH dentro de cada bacia. O processamento D8 acumula índice × área e área válida; a divisão gera média de pressão a montante, sem simular massa ou decaimento.</p>
+<h2>mapas_microplasticos_teco.py</h2>
+<p>Matplotlib compõe três mapas com mesma escala e geometria de impressão. GeoPandas representa setores nativos ou hexágonos conforme o produto. PyProj converte somente rótulos das coordenadas. Rasterio fornece a extensão dos rasters. A legenda mostra unidades físicas nas entradas e índice nos resultados.</p>
+<p>Trecho do arquivo, a partir da linha 35.</p><pre><code>def start(title):
+    fig=plt.figure(figsize=(30/2.54,12.7/2.54));fig.suptitle(title,y=.975,fontsize=12.3,fontweight=&#x27;bold&#x27;,color=&#x27;#244853&#x27;);axes=[]
+    for j,r in enumerate(b.itertuples()):
+        ax=fig.add_axes([.05+j*.325,.23,.27,8.1/12.7]);axes.append(ax);v=views.get(r.id,{})
+        cx=(r.geometry.bounds[0]+r.geometry.bounds[2])/2+v.get(&#x27;dx&#x27;,0);cy=(r.geometry.bounds[1]+r.geometry.bounds[3])/2+v.get(&#x27;dy&#x27;,0);span=v.get(&#x27;span&#x27;,18225)
+</code></pre><h2>consolidar_microplasticos_teco.py</h2>
+<p>Exporta um shapefile por pasta, encurta nomes de campo com mapeamento explícito, copia tabelas, mapas e scripts, atualiza dicionário global e calcula inventário SHA-256. As versões geradas substituídas são movidas a descontinuado. Não altera arquivos brutos.</p>
+<p>Trecho do arquivo, a partir da linha 48.</p><pre><code>  assert dst.resolve().is_relative_to((R/&#x27;descontinuado&#x27;).resolve());shutil.move(str(p),str(dst))
+def export(g,relative,name,defs):
+ folder=F/relative;archive(folder);folder.mkdir(parents=True,exist_ok=True);data=g[list(defs)+[&#x27;geometry&#x27;]].copy();rename={k:v[0] for k,v in defs.items()};data.rename(columns=rename,inplace=True)
+ for c in data.select_dtypes(include=[&#x27;object&#x27;,&#x27;str&#x27;]).columns:
+  if c!=&#x27;geometry&#x27;:data[c]=data[c].map(lambda v:v[:250] if isinstance(v,str) else v)
+</code></pre><h2>integrar_qgis_microplasticos.py</h2>
+<p>PyQGIS abre os dois projetos atuais, cria grupo Microplastics e camadas temáticas, aplica estilos e duplica seis layouts triplos sem reconstruir os grupos anteriores. Mantém caminhos relativos e arquiva os projetos antes da atualização.</p>
+<p>Trecho do arquivo, a partir da linha 93.</p><pre><code>    if oldlayout:manager.removeLayout(oldlayout)
+    layout=manager.duplicateLayout(template,name)
+    for item in layout.items():
+     if isinstance(item,QgsLayoutItemMap):
+      stack=item.layers();new=[];replaced=False
+</code></pre><h2>documentar_microplasticos_teco.py</h2>
+<p>Lê auditoria e tabelas, produz texto, tabelas e pranchas em PDF com ReportLab e a página HTML. O guia incorpora trechos do código efetivamente salvo. Não recalcula indicadores nem reclassifica dados.</p>
+<p>Trecho do arquivo, a partir da linha 185.</p><pre><code># PDF com pranchas em página horizontal
+def pdf(md,gallery):
+ from reportlab.platypus import BaseDocTemplate,PageTemplate,Frame,Paragraph,Spacer,Table,TableStyle,PageBreak,NextPageTemplate,Image,KeepTogether
+ from reportlab.lib import colors
+ from reportlab.lib.styles import getSampleStyleSheet,ParagraphStyle
+</code></pre><h2>reproduzir_microplasticos.py</h2>
+<p>Reproduz a classificação e os testes a partir do GeoJSON derivado publicado, sem baixar novamente as fontes ou processar o MDE. Confere diferença absoluta do índice e interrompe se exceder 1e-8. A reconstrução de censos e caminhos D8 exige a cadeia completa.</p>
+<p>Trecho do arquivo, a partir da linha 14.</p><pre><code>    g=gpd.read_file(R/&#x27;dados/microplasticos/grade_microplasticos.geojson&#x27;);expected=g.MP_INDEX.copy();engine.O=O
+    g,meta=engine.classify(g);g=engine.spatial(g);diff=float(np.nanmax(abs(g.MP_INDEX-expected)))
+    assert diff&lt;1e-8,&#x27;Índice divergente do produto publicado&#x27;
+    g.to_file(O/&#x27;classificacao_reproduzida.gpkg&#x27;,layer=&#x27;microplastic_pressure&#x27;,driver=&#x27;GPKG&#x27;)
+    report={**meta,&#x27;max_abs_difference&#x27;:diff,&#x27;sources_reprocessed&#x27;:False};(O/&#x27;validacao.json&#x27;).write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(json.dumps({&#x27;records&#x27;:len(g),&#x27;eligible&#x27;:meta[&#x27;n_valid&#x27;],&#x27;max_abs_difference&#x27;:diff},ensure_ascii=True))
+</code></pre><h2>Ordem de execução</h2>
+<p>1. Configurar a raiz e conferir entradas.</p>
+<p>2. Executar obter_residuos_licenciamento.py para nova consulta, ou preservar a exportação documentada.</p>
+<p>3. Executar microplasticos_teco.py.</p>
+<p>4. Executar mapas_microplasticos_teco.py.</p>
+<p>5. Executar consolidar_microplasticos_teco.py.</p>
+<p>6. Executar integrar_qgis_microplasticos.py no Python do QGIS.</p>
+<p>7. Executar documentar_microplasticos_teco.py com ReportLab.</p>
+<p>Uma nova variável requer agregação no preparador, definição de transformação/unidade na configuração, pesos em todos os cenários e novos testes de cobertura e redundância. Não reutilizar os pesos como coeficientes de emissão.</p></main></html>

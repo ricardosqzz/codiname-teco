@@ -1,0 +1,126 @@
+<!doctype html><meta charset="utf-8"><style>body{max-width:1100px;margin:30px auto;font:16px/1.65 Arial;color:#254851}pre{white-space:pre;overflow:auto;background:#eef3f4;padding:18px}a{color:#156e80}</style><h1>integrar_qgis_microplasticos.py</h1><p><a href="https://ricardosqzz.github.io/codiname-teco/microplasticos/Guia_codigos_microplasticos.html">Guia metodológico completo deste módulo</a></p><h2>Entradas e saídas</h2><pre># ENTRADAS: entrega_final/01_entradas/18_residuos,19_licenciamento; 02_saidas/06_microplasticos; projeto_teco.qgz e TECO_Consolidado.qgz.
+# CAMPOS: MP_INDEX, MP_CLASS, MP_K, MP_MORAN, MP_STAB; BACIA filtra os três reservatórios.
+# SAÍDAS: grupo Microplastics e seis layouts triplos em cada QGZ; estilos, nomes curtos, definições de campo e auditoria de validade.
+# CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; executar no Python do QGIS.
+from pathlib import Path
+import os,json,datetime,shutil,sys
+os.environ[&#x27;QT_QPA_PLATFORM&#x27;]=&#x27;offscreen&#x27;
+from qgis.core import *
+from qgis.PyQt.QtGui import QColor,QFontDatabase,QFont</pre><h2>Funções</h2><ul><li>vector - linha 21</li><li>legend - linha 48</li><li>main - linha 63</li></ul><h2>Código integral</h2><pre># ENTRADAS: entrega_final/01_entradas/18_residuos,19_licenciamento; 02_saidas/06_microplasticos; projeto_teco.qgz e TECO_Consolidado.qgz.
+# CAMPOS: MP_INDEX, MP_CLASS, MP_K, MP_MORAN, MP_STAB; BACIA filtra os três reservatórios.
+# SAÍDAS: grupo Microplastics e seis layouts triplos em cada QGZ; estilos, nomes curtos, definições de campo e auditoria de validade.
+# CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; executar no Python do QGIS.
+from pathlib import Path
+import os,json,datetime,shutil,sys
+os.environ[&#x27;QT_QPA_PLATFORM&#x27;]=&#x27;offscreen&#x27;
+from qgis.core import *
+from qgis.PyQt.QtGui import QColor,QFontDatabase,QFont
+from qgis.PyQt.QtCore import Qt
+from caminhos_teco import raiz_projeto
+R=raiz_projeto();F=R/&#x27;entrega_final&#x27;;P=F/&#x27;02_saidas/06_microplasticos/01_consolidado/microplastics.shp&#x27;
+app=QgsApplication([],False);app.initQgis();STAMP=datetime.datetime.now().strftime(&#x27;%Y%m%d_%H%M%S&#x27;)
+for fontfile in [&#x27;arial.ttf&#x27;,&#x27;arialbd.ttf&#x27;,&#x27;ariali.ttf&#x27;,&#x27;arialbi.ttf&#x27;,&#x27;calibri.ttf&#x27;]:
+ p=Path(&#x27;C:/Windows/Fonts&#x27;)/fontfile
+ if p.exists():QFontDatabase.addApplicationFont(str(p))
+PAL=[&#x27;#a8d9e6&#x27;,&#x27;#68b7a0&#x27;,&#x27;#e2d17d&#x27;,&#x27;#df995c&#x27;,&#x27;#b94854&#x27;];names={&#x27;pampulha&#x27;:&#x27;Pampulha&#x27;,&#x27;vargem_flores&#x27;:&#x27;Vargem das Flores&#x27;,&#x27;ibirite_regap&#x27;:&#x27;Ibirité / REGAP&#x27;}
+specs=[(&#x27;MP_INDEX&#x27;,&#x27;Microplastic pressure&#x27;,&#x27;continuous&#x27;),(&#x27;MP_CLASS&#x27;,&#x27;Score classes&#x27;,&#x27;classes&#x27;),(&#x27;MP_QUINT&#x27;,&#x27;Relative quintiles&#x27;,&#x27;quintiles&#x27;),(&#x27;MP_K&#x27;,&#x27;Source profiles&#x27;,&#x27;profiles&#x27;),(&#x27;MP_MORAN&#x27;,&#x27;Local Moran&#x27;,&#x27;moran&#x27;),(&#x27;MP_STAB&#x27;,&#x27;Weight sensitivity&#x27;,&#x27;continuous&#x27;)]
+
+# Renderizadores e metadados
+def vector(project,group,path,name,field=None,kind=None,basin=None):
+ layer=QgsVectorLayer(str(path),name,&#x27;ogr&#x27;)
+ if not layer.isValid():raise ValueError(str(path))
+ if basin:layer.setSubsetString(&#x27;&quot;BACIA&quot;=\&#x27;&#x27;+basin+&#x27;\&#x27;&#x27;)
+ if kind==&#x27;continuous&#x27;:
+  ranges=[]
+  for i,col in enumerate(PAL):
+   symbol=QgsFillSymbol.createSimple({&#x27;color&#x27;:col,&#x27;outline_color&#x27;:&#x27;#61746b&#x27;,&#x27;outline_width&#x27;:&#x27;0.08&#x27;});ranges.append(QgsRendererRange(i*20,(i+1)*20,symbol,f&#x27;{i*20}–{(i+1)*20}&#x27;))
+  layer.setRenderer(QgsGraduatedSymbolRenderer(field,ranges))
+  renderer=QgsRuleBasedRenderer.convertFromRenderer(layer.renderer());renderer.rootRule().appendChild(QgsRuleBasedRenderer.Rule(QgsFillSymbol.createSimple({&#x27;color&#x27;:&#x27;#dbe1dd&#x27;,&#x27;outline_color&#x27;:&#x27;#61746b&#x27;,&#x27;outline_width&#x27;:&#x27;0.08&#x27;}),filterExp=&#x27;&quot;&#x27;+field+&#x27;&quot; IS NULL&#x27;,label=&#x27;Insufficient inputs&#x27;));layer.setRenderer(renderer)
+ elif kind in [&#x27;classes&#x27;,&#x27;profiles&#x27;,&#x27;moran&#x27;,&#x27;quintiles&#x27;]:
+  if kind==&#x27;quintiles&#x27;:
+   vals={0:(&#x27;Insufficient inputs&#x27;,&#x27;#dbe1dd&#x27;),**{i+1:(label,PAL[i]) for i,label in enumerate([&#x27;≤P20&#x27;,&#x27;&gt;P20–P40&#x27;,&#x27;&gt;P40–P60&#x27;,&#x27;&gt;P60–P80&#x27;,&#x27;&gt;P80&#x27;])}}
+  else:
+   vals={&#x27;classes&#x27;:{0:(&#x27;Insufficient inputs&#x27;,&#x27;#dbe1dd&#x27;),**{i+1:(v,PAL[i]) for i,v in enumerate([&#x27;Very low&#x27;,&#x27;Low&#x27;,&#x27;Moderate&#x27;,&#x27;High&#x27;,&#x27;Very high&#x27;])}},&#x27;profiles&#x27;:{0:(&#x27;Insufficient inputs&#x27;,&#x27;#dbe1dd&#x27;),1:(&#x27;Profile 1&#x27;,&#x27;#72b8bb&#x27;),2:(&#x27;Profile 2&#x27;,&#x27;#cd7866&#x27;)},&#x27;moran&#x27;:{&#x27;HH&#x27;:(&#x27;High–high&#x27;,&#x27;#bf555b&#x27;),&#x27;LL&#x27;:(&#x27;Low–low&#x27;,&#x27;#5b91b2&#x27;),&#x27;HL&#x27;:(&#x27;High–low&#x27;,&#x27;#e4b278&#x27;),&#x27;LH&#x27;:(&#x27;Low–high&#x27;,&#x27;#a5ced3&#x27;),&#x27;NS&#x27;:(&#x27;Not significant&#x27;,&#x27;#dfe5de&#x27;),&#x27;ND&#x27;:(&#x27;Insufficient inputs&#x27;,&#x27;#c2c8c5&#x27;)}}[kind]
+  cats=[QgsRendererCategory(v,QgsFillSymbol.createSimple({&#x27;color&#x27;:color,&#x27;outline_color&#x27;:&#x27;#61746b&#x27;,&#x27;outline_width&#x27;:&#x27;0.08&#x27;}),label) for v,(label,color) in vals.items()];layer.setRenderer(QgsCategorizedSymbolRenderer(field,cats))
+ elif field==&#x27;WASTE_PCT&#x27;:
+  ranges=[QgsRendererRange(i*20,(i+1)*20,QgsFillSymbol.createSimple({&#x27;color&#x27;:col,&#x27;outline_color&#x27;:&#x27;#61746b&#x27;,&#x27;outline_width&#x27;:&#x27;0.07&#x27;}),f&#x27;{i*20}–{(i+1)*20}%&#x27;) for i,col in enumerate(PAL)];layer.setRenderer(QgsGraduatedSymbolRenderer(field,ranges))
+ elif layer.geometryType()==QgsWkbTypes.PointGeometry:
+  if &#x27;licens&#x27; in name.lower():
+   cats=[QgsRendererCategory(v,QgsMarkerSymbol.createSimple({&#x27;name&#x27;:&#x27;diamond&#x27; if v else &#x27;circle&#x27;,&#x27;color&#x27;:c,&#x27;outline_color&#x27;:&#x27;white&#x27;,&#x27;size&#x27;:&#x27;2.4&#x27; if v else &#x27;1.7&#x27;}),label) for v,c,label in [(0,&#x27;#b1aeb3&#x27;,&#x27;Other activity&#x27;),(1,&#x27;#b84969&#x27;,&#x27;Plastic-related activity: verify&#x27;)]];layer.setRenderer(QgsCategorizedSymbolRenderer(&#x27;MP_CAND&#x27;,cats))
+  else:layer.renderer().setSymbol(QgsMarkerSymbol.createSimple({&#x27;name&#x27;:&#x27;square&#x27;,&#x27;color&#x27;:&#x27;#6c8773&#x27;,&#x27;outline_color&#x27;:&#x27;white&#x27;,&#x27;size&#x27;:&#x27;2.4&#x27;}))
+ project.addMapLayer(layer,False);group.addLayer(layer)
+ metadata=layer.metadata();metadata.setAbstract(&#x27;Exploratory source-pressure assessment. Not occurrence, concentration, probability or verified discharge. See Microplastic assessment report and field dictionary.&#x27;);layer.setMetadata(metadata)
+ return layer
+
+# Legendas específicas dos novos layouts
+def legend(layout,field,title):
+ for item in list(layout.items()):
+  if isinstance(item,(QgsLayoutItemLabel,QgsLayoutItemLegend)) and item.positionWithUnits().y()&gt;=105:layout.removeLayoutItem(item)
+ if field==&#x27;MP_K&#x27;:items=[(&#x27;Profile 1&#x27;,&#x27;#72b8bb&#x27;),(&#x27;Profile 2&#x27;,&#x27;#cd7866&#x27;),(&#x27;Insufficient inputs&#x27;,&#x27;#dbe1dd&#x27;)]
+ elif field==&#x27;MP_MORAN&#x27;:items=[(&#x27;High–high&#x27;,&#x27;#bf555b&#x27;),(&#x27;Low–low&#x27;,&#x27;#5b91b2&#x27;),(&#x27;High–low&#x27;,&#x27;#e4b278&#x27;),(&#x27;Low–high&#x27;,&#x27;#a5ced3&#x27;),(&#x27;Not significant&#x27;,&#x27;#dfe5de&#x27;),(&#x27;Insufficient inputs&#x27;,&#x27;#c2c8c5&#x27;)]
+ elif field==&#x27;MP_QUINT&#x27;:items=list(zip([&#x27;≤P20&#x27;,&#x27;&gt;P20–P40&#x27;,&#x27;&gt;P40–P60&#x27;,&#x27;&gt;P60–P80&#x27;,&#x27;&gt;P80&#x27;],PAL))+[(&#x27;Insufficient inputs&#x27;,&#x27;#dbe1dd&#x27;)]
+ else:items=list(zip([&#x27;0–20&#x27;,&#x27;&gt;20–40&#x27;,&#x27;&gt;40–60&#x27;,&#x27;&gt;60–80&#x27;,&#x27;&gt;80–100&#x27;],PAL))+[(&#x27;Insufficient inputs&#x27;,&#x27;#dbe1dd&#x27;)]
+ head=QgsLayoutItemLabel(layout);head.setText(title+(&#x27; (agreement, %)&#x27; if field==&#x27;MP_STAB&#x27; else &#x27; (index 0–100)&#x27; if field in [&#x27;MP_INDEX&#x27;,&#x27;MP_CLASS&#x27;] else &#x27;&#x27;));head.setFont(QFont(&#x27;Arial&#x27;,7));head.setHAlign(Qt.AlignHCenter);head.attemptMove(QgsLayoutPoint(15,106));head.attemptResize(QgsLayoutSize(276,5));layout.addLayoutItem(head)
+ for row in range((len(items)+2)//3):
+  parts=items[row*3:row*3+3];start=(300-76*len(parts))/2
+  for col,(text,color) in enumerate(parts):
+   x=start+76*col;y=113+row*5.5;swatch=QgsLayoutItemLabel(layout);swatch.setText(&#x27;&#x27;);swatch.setBackgroundEnabled(True);swatch.setBackgroundColor(QColor(color));swatch.attemptMove(QgsLayoutPoint(x,y+1));swatch.attemptResize(QgsLayoutSize(3,1.8));layout.addLayoutItem(swatch)
+   label=QgsLayoutItemLabel(layout);label.setText(text);label.setFont(QFont(&#x27;Arial&#x27;,7));label.attemptMove(QgsLayoutPoint(x+4,y));label.attemptResize(QgsLayoutSize(70,4.5));layout.addLayoutItem(label)
+
+# Integração preservando os projetos atuais
+def main():
+ reports=[]
+ for target in [R/&#x27;projeto_teco.qgz&#x27;,F/&#x27;TECO_Consolidado.qgz&#x27;]:
+  backup=R/&#x27;descontinuado&#x27;/STAMP/&#x27;qgis_antes_microplasticos&#x27;/target.name;backup.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(target,backup)
+  project=QgsProject();assert project.read(str(target));root=project.layerTreeRoot();old=root.findGroup(&#x27;Microplastics&#x27;)
+  if old:
+   ids=[n.layerId() for n in old.findLayers()];root.removeChildNode(old)
+   for i in ids:project.removeMapLayer(i)
+  grp=root.insertGroup(0,&#x27;Microplastics&#x27;);grp.setExpanded(True);inputs=grp.addGroup(&#x27;Inputs&#x27;);allg=grp.addGroup(&#x27;All basins&#x27;);per={k:grp.addGroup(v) for k,v in names.items()};terrain=grp.addGroup(&#x27;Topographic pathways&#x27;)
+  for path,name,field in [(F/&#x27;01_entradas/18_residuos/01_destino_lixo/waste_census.shp&#x27;,&#x27;Waste collection | census&#x27;,&#x27;WASTE_PCT&#x27;),(F/&#x27;01_entradas/19_licenciamento/01_triagem/licensing.shp&#x27;,&#x27;Licensing | process screening&#x27;,None),(F/&#x27;01_entradas/18_residuos/02_instalacoes/waste_fac.shp&#x27;,&#x27;Waste facilities | context&#x27;,None),(F/&#x27;01_entradas/18_residuos/03_planos/waste_plans.shp&#x27;,&#x27;Municipal waste plans | 2024&#x27;,None)]:vector(project,inputs,path,name,field)
+  outputs={}
+  for field,name,kind in specs:
+   outputs[field]=vector(project,allg,P,name,field,kind)
+   for basin,sub in per.items():outputs[field,basin]=vector(project,sub,P,name,field,kind,basin)
+  for basin in names:
+   for suffix,title in [(&#x27;upstream_pressure&#x27;,&#x27;Mean upstream pressure&#x27;),(&#x27;contributing_km2&#x27;,&#x27;Contributing area km²&#x27;)]:
+    p=F/f&#x27;02_saidas/06_microplasticos/04_conectividade/{basin}_{suffix}.tif&#x27;;rl=QgsRasterLayer(str(p),title+&#x27; | &#x27;+names[basin]);assert rl.isValid();project.addMapLayer(rl,False);terrain.addLayer(rl)
+    shader=QgsColorRampShader();shader.setColorRampType(QgsColorRampShader.Interpolated)
+    maximum=100 if suffix==&#x27;upstream_pressure&#x27; else rl.dataProvider().bandStatistics(1).maximumValue
+    shader.setColorRampItemList([QgsColorRampShader.ColorRampItem(i*maximum/4,QColor(c),str(round(i*maximum/4,1))) for i,c in enumerate(PAL)])
+    rs=QgsRasterShader();rs.setRasterShaderFunction(shader);rl.setRenderer(QgsSingleBandPseudoColorRenderer(rl.dataProvider(),1,rs))
+  dictionary=json.loads((F/&#x27;00_documentacao/Microplasticos/Dicionario_QGIS.json&#x27;).read_text(&#x27;utf8&#x27;))
+  for layer in project.mapLayers().values():
+   if isinstance(layer,QgsVectorLayer) and &#x27;microplastic&#x27; in layer.source().lower():
+    for i,f in enumerate(layer.fields()):
+     if f.name() in dictionary:layer.setFieldAlias(i,f.name().replace(&#x27;_&#x27;,&#x27; &#x27;));layer.setCustomProperty(&#x27;fieldDescription/&#x27;+f.name(),dictionary[f.name()])
+  manager=project.layoutManager();template=manager.layoutByName(&#x27;Index S0&#x27;);created=[]
+  if template:
+   for field,title,kind in specs:
+    name=&#x27;MP | &#x27;+title;oldlayout=manager.layoutByName(name)
+    if oldlayout:manager.removeLayout(oldlayout)
+    layout=manager.duplicateLayout(template,name)
+    for item in layout.items():
+     if isinstance(item,QgsLayoutItemMap):
+      stack=item.layers();new=[];replaced=False
+      for lyr in stack:
+       source=lyr.source().lower();lname=lyr.name().lower()
+       if lname==&#x27;s0&#x27; or any(v in lname for v in [&#x27;index s0&#x27;,&#x27;s0 index&#x27;,&#x27;multivariate&#x27;,&#x27;multivari&#x27;,&#x27;index |&#x27;,&#x27;base index&#x27;]) or &#x27;teco_final.shp&#x27; in source or &#x27;weighted_index.shp&#x27; in source:
+        basin=next((k for k in names if k in source or k in lyr.subsetString()),None)
+        if not replaced:new.append(outputs.get((field,basin),outputs[field]));replaced=True
+       else:new.append(lyr)
+      if not replaced:new.append(outputs[field])
+      item.setLayers(new);item.setKeepLayerSet(True);item.refresh()
+     elif isinstance(item,QgsLayoutItemLegend):
+      item.setAutoUpdateModel(False);item.model().rootGroup().clear();item.model().rootGroup().addLayer(outputs[field]);item.setTitle(title);item.adjustBoxSize()
+     elif isinstance(item,QgsLayoutItemLabel):
+      text=item.text()
+      if &#x27;S0&#x27; in text or &#x27;Multivariate&#x27; in text or &#x27;multivari&#x27; in text:item.setText(title)
+    legend(layout,field,title);created.append(name)
+  for sub in [inputs,allg,terrain,*per.values()]:sub.setExpanded(False)
+  project.setFilePathStorage(Qgis.FilePathType.Relative);assert project.write(str(target));reports.append({&#x27;project&#x27;:str(target),&#x27;new_layouts&#x27;:created,&#x27;microplastic_layers&#x27;:len(grp.findLayers()),&#x27;invalid_layers&#x27;:[l.name() for l in project.mapLayers().values() if not l.isValid()]})
+  if target==R/&#x27;projeto_teco.qgz&#x27;:
+   layout=manager.layoutByName(&#x27;MP | Microplastic pressure&#x27;);settings=QgsLayoutExporter.ImageExportSettings();settings.dpi=160;out=R/&#x27;temp/microplasticos/qgis_pressure.png&#x27;;assert QgsLayoutExporter(layout).exportToImage(str(out),settings)==QgsLayoutExporter.Success
+ (F/&#x27;00_documentacao/Microplasticos/Conferencia_QGIS.json&#x27;).write_text(json.dumps(reports,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(json.dumps(reports,ensure_ascii=True))
+if __name__==&#x27;__main__&#x27;:main()
+</pre>

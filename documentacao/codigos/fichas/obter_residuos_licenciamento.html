@@ -1,0 +1,87 @@
+<!doctype html><meta charset="utf-8"><style>body{max-width:1100px;margin:30px auto;font:16px/1.65 Arial;color:#254851}pre{white-space:pre;overflow:auto;background:#eef3f4;padding:18px}a{color:#156e80}</style><h1>obter_residuos_licenciamento.py</h1><p><a href="https://ricardosqzz.github.io/codiname-teco/microplasticos/Guia_codigos_microplasticos.html">Guia metodológico completo deste módulo</a></p><h2>Entradas e saídas</h2><pre># ENTRADAS: bacias_estudo em output/04_grade_500m/teco_grade_500m.gpkg; geometria EPSG:31983.
+# FONTES: WFS IDE-Sisema e catálogo CKAN do MMA; lista LAYERS e BUFFER_M editáveis abaixo.
+# SAÍDAS: dados_publicos/residuos_licenciamento/originais, manifesto_downloads.json e esquemas.
+from pathlib import Path
+import sys,json,hashlib,time,datetime,zipfile,subprocess,argparse
+from concurrent.futures import ThreadPoolExecutor,as_completed
+import requests
+import geopandas as gpd
+from caminhos_teco import raiz_projeto</pre><h2>Funções</h2><ul><li>get - linha 24</li><li>collect - linha 31</li><li>main - linha 43</li></ul><h2>Código integral</h2><pre># ENTRADAS: bacias_estudo em output/04_grade_500m/teco_grade_500m.gpkg; geometria EPSG:31983.
+# FONTES: WFS IDE-Sisema e catálogo CKAN do MMA; lista LAYERS e BUFFER_M editáveis abaixo.
+# SAÍDAS: dados_publicos/residuos_licenciamento/originais, manifesto_downloads.json e esquemas.
+from pathlib import Path
+import sys,json,hashlib,time,datetime,zipfile,subprocess,argparse
+from concurrent.futures import ThreadPoolExecutor,as_completed
+import requests
+import geopandas as gpd
+from caminhos_teco import raiz_projeto
+R=raiz_projeto()
+OUT=R/&#x27;dados_publicos/residuos_licenciamento&#x27;;RAW=OUT/&#x27;originais&#x27;;RAW.mkdir(parents=True,exist_ok=True)
+WFS=&#x27;https://geoserver.meioambiente.mg.gov.br/ows&#x27;
+BUFFER_M=20000
+LAYERS={
+&#x27;licencas_sla&#x27;:&#x27;IDE:ide_2101_mg_empreendimentos_licenciados_pto&#x27;,
+&#x27;licencas_historicas&#x27;:&#x27;IDE:ide_2101_mg_historico_empreendi_lic_2013_2019_pto&#x27;,
+&#x27;transbordo&#x27;:&#x27;IDE:ide_0601_mg_loc_est_trbd_rsu_pto&#x27;,
+&#x27;disposicao_precaria&#x27;:&#x27;IDE:ide_0601_mg_loc_lixao_pto&#x27;,
+&#x27;aterros_sanitarios&#x27;:&#x27;IDE:ide_0601_mg_loc_at_sanit_pto&#x27;,
+&#x27;plano_residuos_2024&#x27;:&#x27;IDE:ide_240805_mg_idam_pmgirs_2024_pol&#x27;,
+&#x27;competencia_municipal&#x27;:&#x27;IDE:ide_2102_mg_licenciamento_ambiental_municipal_pol&#x27;}
+
+# Consulta e proveniência
+def get(url,params=None):
+    error=None
+    for attempt in range(3):
+        try:
+            r=requests.get(url,params=params,timeout=45);r.raise_for_status();return r
+        except Exception as e:error=e;time.sleep(1+attempt)
+    raise error
+def collect(key,name,bounds):
+    path=RAW/(key+&#x27;.geojson&#x27;);records=[];offset=0;urls=[];matched=None
+    while True:
+        params={&#x27;service&#x27;:&#x27;WFS&#x27;,&#x27;version&#x27;:&#x27;2.0.0&#x27;,&#x27;request&#x27;:&#x27;GetFeature&#x27;,&#x27;typeNames&#x27;:name,&#x27;srsName&#x27;:&#x27;EPSG:31983&#x27;,&#x27;outputFormat&#x27;:&#x27;application/json&#x27;,&#x27;bbox&#x27;:&#x27;,&#x27;.join(map(str,bounds))+&#x27;,EPSG:31983&#x27;,&#x27;count&#x27;:5000,&#x27;startIndex&#x27;:offset}
+        r=get(WFS,params);data=r.json();features=data.get(&#x27;features&#x27;)
+        if features is None:raise ValueError(r.text[:200])
+        urls.append(r.url);records.extend(features);matched=data.get(&#x27;totalFeatures&#x27;,data.get(&#x27;numberMatched&#x27;))
+        if len(features)&lt;5000:break
+        offset+=5000
+    data[&#x27;features&#x27;]=records;data[&#x27;numberReturned&#x27;]=len(records);data[&#x27;totalFeatures&#x27;]=len(records)
+    path.write_text(json.dumps(data,ensure_ascii=False),encoding=&#x27;utf8&#x27;)
+    return {&#x27;chave&#x27;:key,&#x27;camada&#x27;:name,&#x27;arquivo&#x27;:str(path.relative_to(R)),&#x27;consulta_urls&#x27;:urls,&#x27;registros&#x27;:len(records),&#x27;total_servidor&#x27;:matched,&#x27;sha256&#x27;:hashlib.sha256(path.read_bytes()).hexdigest(),&#x27;campos&#x27;:list(records[0][&#x27;properties&#x27;]) if records else []}
+def main():
+    parser=argparse.ArgumentParser();parser.add_argument(&#x27;--cache&#x27;,action=&#x27;store_true&#x27;);args=parser.parse_args()
+    b=gpd.read_file(R/&#x27;output/04_grade_500m/teco_grade_500m.gpkg&#x27;,layer=&#x27;bacias_estudo&#x27;).to_crs(31983)
+    bounds=b.geometry.union_all().buffer(BUFFER_M).bounds;result=[];errors=[]
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        jobs={pool.submit(collect,k,v,bounds):k for k,v in LAYERS.items()}
+        for job in as_completed(jobs):
+            try:r=job.result();result.append(r);print(json.dumps({&#x27;layer&#x27;:r[&#x27;chave&#x27;],&#x27;n&#x27;:r[&#x27;registros&#x27;]},ensure_ascii=True),flush=True)
+            except Exception as e:errors.append({&#x27;chave&#x27;:jobs[job],&#x27;erro&#x27;:str(e)});print(&#x27;ERRO&#x27;,jobs[job],str(e),flush=True)
+    try:
+        r=get(&#x27;https://dados.mma.gov.br/api/3/action/package_show&#x27;,{&#x27;id&#x27;:&#x27;sinir&#x27;});(RAW/&#x27;sinir_catalogo.json&#x27;).write_bytes(r.content)
+        resources=r.json()[&#x27;result&#x27;][&#x27;resources&#x27;];print(&#x27;SINIR&#x27;,json.dumps([{&#x27;nome&#x27;:x[&#x27;name&#x27;],&#x27;url&#x27;:x[&#x27;url&#x27;]} for x in resources],ensure_ascii=True),flush=True)
+        for resource in resources:
+            if resource[&#x27;url&#x27;].lower().endswith(&#x27;.zip&#x27;) and &#x27;2024&#x27; in resource[&#x27;url&#x27;]:
+                p=RAW/&#x27;sinir_estados_municipios_2024.zip&#x27;
+                if not(args.cache and p.exists()):p.write_bytes(get(resource[&#x27;url&#x27;]).content)
+                with zipfile.ZipFile(p) as z:
+                    files=z.namelist()
+                    for n in files:
+                        target=(RAW/&#x27;sinir_2024&#x27;/n).resolve()
+                        if not target.is_relative_to((RAW/&#x27;sinir_2024&#x27;).resolve()):raise ValueError(&#x27;Caminho ZIP inválido&#x27;)
+                    z.extractall(RAW/&#x27;sinir_2024&#x27;)
+                result.append({&#x27;chave&#x27;:&#x27;sinir_2024&#x27;,&#x27;url&#x27;:resource[&#x27;url&#x27;],&#x27;arquivo&#x27;:str(p.relative_to(R)),&#x27;sha256&#x27;:hashlib.sha256(p.read_bytes()).hexdigest(),&#x27;arquivos&#x27;:files});print(&#x27;SINIR_ZIP&#x27;,len(files),flush=True)
+        resource=next(v for v in resources if &#x27;relatorios-2025&#x27; in v[&#x27;url&#x27;].lower())
+        p=RAW/&#x27;sinir_estados_municipios_2025.rar&#x27;
+        if not(args.cache and p.exists()):p.write_bytes(get(resource[&#x27;url&#x27;]).content)
+        dest=RAW/&#x27;sinir_2025&#x27;;dest.mkdir(exist_ok=True)
+        listing=subprocess.check_output([&#x27;tar&#x27;,&#x27;-tf&#x27;,str(p)]).decode(&#x27;utf8&#x27;,errors=&#x27;replace&#x27;).splitlines()
+        for n in listing:
+            if Path(n).is_absolute() or &#x27;..&#x27; in Path(n).parts:raise ValueError(&#x27;Caminho RAR inválido&#x27;)
+        subprocess.run([&#x27;tar&#x27;,&#x27;-xf&#x27;,str(p),&#x27;-C&#x27;,str(dest)],check=True)
+        result.append({&#x27;chave&#x27;:&#x27;sinir_2025&#x27;,&#x27;url&#x27;:resource[&#x27;url&#x27;],&#x27;arquivo&#x27;:str(p.relative_to(R)),&#x27;sha256&#x27;:hashlib.sha256(p.read_bytes()).hexdigest(),&#x27;exercicio&#x27;:2025,&#x27;ano_referencia&#x27;:2024})
+    except Exception as e:errors.append({&#x27;chave&#x27;:&#x27;sinir&#x27;,&#x27;erro&#x27;:str(e)})
+    (OUT/&#x27;manifesto_downloads.json&#x27;).write_text(json.dumps({&#x27;data_utc&#x27;:datetime.datetime.now(datetime.timezone.utc).isoformat(),&#x27;crs&#x27;:&#x27;EPSG:31983&#x27;,&#x27;bbox_m&#x27;:bounds,&#x27;buffer_m&#x27;:BUFFER_M,&#x27;fontes&#x27;:result,&#x27;falhas&#x27;:errors},ensure_ascii=False,indent=2,default=str),encoding=&#x27;utf8&#x27;)
+    print(&#x27;CONCLUIDO&#x27;,len(result),&#x27;fontes;&#x27;,len(errors),&#x27;falhas&#x27;,flush=True)
+if __name__==&#x27;__main__&#x27;:main()
+</pre>

@@ -1,0 +1,212 @@
+<!doctype html><meta charset="utf-8"><style>body{max-width:1100px;margin:30px auto;font:16px/1.65 Arial;color:#254851}pre{white-space:pre;overflow:auto;background:#eef3f4;padding:18px}a{color:#156e80}</style><h1>microplasticos_teco.py</h1><p><a href="https://ricardosqzz.github.io/codiname-teco/microplasticos/Guia_codigos_microplasticos.html">Guia metodológico completo deste módulo</a></p><h2>Entradas e saídas</h2><pre># ENTRADAS: config/microplasticos.json; caminhos relativos à raiz TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json.
+# GRADE: grade_resultados e influencia_500m; chaves GRID_ID/BACIA; POP_DENS, SEM_REDE, VIAS_KM, AREA_KM2, VALIDO.
+# CENSO: analise_setores; setor_id, dom_set (DPP ocupados), set_km2 (área original), geometria recortada.
+# LIXO: CSV IBGE, setor e V00397-00402; X é sigilo, não zero; denominador dom_set.
+# CONTEXTO: GeoJSON IDE-Sisema e CSV SINIR; atividade, processo, situação, plano e coleta seletiva; sem CPF/nome pessoal nas saídas.
+# SAÍDAS: output/07_microplasticos; microplasticos.gpkg, tabelas, rasters, auditoria; MP_INDEX, MP_CLASS, MP_K, MP_MORAN.
+# NOVA ENTRADA: definir a agregação abaixo e acrescentar campo, transformação e pesos em config/microplasticos.json.
+from pathlib import Path
+from collections import deque</pre><h2>Funções</h2><ul><li>norm - linha 28</li><li>csv - linha 29</li><li>layer - linha 30</li><li>digest - linha 32</li><li>waste - linha 39</li><li>aggregate - linha 66</li><li>context - linha 83</li><li>classify - linha 121</li><li>spatial - linha 152</li><li>connectivity - linha 164</li><li>main - linha 189</li></ul><h2>Código integral</h2><pre># ENTRADAS: config/microplasticos.json; caminhos relativos à raiz TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json.
+# GRADE: grade_resultados e influencia_500m; chaves GRID_ID/BACIA; POP_DENS, SEM_REDE, VIAS_KM, AREA_KM2, VALIDO.
+# CENSO: analise_setores; setor_id, dom_set (DPP ocupados), set_km2 (área original), geometria recortada.
+# LIXO: CSV IBGE, setor e V00397-00402; X é sigilo, não zero; denominador dom_set.
+# CONTEXTO: GeoJSON IDE-Sisema e CSV SINIR; atividade, processo, situação, plano e coleta seletiva; sem CPF/nome pessoal nas saídas.
+# SAÍDAS: output/07_microplasticos; microplasticos.gpkg, tabelas, rasters, auditoria; MP_INDEX, MP_CLASS, MP_K, MP_MORAN.
+# NOVA ENTRADA: definir a agregação abaixo e acrescentar campo, transformação e pesos em config/microplasticos.json.
+from pathlib import Path
+from collections import deque
+import json,hashlib,datetime,unicodedata,re
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+import rasterio
+from rasterio.features import rasterize
+from scipy.spatial import cKDTree,distance
+from scipy.sparse import csr_matrix
+from scipy.stats import spearmanr
+from scipy.optimize import linear_sum_assignment
+from caminhos_teco import raiz_projeto
+from analise_espacial_teco import fitkm,silhouette,ari
+from multivariada_teco import moran_w
+R=raiz_projeto();C=json.loads((R/&#x27;config/microplasticos.json&#x27;).read_text(&#x27;utf8&#x27;));O=R/C[&#x27;saida&#x27;];G=O/&#x27;microplasticos.gpkg&#x27;
+for d in [&#x27;tabelas&#x27;,&#x27;rasters&#x27;,&#x27;auditoria&#x27;,&#x27;figuras&#x27;]:(O/d).mkdir(parents=True,exist_ok=True)
+SEED=C[&#x27;semente&#x27;];D8={1:(-1,1),2:(-1,0),3:(-1,-1),4:(0,-1),5:(1,-1),6:(1,0),7:(1,1),8:(0,1)}
+
+# Escrita e identificação
+def norm(x):return &#x27;&#x27;.join(c for c in unicodedata.normalize(&#x27;NFKD&#x27;,str(x)) if not unicodedata.combining(c)).lower()
+def csv(df,name):df.to_csv(O/&#x27;tabelas&#x27;/f&#x27;{name}.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+def layer(g,name):
+    if len(g):g.to_file(G,layer=name,driver=&#x27;GPKG&#x27;)
+def digest(p):
+    h=hashlib.sha256()
+    with open(p,&#x27;rb&#x27;) as f:
+        for b in iter(lambda:f.read(1024*1024),b&#x27;&#x27;):h.update(b)
+    return h.hexdigest()
+
+# Destinação domiciliar e limites de sigilo
+def waste(sectors):
+    fields=[f&#x27;V{i:05d}&#x27; for i in range(397,403)];ids=set(sectors.setor_id.astype(str));parts=[]
+    for chunk in pd.read_csv(R/C[&#x27;ibge_lixo&#x27;],sep=&#x27;;&#x27;,usecols=[&#x27;setor&#x27;,*fields],dtype=str,chunksize=30000):
+        sub=chunk[chunk.setor.isin(ids)]
+        if len(sub):parts.append(sub)
+    raw=pd.concat(parts,ignore_index=True).rename(columns={&#x27;setor&#x27;:&#x27;setor_id&#x27;});assert raw.setor_id.is_unique
+    csv(raw,&#x27;ibge_lixo_recorte_original&#x27;)
+    s=sectors[[&#x27;setor_id&#x27;,&#x27;bas_id&#x27;,&#x27;mun_nome&#x27;,&#x27;dom_set&#x27;,&#x27;set_km2&#x27;,&#x27;geometry&#x27;]].merge(raw,on=&#x27;setor_id&#x27;,how=&#x27;left&#x27;,validate=&#x27;many_to_one&#x27;)
+    vals=s[fields].apply(pd.to_numeric,errors=&#x27;coerce&#x27;);total=pd.to_numeric(s.dom_set,errors=&#x27;coerce&#x27;)
+    known_yes=vals[fields[:2]].sum(axis=1,min_count=1).fillna(0);known_no=vals[fields[2:]].sum(axis=1,min_count=1).fillna(0)
+    yes_exact=vals[fields[:2]].notna().all(axis=1);no_exact=vals[fields[2:]].notna().all(axis=1)
+    bad=(known_yes+known_no&gt;total+1e-6)|(total&lt;0)|(vals.lt(0).any(axis=1))|total.isna()|~s.setor_id.isin(raw.setor_id)
+    lo=known_no.copy();hi=(total-known_yes).clip(lower=0)
+    lo=np.where(yes_exact,total-known_yes,lo);hi=np.where(no_exact,known_no,hi)
+    bad|=np.asarray(lo)&gt;np.asarray(hi)+1e-6
+    s[&#x27;HH_TOTAL&#x27;]=total;s[&#x27;UNC_LO&#x27;]=np.where(bad,np.nan,lo);s[&#x27;UNC_HI&#x27;]=np.where(bad,np.nan,hi)
+    s[&#x27;UNC_MID&#x27;]=(s.UNC_LO+s.UNC_HI)/2;s[&#x27;WASTE_LO&#x27;]=100*s.UNC_LO/total.where(total&gt;0);s[&#x27;WASTE_HI&#x27;]=100*s.UNC_HI/total.where(total&gt;0)
+    s[&#x27;WASTE_PCT&#x27;]=(s.WASTE_LO+s.WASTE_HI)/2;s[&#x27;WASTE_EST&#x27;]=((s.UNC_HI-s.UNC_LO)&gt;1e-8).astype(int)
+    s[&#x27;WASTE_QA&#x27;]=np.where(bad,&#x27;inconsistent_or_missing&#x27;,np.where(total==0,&#x27;no_households&#x27;,np.where(s.WASTE_EST==1,&#x27;interval_midpoint&#x27;,&#x27;exact_combined&#x27;)))
+    s[&#x27;ORIG_KM2&#x27;]=s.set_km2;s[&#x27;PART_KM2&#x27;]=s.area/1e6;s[&#x27;BACIA&#x27;]=s.bas_id
+    for f in [&#x27;HH_TOTAL&#x27;,&#x27;UNC_LO&#x27;,&#x27;UNC_HI&#x27;,&#x27;UNC_MID&#x27;]:s[f+&#x27;_AL&#x27;]=s[f]*s.PART_KM2/s.ORIG_KM2
+    sums=s.groupby(&#x27;BACIA&#x27;)[[&#x27;HH_TOTAL_AL&#x27;,&#x27;UNC_LO_AL&#x27;,&#x27;UNC_HI_AL&#x27;,&#x27;UNC_MID_AL&#x27;]].sum(min_count=1)
+    sums[&#x27;WASTE_LO&#x27;]=100*sums.UNC_LO_AL/sums.HH_TOTAL_AL;sums[&#x27;WASTE_HI&#x27;]=100*sums.UNC_HI_AL/sums.HH_TOTAL_AL
+    csv(sums.reset_index(),&#x27;residuos_por_bacia&#x27;);layer(s,&#x27;waste_census&#x27;)
+    return s
+
+# Agregação nas vizinhanças de cálculo
+def aggregate(g,circles,s):
+    pieces=gpd.overlay(circles[[&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;,&#x27;geometry&#x27;]],s[[&#x27;setor_id&#x27;,&#x27;BACIA&#x27;,&#x27;HH_TOTAL&#x27;,&#x27;UNC_LO&#x27;,&#x27;UNC_HI&#x27;,&#x27;ORIG_KM2&#x27;,&#x27;geometry&#x27;]].rename(columns={&#x27;BACIA&#x27;:&#x27;SRC_BAS&#x27;}),how=&#x27;intersection&#x27;,keep_geom_type=True)
+    pieces=pieces[pieces.BACIA==pieces.SRC_BAS].copy();pieces[&#x27;KM2&#x27;]=pieces.area/1e6
+    pieces[&#x27;HH&#x27;]=pieces.HH_TOTAL*pieces.KM2/pieces.ORIG_KM2
+    for f in [&#x27;UNC_LO&#x27;,&#x27;UNC_HI&#x27;]:pieces[f+&#x27;_ALLOC&#x27;]=pieces[f]*pieces.KM2/pieces.ORIG_KM2
+    pieces[&#x27;OBS_HH&#x27;]=pieces.HH.where(pieces.UNC_LO.notna()&amp;pieces.UNC_HI.notna(),0)
+    sums=pieces.groupby([&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;])[[&#x27;HH&#x27;,&#x27;OBS_HH&#x27;,&#x27;UNC_LO_ALLOC&#x27;,&#x27;UNC_HI_ALLOC&#x27;]].sum(min_count=1)
+    g=g.merge(sums,on=[&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;],how=&#x27;left&#x27;,validate=&#x27;one_to_one&#x27;)
+    g[&#x27;WASTE_LO&#x27;]=100*g.UNC_LO_ALLOC/g.OBS_HH.where(g.OBS_HH&gt;0);g[&#x27;WASTE_HI&#x27;]=100*g.UNC_HI_ALLOC/g.OBS_HH.where(g.OBS_HH&gt;0)
+    g[&#x27;WASTE_PCT&#x27;]=(g.WASTE_LO+g.WASTE_HI)/2;g[&#x27;WASTE_COV&#x27;]=100*g.OBS_HH/g.HH.where(g.HH&gt;0)
+    g[&#x27;WASTE_DENS&#x27;]=(g.UNC_LO_ALLOC+g.UNC_HI_ALLOC)/2/g.AREA_KM2
+    g[&#x27;SEWER_DENS&#x27;]=g.SEM/g.AREA_KM2
+    g[&#x27;ROAD_DENS&#x27;]=g.VIAS_KM/g.AREA_KM2
+    g[&#x27;MP_VALID&#x27;]=(g.VALIDO.astype(bool)&amp;g[C[&#x27;variaveis&#x27;][0][&#x27;campo&#x27;]].notna()&amp;(g.WASTE_COV&gt;=99.9)&amp;g.WASTE_PCT.notna()).astype(int)
+    return g
+
+# Catálogos públicos e triagem por atividade
+def context(b,sectors):
+    raw=R/C[&#x27;originais&#x27;];records=[];region=[];union=b.geometry.union_all()
+    for code in [&#x27;licencas_sla&#x27;,&#x27;licencas_historicas&#x27;]:
+        a=gpd.read_file(raw/(code+&#x27;.geojson&#x27;)).to_crs(31983)
+        for i,r in a.iterrows():
+            current=code==&#x27;licencas_sla&#x27;;act=str(r.get(&#x27;des_atvpri&#x27; if current else &#x27;atividade&#x27;,&#x27;&#x27;));process=str(r.get(&#x27;n_processo&#x27; if current else &#x27;processo&#x27;,&#x27;&#x27;))
+            text=norm(act);candidate=bool(re.search(r&#x27;plastic|termoplastic|borracha|textil|lavander|resina|polimer&#x27;,text))
+            loc=[str(q.id) for q in b.itertuples() if q.geometry.intersects(r.geometry)]
+            rec={&#x27;REC_ID&#x27;:f&#x27;{&quot;SLA&quot; if current else &quot;HIS&quot;}{i+1:05d}&#x27;,&#x27;SOURCE&#x27;:code,&#x27;PROCESS&#x27;:process,&#x27;ACT_CODE&#x27;:str(r.get(&#x27;cod_atvpri&#x27; if current else &#x27;cod_dn&#x27;,&#x27;&#x27;)),&#x27;ACTIVITY&#x27;:act,&#x27;STATUS&#x27;:str(r.get(&#x27;status_pro&#x27; if current else &#x27;modalidade&#x27;,&#x27;&#x27;)),&#x27;VALIDITY&#x27;:str(r.get(&#x27;data_val&#x27; if current else &#x27;validade&#x27;,&#x27;&#x27;)),&#x27;ISSUED&#x27;:str(r.get(&#x27;data_emiss&#x27; if current else &#x27;ano&#x27;,&#x27;&#x27;)),&#x27;MP_CAND&#x27;:int(candidate),&#x27;BACIA&#x27;:&#x27;|&#x27;.join(loc),&#x27;REVIEW&#x27;:&#x27;verify_process_and_operation&#x27;,&#x27;URL&#x27;:str(r.get(&#x27;link&#x27;,&#x27;&#x27;)) if current else &#x27;https://www.siam.mg.gov.br/siam/processo/index.jsp&#x27;,&#x27;geometry&#x27;:r.geometry}
+            region.append(rec)
+            if loc:records.append(rec)
+    lic=gpd.GeoDataFrame(records,crs=31983);layer(lic,&#x27;licensing_screening&#x27;);csv(lic.drop(columns=&#x27;geometry&#x27;),&#x27;licencas_triagem&#x27;)
+    csv(pd.DataFrame([{k:v for k,v in r.items() if k!=&#x27;geometry&#x27;} for r in region]),&#x27;licencas_contexto_20km&#x27;)
+    facilities=[]
+    for code in [&#x27;aterros_sanitarios&#x27;,&#x27;transbordo&#x27;,&#x27;disposicao_precaria&#x27;]:
+        p=raw/(code+&#x27;.geojson&#x27;);data=json.loads(p.read_text(&#x27;utf8&#x27;))
+        if not data.get(&#x27;features&#x27;):continue
+        a=gpd.read_file(p).to_crs(31983)
+        for i,r in a.iterrows():
+            loc=[str(q.id) for q in b.itertuples() if q.geometry.intersects(r.geometry)]
+            facilities.append({&#x27;REC_ID&#x27;:f&#x27;{code[:3]}{i+1:04d}&#x27;,&#x27;TYPE&#x27;:code,&#x27;MUNICIPAL&#x27;:str(r.get(&#x27;municipio&#x27;,&#x27;&#x27;)),&#x27;STATUS&#x27;:str(r.get(&#x27;regul_amb&#x27;,r.get(&#x27;situacao&#x27;,&#x27;&#x27;))),&#x27;SHARED&#x27;:str(r.get(&#x27;compart&#x27;,&#x27;&#x27;)),&#x27;BACIA&#x27;:&#x27;|&#x27;.join(loc),&#x27;IN_BASIN&#x27;:int(bool(loc)),&#x27;CHECK&#x27;:&#x27;acceptance_and_status_unverified&#x27;,&#x27;geometry&#x27;:r.geometry})
+    fac=gpd.GeoDataFrame(facilities,crs=31983);layer(fac,&#x27;waste_management&#x27;);csv(fac.drop(columns=&#x27;geometry&#x27;),&#x27;instalacoes_residuos_contexto&#x27;)
+    plans=gpd.read_file(raw/&#x27;plano_residuos_2024.geojson&#x27;).to_crs(31983);plans=plans[plans.intersects(union)].copy()
+    plans=plans[[&#x27;nome&#x27;,&#x27;geocodigo&#x27;,&#x27;pmgirs_24&#x27;,&#x27;colsel_24&#x27;,&#x27;tiprsu_24&#x27;,&#x27;geometry&#x27;]];layer(plans,&#x27;municipal_waste_plans&#x27;);csv(plans.drop(columns=&#x27;geometry&#x27;),&#x27;planos_municipais_2024&#x27;)
+    names={norm(x) for x in sectors.mun_nome.unique()};sinir=[]
+    for p in (raw/&#x27;sinir_2025&#x27;).rglob(&#x27;Municipal*.csv&#x27;):
+        if not any(x in p.name for x in [&#x27;Diagnostico&#x27;,&#x27;Passivo&#x27;,&#x27;Compartilhadas&#x27;]):continue
+        x=pd.read_csv(p,sep=&#x27;;&#x27;,encoding=&#x27;latin1&#x27;,dtype=str)
+        x.columns=[c.encode(&#x27;latin1&#x27;).decode(&#x27;utf8&#x27;,errors=&#x27;replace&#x27;) if &#x27;Ã&#x27; in c or &#x27;\x83&#x27; in c else c for c in x.columns]
+        x[&#x27;Declarante&#x27;]=x[&#x27;Declarante&#x27;].map(lambda v:v.encode(&#x27;latin1&#x27;).decode(&#x27;utf8&#x27;,errors=&#x27;replace&#x27;) if isinstance(v,str) and &#x27;Ã&#x27; in v else v)
+        x=x[(x[&#x27;UF Declarante&#x27;]==&#x27;MG&#x27;)&amp;x[&#x27;Declarante&#x27;].map(norm).isin(names)].copy()
+        if len(x):
+            for f in x:
+                x[f]=x[f].map(lambda v:v.encode(&#x27;latin1&#x27;).decode(&#x27;utf8&#x27;,errors=&#x27;replace&#x27;) if isinstance(v,str) and (&#x27;Ã&#x27; in v or &#x27;\x83&#x27; in v) else v)
+            x[&#x27;SOURCE_TABLE&#x27;]=p.stem;csv(x,&#x27;sinir_&#x27;+(&#x27;diagnostico&#x27; if &#x27;Diagnostico&#x27; in p.name else &#x27;passivos&#x27; if &#x27;Passivo&#x27; in p.name else &#x27;compartilhados&#x27;));sinir.append(x)
+    return lic,fac,plans,{&#x27;licencas_bacias&#x27;:len(lic),&#x27;licencas_candidatas&#x27;:int(lic.MP_CAND.sum()),&#x27;instalacoes_regionais&#x27;:len(fac),&#x27;instalacoes_bacias&#x27;:int(fac.IN_BASIN.sum()),&#x27;municipios_sinir&#x27;:sorted(set(v for x in sinir for v in x.Declarante.unique()))}
+
+# Multicritério e k-means
+def classify(g):
+    idx=g.index[g.MP_VALID==1];defs=C[&#x27;variaveis&#x27;];features=[v[&#x27;campo&#x27;] for v in defs];raw=g.loc[idx,features].to_numpy(float);x=raw.copy();params=[]
+    for j,v in enumerate(defs):
+        if v[&#x27;transformacao&#x27;]==&#x27;log1p&#x27;:x[:,j]=np.log1p(x[:,j])
+        lo,hi=x[:,j].min(),x[:,j].max();params.append({&#x27;campo&#x27;:features[j],&#x27;transformacao&#x27;:v[&#x27;transformacao&#x27;],&#x27;min&#x27;:lo,&#x27;max&#x27;:hi});x[:,j]=(x[:,j]-lo)/(hi-lo) if hi&gt;lo else 0
+        g[&#x27;MP_N&#x27;+str(j+1)]=np.nan;g.loc[idx,&#x27;MP_N&#x27;+str(j+1)]=x[:,j]
+    csv(pd.DataFrame(params),&#x27;normalizacao&#x27;);models={};ks=[];scenarios=[];scores={}
+    for code,ww in C[&#x27;cenarios&#x27;].items():
+        w=np.asarray(ww);wx=x*np.sqrt(w/w.sum());score=100*(x@w)/w.sum();scores[code]=score;g[&#x27;MP_&#x27;+code]=np.nan;g.loc[idx,&#x27;MP_&#x27;+code]=score
+        for k in C[&#x27;k_testados&#x27;]:
+            loss,cent,lab=fitkm(wx,k,SEED+100*int(code[1:]),starts=20);sil=silhouette(wx,lab);sizes=np.bincount(lab,minlength=k)
+            ks.append({&#x27;scenario&#x27;:code,&#x27;k&#x27;:k,&#x27;silhouette&#x27;:sil,&#x27;min_n&#x27;:int(sizes.min()),&#x27;inertia&#x27;:loss});models[code,k]=(cent,lab)
+        best=max([r for r in ks if r[&#x27;scenario&#x27;]==code],key=lambda r:r[&#x27;silhouette&#x27;]);scenarios.append({**best,&#x27;weights&#x27;:ww})
+    k0=next(s[&#x27;k&#x27;] for s in scenarios if s[&#x27;scenario&#x27;]==&#x27;S0&#x27;);base=models[&#x27;S0&#x27;,k0][1];order=sorted(set(base),key=lambda c:scores[&#x27;S0&#x27;][base==c].mean());lookup={a:i for i,a in enumerate(order)};base=np.array([lookup[a] for a in base]);stability=[]
+    for rec in scenarios:
+        code=rec[&#x27;scenario&#x27;];lab=models[code,k0][1];cont=np.bincount(base*k0+lab,minlength=k0*k0).reshape(k0,k0);rr,cc=linear_sum_assignment(-cont);lookup=dict(zip(cc,rr));lab=np.array([lookup[v] for v in lab]);stability.append(lab==base)
+        rec.update(ARI_base=ari(base,lab),rho_score=spearmanr(scores[&#x27;S0&#x27;],scores[code]).statistic,k_reference=k0)
+        g[&#x27;MK_&#x27;+code]=0;g.loc[idx,&#x27;MK_&#x27;+code]=lab+1
+    g[&#x27;MP_INDEX&#x27;]=g.MP_S0;g[&#x27;MP_CLASS&#x27;]=0;g.loc[idx,&#x27;MP_CLASS&#x27;]=np.clip(np.ceil(g.loc[idx,&#x27;MP_INDEX&#x27;]/20).astype(int),1,5)
+    cuts=np.quantile(scores[&#x27;S0&#x27;],[.2,.4,.6,.8]);g[&#x27;MP_QUINT&#x27;]=0;g.loc[idx,&#x27;MP_QUINT&#x27;]=np.searchsorted(cuts,scores[&#x27;S0&#x27;],side=&#x27;left&#x27;)+1
+    g[&#x27;MP_K&#x27;]=g.MK_S0;g[&#x27;MP_STAB&#x27;]=np.nan;g.loc[idx,&#x27;MP_STAB&#x27;]=100*np.mean(stability,axis=0)
+    p=params[2];lower=x.copy();upper=x.copy();lower[:,2]=(np.log1p(g.loc[idx,&#x27;UNC_LO_ALLOC&#x27;]/g.loc[idx,&#x27;AREA_KM2&#x27;])-p[&#x27;min&#x27;])/(p[&#x27;max&#x27;]-p[&#x27;min&#x27;]);upper[:,2]=(np.log1p(g.loc[idx,&#x27;UNC_HI_ALLOC&#x27;]/g.loc[idx,&#x27;AREA_KM2&#x27;])-p[&#x27;min&#x27;])/(p[&#x27;max&#x27;]-p[&#x27;min&#x27;])
+    lower[:,2]=np.clip(lower[:,2],0,1);upper[:,2]=np.clip(upper[:,2],0,1)
+    g[&#x27;MP_LO&#x27;]=np.nan;g[&#x27;MP_HI&#x27;]=np.nan;g.loc[idx,&#x27;MP_LO&#x27;]=lower.mean(1)*100;g.loc[idx,&#x27;MP_HI&#x27;]=upper.mean(1)*100
+    g[&#x27;ARG_INDEX&#x27;]=g.I_S0;g[&#x27;ARG_K&#x27;]=g.K_S0
+    profiles=g[g.MP_VALID==1].groupby(&#x27;MP_K&#x27;)[features+[&#x27;MP_INDEX&#x27;]].median().reset_index();profiles[&#x27;n&#x27;]=g[g.MP_VALID==1].groupby(&#x27;MP_K&#x27;).size().values
+    csv(profiles,&#x27;perfis_kmeans&#x27;);csv(pd.DataFrame(ks),&#x27;kmeans_testes&#x27;);csv(pd.DataFrame(scenarios),&#x27;sensibilidade_pesos&#x27;);csv(pd.DataFrame(raw,columns=features).corr(method=&#x27;spearman&#x27;).reset_index(names=&#x27;variable&#x27;),&#x27;correlacao_entradas&#x27;)
+    csv(pd.DataFrame([{&#x27;q&#x27;:i+1,&#x27;cut&#x27;:float(v)} for i,v in enumerate(cuts)]),&#x27;cortes_quintis&#x27;)
+    return g,{&#x27;n_valid&#x27;:len(idx),&#x27;n_total&#x27;:len(g),&#x27;k_reference&#x27;:k0,&#x27;silhouette&#x27;:next(r[&#x27;silhouette&#x27;] for r in ks if r[&#x27;scenario&#x27;]==&#x27;S0&#x27; and r[&#x27;k&#x27;]==k0),&#x27;quintile_cuts&#x27;:cuts.tolist(),&#x27;parameters&#x27;:params}
+
+# Moran por bacia e tema
+def spatial(g):
+    rows=[];g[&#x27;MP_MORAN&#x27;]=&#x27;ND&#x27;;g[&#x27;MP_P&#x27;]=np.nan;g[&#x27;MP_Q&#x27;]=np.nan
+    for basin,sub in g[g.MP_VALID==1].groupby(&#x27;BACIA&#x27;):
+        xy=np.c_[sub.geometry.representative_point().x,sub.geometry.representative_point().y];neighbors=cKDTree(xy).query(xy,k=min(C[&#x27;vizinhos&#x27;]+1,len(sub)))[1][:,1:]
+        w=csr_matrix((np.ones(neighbors.size),(np.repeat(np.arange(len(sub)),neighbors.shape[1]),neighbors.ravel())),shape=(len(sub),len(sub)));w=w.maximum(w.T);w.setdiag(0);w.eliminate_zeros()
+        for theme,field in [(&#x27;microplastics&#x27;,&#x27;MP_INDEX&#x27;),(&#x27;ARG_baseline&#x27;,&#x27;ARG_INDEX&#x27;)]:
+            rec,local,ids=moran_w(sub[field].to_numpy(float),w,local=True,seed=SEED);rows.append({&#x27;basin&#x27;:basin,&#x27;theme&#x27;:theme,**rec,&#x27;neighbors&#x27;:C[&#x27;vizinhos&#x27;],&#x27;FDR&#x27;:&#x27;BH_0.05_within_basin_theme&#x27;})
+            if theme==&#x27;microplastics&#x27; and local is not None:
+                take=sub.index[ids];g.loc[take,&#x27;MP_MORAN&#x27;]=local[&#x27;cluster&#x27;];g.loc[take,&#x27;MP_P&#x27;]=local[&#x27;p&#x27;];g.loc[take,&#x27;MP_Q&#x27;]=local[&#x27;q&#x27;]
+    csv(pd.DataFrame(rows),&#x27;moran_global&#x27;);return g
+
+# Conectividade topográfica sem carga ou decaimento
+def connectivity(g):
+    checks=[]
+    for key,sub in g.groupby(&#x27;BACIA&#x27;):
+        with rasterio.open(R/&#x27;sub_bacia&#x27;/key/&#x27;direcao_d8.tif&#x27;) as src:dr=src.read(1);t=src.transform;profile=src.profile
+        h,w=dr.shape;n=h*w;lab=rasterize([(r.geometry,float(r.MP_INDEX)) for r in sub.itertuples() if np.isfinite(r.MP_INDEX)],out_shape=(h,w),transform=t,fill=-9999,dtype=&#x27;float32&#x27;);valid=lab!=-9999
+        lake=gpd.read_file(R/&#x27;reservatorio&#x27;/f&#x27;{key}.shp&#x27;).to_crs(31983);lm=rasterize([(v,1) for v in lake.geometry],out_shape=(h,w),transform=t,dtype=&#x27;uint8&#x27;,all_touched=True).astype(bool)
+        domain=valid|lm;dest=np.full(n,-1,dtype=&#x27;int64&#x27;)
+        for code,(dy,dx) in D8.items():
+            yy,xx=np.where((dr==code)&amp;domain&amp;~lm);ny,nx=yy+dy,xx+dx;ok=(ny&gt;=0)&amp;(ny&lt;h)&amp;(nx&gt;=0)&amp;(nx&lt;w);a=yy[ok]*w+xx[ok];b=ny[ok]*w+nx[ok];ok=domain.ravel()[b];dest[a[ok]]=b[ok]
+        area=np.where(valid&amp;~lm,abs(t.a*t.e)/1e6,0).ravel();weighted=np.where(valid&amp;~lm,lab,0).ravel()*area
+        indeg=np.bincount(dest[dest&gt;=0],minlength=n);queue=deque(np.flatnonzero(domain.ravel()&amp;(indeg==0)));done=0
+        while queue:
+            j=queue.popleft();done+=1;k=dest[j]
+            if k&gt;=0:
+                area[k]+=area[j];weighted[k]+=weighted[j];indeg[k]-=1
+                if indeg[k]==0:queue.append(k)
+        cycles=int((domain.ravel()&amp;(indeg&gt;0)).sum());assert cycles==0,&#x27;Ciclo no grafo D8&#x27;
+        mean=np.divide(weighted,area,out=np.full(n,np.nan),where=area&gt;0).reshape(h,w);mean=np.where(domain,mean,np.nan)
+        for name,data in [(&#x27;upstream_pressure&#x27;,mean),(&#x27;contributing_km2&#x27;,np.where(domain,area.reshape(h,w),np.nan))]:
+            pr=profile.copy();pr.update(driver=&#x27;GTiff&#x27;,dtype=&#x27;float32&#x27;,nodata=-9999,count=1,compress=&#x27;deflate&#x27;)
+            with rasterio.open(O/&#x27;rasters&#x27;/f&#x27;{key}_{name}.tif&#x27;,&#x27;w&#x27;,**pr) as dst:dst.write(np.where(np.isfinite(data),data,-9999).astype(&#x27;float32&#x27;),1)
+        checks.append({&#x27;basin&#x27;:key,&#x27;domain_pixels&#x27;:int(domain.sum()),&#x27;processed&#x27;:done,&#x27;cycles&#x27;:cycles,&#x27;finite_mean&#x27;:int(np.isfinite(mean).sum()),&#x27;max_index&#x27;:float(np.nanmax(mean))})
+    csv(pd.DataFrame(checks),&#x27;auditoria_d8&#x27;);return checks
+
+# Execução e auditoria
+def main():
+    b=gpd.read_file(R/C[&#x27;base_grade&#x27;],layer=&#x27;bacias_estudo&#x27;);g=gpd.read_file(R/C[&#x27;base_grade&#x27;],layer=&#x27;grade_resultados&#x27;);original=g[[&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;,&#x27;I_S0&#x27;,&#x27;K_S0&#x27;]].copy()
+    circles=gpd.read_file(R/C[&#x27;base_grade&#x27;],layer=&#x27;influencia_500m&#x27;);s=gpd.read_file(R/C[&#x27;base_setores&#x27;],layer=&#x27;analise_setores&#x27;)
+    s=waste(s);g=aggregate(g,circles,s);print(&#x27;Censo e agregacao&#x27;,len(s),len(g),int(g.MP_VALID.sum()),flush=True)
+    lic,fac,plans,ctx=context(b,s.rename(columns={&#x27;mun_nome&#x27;:&#x27;mun_nome&#x27;}));g,meta=classify(g);g=spatial(g);d8=connectivity(g)
+    assert g[[&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;]].duplicated().sum()==0
+    assert np.allclose(g.ARG_INDEX,original.I_S0,equal_nan=True)
+    assert np.allclose(g.ARG_K,original.K_S0,equal_nan=True)
+    assert g.loc[g.MP_VALID==1,[&#x27;MP_INDEX&#x27;,&#x27;WASTE_PCT&#x27;,&#x27;ROAD_DENS&#x27;]].notna().all().all()
+    assert g.loc[g.MP_VALID==1,&#x27;MP_INDEX&#x27;].between(0,100).all()
+    layer(g,&#x27;microplastic_pressure&#x27;);layer(b,&#x27;basins&#x27;);csv(g.drop(columns=&#x27;geometry&#x27;),&#x27;classificacao_microplasticos&#x27;)
+    report={**meta,**ctx,&#x27;D8&#x27;:d8,&#x27;ARG_preserved&#x27;:True,&#x27;fields&#x27;:list(g.columns),&#x27;source_hashes&#x27;:{&#x27;ibge_lixo&#x27;:digest(R/C[&#x27;ibge_lixo&#x27;]),&#x27;config&#x27;:digest(R/&#x27;config/microplasticos.json&#x27;)},&#x27;updated_utc&#x27;:datetime.datetime.now(datetime.timezone.utc).isoformat()}
+    (O/&#x27;auditoria/metodo_microplasticos.json&#x27;).write_text(json.dumps(report,ensure_ascii=False,indent=2,default=str),encoding=&#x27;utf8&#x27;)
+    print(json.dumps({k:v for k,v in report.items() if k in [&#x27;n_valid&#x27;,&#x27;n_total&#x27;,&#x27;k_reference&#x27;,&#x27;silhouette&#x27;,&#x27;licencas_candidatas&#x27;,&#x27;ARG_preserved&#x27;]},ensure_ascii=True),flush=True)
+if __name__==&#x27;__main__&#x27;:main()
+</pre>

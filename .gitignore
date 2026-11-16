@@ -12,3 +12,5 @@ descontinuado/
 *.LST
 *.zip
 .chart-data-*/
+
+!dados/microplasticos/shapefiles_microplasticos.zip

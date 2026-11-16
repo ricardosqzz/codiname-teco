@@ -1,0 +1,103 @@
+<!doctype html><meta charset="utf-8"><style>body{max-width:1100px;margin:30px auto;font:16px/1.65 Arial;color:#254851}pre{white-space:pre;overflow:auto;background:#eef3f4;padding:18px}a{color:#156e80}</style><h1>consolidar_microplasticos_teco.py</h1><p><a href="https://ricardosqzz.github.io/codiname-teco/microplasticos/Guia_codigos_microplasticos.html">Guia metodológico completo deste módulo</a></p><h2>Entradas e saídas</h2><pre># ENTRADAS: output/07_microplasticos/microplasticos.gpkg e tabelas; campos definidos em FIELDS abaixo.
+# SAÍDAS: entrega_final/01_entradas/18_residuos, 19_licenciamento; 02_saidas/06_microplasticos; 03_mapas/14_microplasticos.
+# DICIONÁRIOS: 00_documentacao/Microplasticos; nomes curtos SHP, unidade, definição e script produtor.
+# CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; saídas existentes do módulo são arquivadas em descontinuado.
+from pathlib import Path
+import json,shutil,datetime,hashlib
+import geopandas as gpd
+import pandas as pd
+from caminhos_teco import raiz_projeto</pre><h2>Funções</h2><ul><li>archive - linha 45</li><li>export - linha 49</li><li>main - linha 61</li></ul><h2>Código integral</h2><pre># ENTRADAS: output/07_microplasticos/microplasticos.gpkg e tabelas; campos definidos em FIELDS abaixo.
+# SAÍDAS: entrega_final/01_entradas/18_residuos, 19_licenciamento; 02_saidas/06_microplasticos; 03_mapas/14_microplasticos.
+# DICIONÁRIOS: 00_documentacao/Microplasticos; nomes curtos SHP, unidade, definição e script produtor.
+# CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; saídas existentes do módulo são arquivadas em descontinuado.
+from pathlib import Path
+import json,shutil,datetime,hashlib
+import geopandas as gpd
+import pandas as pd
+from caminhos_teco import raiz_projeto
+R=raiz_projeto();O=R/&#x27;output/07_microplasticos&#x27;;F=R/&#x27;entrega_final&#x27;;STAMP=datetime.datetime.now().strftime(&#x27;%Y%m%d_%H%M%S&#x27;);D=F/&#x27;00_documentacao/Microplasticos&#x27;;D.mkdir(parents=True,exist_ok=True)
+FIELDS={
+&#x27;GRID_ID&#x27;:(&#x27;GRID_ID&#x27;,&#x27;Identificador do centro da grade; usar junto com BACIA para distinguir fragmentos.&#x27;,&#x27;código&#x27;),
+&#x27;BACIA&#x27;:(&#x27;BACIA&#x27;,&#x27;Bacia contribuinte: pampulha, vargem_flores ou ibirite_regap.&#x27;,&#x27;código&#x27;),
+&#x27;AREA_KM2&#x27;:(&#x27;AREA_KM2&#x27;,&#x27;Área do círculo de cálculo de raio 500 m recortado pela bacia; não é a área do hexágono exibido.&#x27;,&#x27;km²&#x27;),
+&#x27;POP_DENS&#x27;:(&#x27;POP_DENS&#x27;,&#x27;População Censo 2022 alocada proporcionalmente à área do setor e dividida pela área do círculo.&#x27;,&#x27;habitantes/km²&#x27;),
+&#x27;SEM_REDE&#x27;:(&#x27;SEM_REDE&#x27;,&#x27;Domicílios estimados sem ligação à rede geral/pluvial ou fossa ligada à rede; não equivale a ausência de tratamento.&#x27;,&#x27;%&#x27;),
+&#x27;SEWER_DENS&#x27;:(&#x27;SEW_DENS&#x27;,&#x27;Domicílios sem ligação geral/pluvial estimados na vizinhança divididos pela área do círculo; herda o tratamento de lacunas do esgotamento anterior.&#x27;,&#x27;domicílios/km²&#x27;),
+&#x27;WASTE_DENS&#x27;:(&#x27;WAS_DENS&#x27;,&#x27;Ponto médio dos limites agregados de domicílios sem coleta por serviço de limpeza dividido pela área do círculo.&#x27;,&#x27;domicílios/km²&#x27;),
+&#x27;WASTE_PCT&#x27;:(&#x27;WASTE_PCT&#x27;,&#x27;Ponto médio do percentual domiciliar sem coleta, ponderado por domicílios e área de interseção.&#x27;,&#x27;%&#x27;),
+&#x27;WASTE_LO&#x27;:(&#x27;WASTE_LO&#x27;,&#x27;Limite inferior do percentual sem coleta compatível com contagens conhecidas e total de domicílios; sigilo não foi convertido em zero.&#x27;,&#x27;%&#x27;),
+&#x27;WASTE_HI&#x27;:(&#x27;WASTE_HI&#x27;,&#x27;Limite superior do percentual sem coleta compatível com contagens conhecidas e total de domicílios.&#x27;,&#x27;%&#x27;),
+&#x27;WASTE_COV&#x27;:(&#x27;WASTE_COV&#x27;,&#x27;Proporção de domicílios da vizinhança com limites de destino do lixo calculáveis; elegibilidade exige pelo menos 99,9%.&#x27;,&#x27;%&#x27;),
+&#x27;ROAD_DENS&#x27;:(&#x27;ROAD_DENS&#x27;,&#x27;Comprimento das vias cadastradas no círculo dividido por sua área; indicador geométrico, sem volume de tráfego ou fator de emissão de pneus.&#x27;,&#x27;km/km²&#x27;),
+&#x27;MP_VALID&#x27;:(&#x27;MP_VALID&#x27;,&#x27;1 se elegível na base anterior, com domicílios, dados finitos e cobertura de resíduos &gt;=99,9%; 0 caso contrário.&#x27;,&#x27;0/1&#x27;),
+&#x27;MP_INDEX&#x27;:(&#x27;MP_INDEX&#x27;,&#x27;Média dos quatro critérios log1p/min-max com pesos iguais; pressão relativa exploratória, não concentração nem probabilidade.&#x27;,&#x27;0–100&#x27;),
+&#x27;MP_CLASS&#x27;:(&#x27;MP_CLASS&#x27;,&#x27;Classe fixa do índice: 1 &lt;=20; 2 &gt;20–40; 3 &gt;40–60; 4 &gt;60–80; 5 &gt;80; 0 insuficiente.&#x27;,&#x27;classe&#x27;),
+&#x27;MP_QUINT&#x27;:(&#x27;MP_QUINT&#x27;,&#x27;Quintil global do índice entre unidades elegíveis das três bacias; fronteiras P20/P40/P60/P80 inclusivas à esquerda.&#x27;,&#x27;1–5; 0 insuficiente&#x27;),
+&#x27;MP_K&#x27;:(&#x27;MP_K&#x27;,&#x27;Perfil k-means do cenário S0, ordenado pela média do índice; perfil não é classe de risco.&#x27;,&#x27;perfil&#x27;),
+&#x27;MP_STAB&#x27;:(&#x27;MP_STAB&#x27;,&#x27;Percentual dos cinco cenários com mesmo perfil de S0, após alinhar rótulos e manter K de S0; inclui S0.&#x27;,&#x27;%&#x27;),
+&#x27;MP_LO&#x27;:(&#x27;MP_LO&#x27;,&#x27;Índice S0 com limite inferior da contagem sem coleta, mantendo as escalas do cenário central e truncamento em 0–1.&#x27;,&#x27;0–100&#x27;),
+&#x27;MP_HI&#x27;:(&#x27;MP_HI&#x27;,&#x27;Índice S0 com limite superior da contagem sem coleta; mede apenas incerteza do sigilo do lixo, não incerteza total.&#x27;,&#x27;0–100&#x27;),
+&#x27;MP_MORAN&#x27;:(&#x27;MP_MORAN&#x27;,&#x27;Moran local do índice em oito vizinhos por bacia: HH/LL/HL/LH após BH 5%; NS não significativo; ND não elegível.&#x27;,&#x27;categoria&#x27;),
+&#x27;MP_P&#x27;:(&#x27;MP_P&#x27;,&#x27;Pseudo-p bilateral do Moran local com 999 permutações condicionais; não é teste da existência de microplásticos.&#x27;,&#x27;0–1&#x27;),
+&#x27;MP_Q&#x27;:(&#x27;MP_Q&#x27;,&#x27;Valor p ajustado por Benjamini-Hochberg dentro de cada bacia e tema.&#x27;,&#x27;0–1&#x27;),
+&#x27;ARG_INDEX&#x27;:(&#x27;ARG_INDEX&#x27;,&#x27;Cópia integral do índice ARG anterior I_S0; não recalculado nem calibrado por microplásticos.&#x27;,&#x27;0–100&#x27;),
+&#x27;ARG_K&#x27;:(&#x27;ARG_K&#x27;,&#x27;Cópia integral do perfil ARG anterior K_S0.&#x27;,&#x27;perfil&#x27;)}
+for j,name in enumerate([&#x27;População&#x27;,&#x27;Domicílios sem rede&#x27;,&#x27;Domicílios sem coleta&#x27;,&#x27;Densidade viária&#x27;],1):FIELDS[&#x27;MP_N&#x27;+str(j)]=(&#x27;MP_N&#x27;+str(j),f&#x27;{name}: log1p e min-max conjunto fixo nas três bacias; parâmetros em normalizacao.csv.&#x27;,&#x27;0–1&#x27;)
+for sc in range(5):
+ FIELDS[&#x27;MP_S&#x27;+str(sc)]=(&#x27;MP_S&#x27;+str(sc),f&#x27;Índice do cenário S{sc}; pesos na configuração e tabela de sensibilidade.&#x27;,&#x27;0–100&#x27;)
+ FIELDS[&#x27;MK_S&#x27;+str(sc)]=(&#x27;MK_S&#x27;+str(sc),f&#x27;Perfil k-means S{sc}, com K de S0 e rótulos alinhados por máxima coincidência.&#x27;,&#x27;perfil&#x27;)
+COMMON={&#x27;BACIA&#x27;:(&#x27;Bacia contribuinte.&#x27;,&#x27;código&#x27;),&#x27;REC_ID&#x27;:(&#x27;Identificador genérico do registro; não identifica pessoa física.&#x27;,&#x27;código&#x27;)}
+DICT=[]
+
+# Preservação e exportação
+def archive(p):
+ if p.exists():
+  dst=R/&#x27;descontinuado&#x27;/STAMP/&#x27;microplasticos&#x27;/p.relative_to(F);dst.parent.mkdir(parents=True,exist_ok=True)
+  assert dst.resolve().is_relative_to((R/&#x27;descontinuado&#x27;).resolve());shutil.move(str(p),str(dst))
+def export(g,relative,name,defs):
+ folder=F/relative;archive(folder);folder.mkdir(parents=True,exist_ok=True);data=g[list(defs)+[&#x27;geometry&#x27;]].copy();rename={k:v[0] for k,v in defs.items()};data.rename(columns=rename,inplace=True)
+ for c in data.select_dtypes(include=[&#x27;object&#x27;,&#x27;str&#x27;]).columns:
+  if c!=&#x27;geometry&#x27;:data[c]=data[c].map(lambda v:v[:250] if isinstance(v,str) else v)
+ path=folder/(name+&#x27;.shp&#x27;);data.to_file(path,driver=&#x27;ESRI Shapefile&#x27;,encoding=&#x27;UTF-8&#x27;)
+ rows=[]
+ for field,(short,desc,unit) in defs.items():
+  row={&#x27;arquivo&#x27;:str(path.relative_to(F)).replace(&#x27;\\&#x27;,&#x27;/&#x27;),&#x27;campo_shp&#x27;:short,&#x27;campo_original&#x27;:field,&#x27;descricao&#x27;:desc,&#x27;unidade&#x27;:unit,&#x27;natureza&#x27;:&#x27;derivado; ver definição&#x27;,&#x27;fonte_camada&#x27;:str(O/&#x27;microplasticos.gpkg&#x27;),&#x27;script_python&#x27;:&#x27;05_scripts/python/microplasticos_teco.py&#x27;,&#x27;linha_referencia&#x27;:&#x27;&#x27;,&#x27;trecho_referencia&#x27;:field,&#x27;scripts_apoio&#x27;:&#x27;05_scripts/python/consolidar_microplasticos_teco.py&#x27;};rows.append(row);DICT.append(row)
+ pd.DataFrame(rows).to_csv(folder/&#x27;campos.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;);(folder/&#x27;README.md&#x27;).write_text(&#x27;\n&#x27;.join(f&quot;- **{r[&#x27;campo_shp&#x27;]}** ({r[&#x27;unidade&#x27;]}): {r[&#x27;descricao&#x27;]}&quot; for r in rows),encoding=&#x27;utf8&#x27;)
+ return path
+
+# Camadas finais
+def main():
+ g=gpd.read_file(O/&#x27;microplasticos.gpkg&#x27;,layer=&#x27;microplastic_pressure&#x27;);export(g,&#x27;02_saidas/06_microplasticos/01_consolidado&#x27;,&#x27;microplastics&#x27;,FIELDS)
+ s=gpd.read_file(O/&#x27;microplasticos.gpkg&#x27;,layer=&#x27;waste_census&#x27;)
+ defs={&#x27;setor_id&#x27;:(&#x27;SECTOR_ID&#x27;,&#x27;Código do setor censitário Censo 2022; contagens originais referem-se ao setor inteiro.&#x27;,&#x27;código&#x27;),&#x27;BACIA&#x27;:(&#x27;BACIA&#x27;,&#x27;Bacia do recorte geométrico.&#x27;,&#x27;código&#x27;),&#x27;HH_TOTAL&#x27;:(&#x27;HH_TOTAL&#x27;,&#x27;Domicílios particulares permanentes ocupados do setor inteiro; denominador do destino do lixo.&#x27;,&#x27;domicílios&#x27;),&#x27;ORIG_KM2&#x27;:(&#x27;ORIG_KM2&#x27;,&#x27;Área do setor inteiro antes do recorte; usada para alocação proporcional.&#x27;,&#x27;km²&#x27;),&#x27;PART_KM2&#x27;:(&#x27;PART_KM2&#x27;,&#x27;Área da interseção setor/bacia.&#x27;,&#x27;km²&#x27;),&#x27;UNC_LO&#x27;:(&#x27;UNC_LO&#x27;,&#x27;Limite inferior de domicílios sem coleta no setor inteiro.&#x27;,&#x27;domicílios&#x27;),&#x27;UNC_HI&#x27;:(&#x27;UNC_HI&#x27;,&#x27;Limite superior de domicílios sem coleta no setor inteiro.&#x27;,&#x27;domicílios&#x27;),&#x27;WASTE_PCT&#x27;:FIELDS[&#x27;WASTE_PCT&#x27;],&#x27;WASTE_LO&#x27;:FIELDS[&#x27;WASTE_LO&#x27;],&#x27;WASTE_HI&#x27;:FIELDS[&#x27;WASTE_HI&#x27;],&#x27;WASTE_EST&#x27;:(&#x27;WASTE_EST&#x27;,&#x27;1 se usado ponto médio de intervalo de sigilo; 0 se combinado exato ou inválido, conferir QA.&#x27;,&#x27;0/1&#x27;),&#x27;WASTE_QA&#x27;:(&#x27;WASTE_QA&#x27;,&#x27;exact_combined: combinado exato; interval_midpoint: hipótese central; no_households: sem domicílios; inconsistent_or_missing: excluir.&#x27;,&#x27;categoria&#x27;)}
+ defs[&#x27;WASTE_PCT&#x27;]=(&#x27;WASTE_PCT&#x27;,&#x27;Ponto médio do intervalo percentual sem coleta do setor inteiro; não recalculado apenas para a geometria recortada.&#x27;,&#x27;%&#x27;)
+ defs[&#x27;WASTE_LO&#x27;]=(&#x27;WASTE_LO&#x27;,&#x27;Limite inferior de domicílios sem coleta / HH_TOTAL do setor inteiro × 100.&#x27;,&#x27;%&#x27;)
+ defs[&#x27;WASTE_HI&#x27;]=(&#x27;WASTE_HI&#x27;,&#x27;Limite superior de domicílios sem coleta / HH_TOTAL do setor inteiro × 100.&#x27;,&#x27;%&#x27;)
+ export(s,&#x27;01_entradas/18_residuos/01_destino_lixo&#x27;,&#x27;waste_census&#x27;,defs)
+ raw=F/&#x27;01_entradas/18_residuos/00_tabelas&#x27;;raw.mkdir(exist_ok=True,parents=True)
+ for p in (O/&#x27;tabelas&#x27;).glob(&#x27;*.csv&#x27;):
+  if p.stem.startswith((&#x27;ibge_&#x27;,&#x27;sinir_&#x27;,&#x27;planos_&#x27;,&#x27;instalacoes_&#x27;,&#x27;residuos_por&#x27;)):shutil.copy2(p,raw/p.name)
+ lic=gpd.read_file(O/&#x27;microplasticos.gpkg&#x27;,layer=&#x27;licensing_screening&#x27;);ld={k:(k,desc,unit) for k,(desc,unit) in {**COMMON,&#x27;SOURCE&#x27;:(&#x27;Cadastro SLA ou histórico estadual 2013–2019; registros não equivalem a estabelecimentos únicos.&#x27;,&#x27;cadastro&#x27;),&#x27;PROCESS&#x27;:(&#x27;Número público do processo de licenciamento.&#x27;,&#x27;identificador&#x27;),&#x27;ACT_CODE&#x27;:(&#x27;Código da atividade principal do cadastro ambiental, não CNAE.&#x27;,&#x27;código&#x27;),&#x27;ACTIVITY&#x27;:(&#x27;Descrição da atividade principal; texto completo em licencas_triagem.csv.&#x27;,&#x27;texto&#x27;),&#x27;STATUS&#x27;:(&#x27;Situação SLA ou modalidade do processo histórico; não confirma operação atual.&#x27;,&#x27;texto&#x27;),&#x27;VALIDITY&#x27;:(&#x27;Validade conforme cadastro; histórico pode informar duração e não data final.&#x27;,&#x27;texto&#x27;),&#x27;ISSUED&#x27;:(&#x27;Data de emissão SLA ou ano do processo histórico.&#x27;,&#x27;data/ano&#x27;),&#x27;MP_CAND&#x27;:(&#x27;1 se descrição menciona plástico, termoplástico, borracha, têxtil, lavanderia, resina ou polímero; requer leitura do processo.&#x27;,&#x27;0/1&#x27;),&#x27;REVIEW&#x27;:(&#x27;Estado de triagem: verificar processo e operação antes de utilizar como fonte quantitativa.&#x27;,&#x27;texto&#x27;),&#x27;URL&#x27;:(&#x27;Consulta pública de origem do processo.&#x27;,&#x27;URL&#x27;)}.items()};export(lic,&#x27;01_entradas/19_licenciamento/01_triagem&#x27;,&#x27;licensing&#x27;,ld)
+ fac=gpd.read_file(O/&#x27;microplasticos.gpkg&#x27;,layer=&#x27;waste_management&#x27;);fd={k:(k,d,u) for k,(d,u) in {**COMMON,&#x27;TYPE&#x27;:(&#x27;Tipo do cadastro: aterro sanitário, transbordo ou disposição precária.&#x27;,&#x27;categoria&#x27;),&#x27;MUNICIPAL&#x27;:(&#x27;Município informado no cadastro da instalação.&#x27;,&#x27;texto&#x27;),&#x27;STATUS&#x27;:(&#x27;Situação informada pelo cadastro, sem inspeção de campo.&#x27;,&#x27;texto&#x27;),&#x27;SHARED&#x27;:(&#x27;Indicação cadastral de uso compartilhado; não comprova capacidade de recebimento.&#x27;,&#x27;texto&#x27;),&#x27;IN_BASIN&#x27;:(&#x27;1 se ponto intersecta uma das bacias, 0 se apenas no contexto regional de 20 km.&#x27;,&#x27;0/1&#x27;),&#x27;CHECK&#x27;:(&#x27;Pendência de verificar operação, resíduos aceitos e vínculo com o município gerador.&#x27;,&#x27;texto&#x27;)}.items()};export(fac,&#x27;01_entradas/18_residuos/02_instalacoes&#x27;,&#x27;waste_fac&#x27;,fd)
+ plans=gpd.read_file(O/&#x27;microplasticos.gpkg&#x27;,layer=&#x27;municipal_waste_plans&#x27;);pdct={k:(short,d,u) for k,short,d,u in [(&#x27;nome&#x27;,&#x27;MUNICIPAL&#x27;,&#x27;Município do polígono; indicador administrativo, não medição em 500 m.&#x27;,&#x27;texto&#x27;),(&#x27;geocodigo&#x27;,&#x27;MUN_CODE&#x27;,&#x27;Código municipal IBGE.&#x27;,&#x27;código&#x27;),(&#x27;pmgirs_24&#x27;,&#x27;PLAN_2024&#x27;,&#x27;Existência informada de plano de gestão integrada em 2024.&#x27;,&#x27;cadastro&#x27;),(&#x27;colsel_24&#x27;,&#x27;SEL_2024&#x27;,&#x27;Existência informada de coleta seletiva em 2024; não é percentual de cobertura.&#x27;,&#x27;cadastro&#x27;),(&#x27;tiprsu_24&#x27;,&#x27;DEST_2024&#x27;,&#x27;Tipologia declarada de destinação final municipal em 2024.&#x27;,&#x27;cadastro&#x27;)]};export(plans,&#x27;01_entradas/18_residuos/03_planos&#x27;,&#x27;waste_plans&#x27;,pdct)
+ for code in [&#x27;S0&#x27;,&#x27;S1&#x27;,&#x27;S2&#x27;,&#x27;S3&#x27;,&#x27;S4&#x27;]:
+  keep={k:v for k,v in FIELDS.items() if k in [&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;,&#x27;MP_VALID&#x27;,&#x27;MP_&#x27;+code,&#x27;MK_&#x27;+code,&#x27;MP_STAB&#x27;]};export(g,f&#x27;02_saidas/06_microplasticos/02_testes/{code}&#x27;,code.lower(),keep)
+ target=F/&#x27;02_saidas/06_microplasticos/03_tabelas&#x27;;archive(target);shutil.copytree(O/&#x27;tabelas&#x27;,target)
+ target=F/&#x27;02_saidas/06_microplasticos/04_conectividade&#x27;;archive(target);shutil.copytree(O/&#x27;rasters&#x27;,target)
+ target=F/&#x27;03_mapas/14_microplasticos&#x27;;archive(target);shutil.copytree(O/&#x27;figuras&#x27;,target)
+ for n in [&#x27;obter_residuos_licenciamento.py&#x27;,&#x27;microplasticos_teco.py&#x27;,&#x27;mapas_microplasticos_teco.py&#x27;,&#x27;consolidar_microplasticos_teco.py&#x27;,&#x27;integrar_qgis_microplasticos.py&#x27;,&#x27;documentar_microplasticos_teco.py&#x27;]:
+  dest=F/&#x27;05_scripts/python&#x27;/n;dest.parent.mkdir(exist_ok=True,parents=True);shutil.copy2(R/&#x27;codigo&#x27;/n,dest)
+ cfg=F/&#x27;05_scripts/config&#x27;;cfg.mkdir(exist_ok=True,parents=True);shutil.copy2(R/&#x27;config/microplasticos.json&#x27;,cfg/&#x27;microplasticos.json&#x27;)
+ pd.DataFrame(DICT).to_csv(D/&#x27;Dicionario_microplasticos.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+ (D/&#x27;Dicionario_QGIS.json&#x27;).write_text(json.dumps({r[&#x27;campo_shp&#x27;]:r[&#x27;descricao&#x27;]+&#x27; Unidade: &#x27;+r[&#x27;unidade&#x27;] for r in DICT},ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;)
+ p=F/&#x27;00_documentacao/Dicionario_dos_campos.csv&#x27;;old=pd.read_csv(p,sep=&#x27;;&#x27;,dtype=str).fillna(&#x27;&#x27;);old=old[~old.arquivo.str.contains(&#x27;18_residuos|19_licenciamento|06_microplasticos&#x27;,regex=True)];allrows=pd.concat([old,pd.DataFrame(DICT)],ignore_index=True);allrows.to_csv(p,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+ (p.with_suffix(&#x27;.json&#x27;)).write_text(allrows.to_json(orient=&#x27;records&#x27;,force_ascii=False,indent=2),encoding=&#x27;utf8&#x27;)
+ (p.with_suffix(&#x27;.html&#x27;)).write_text(&#x27;&lt;!doctype html&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;title&gt;Dicionário de campos&lt;/title&gt;&lt;style&gt;body{font:14px Arial}table{border-collapse:collapse}td,th{padding:8px;border:1px solid #ccd8da;vertical-align:top}&lt;/style&gt;&lt;h1&gt;Dicionário de campos | ARG e microplásticos&lt;/h1&gt;&#x27;+allrows.to_html(index=False,escape=True),encoding=&#x27;utf8&#x27;)
+ shutil.copy2(O/&#x27;auditoria/metodo_microplasticos.json&#x27;,D/&#x27;Auditoria_microplasticos.json&#x27;)
+ p=D/&#x27;Inventario_arquivos.csv&#x27;;rows=[]
+ for folder in [F/&#x27;01_entradas/18_residuos&#x27;,F/&#x27;01_entradas/19_licenciamento&#x27;,F/&#x27;02_saidas/06_microplasticos&#x27;,F/&#x27;03_mapas/14_microplasticos&#x27;]:
+  for f in folder.rglob(&#x27;*&#x27;):
+   if f.is_file():rows.append({&#x27;arquivo&#x27;:str(f.relative_to(F)),&#x27;bytes&#x27;:f.stat().st_size,&#x27;sha256&#x27;:hashlib.sha256(f.read_bytes()).hexdigest()})
+ pd.DataFrame(rows).to_csv(p,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;);print(&#x27;Consolidado&#x27;,len(rows),&#x27;arquivos;&#x27;,len(DICT),&#x27;campos&#x27;,flush=True)
+if __name__==&#x27;__main__&#x27;:main()
+</pre>
