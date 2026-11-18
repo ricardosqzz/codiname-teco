@@ -1,0 +1,66 @@
+<!doctype html><meta charset="utf-8"><style>body{max-width:1100px;margin:30px auto;font:16px/1.6 Arial}pre{background:#edf3f5;overflow:auto;padding:18px}</style><h1>atualizar_visualizador_intermediarios.py</h1><p>revisão editorial e produtos intermediários de 18/11/2026</p><h2>Entradas e saídas</h2><pre># ENTRADAS: documentar_microplasticos_teco.text; figuras/galeria.json e mapas 01-20; contagem_tipologias_bacias.csv.
+# SAÍDAS: página local do relatório HTML e docs/microplasticos no repositório; prévias públicas SVG com WebP, sem alterar figuras científicas originais.
+# TEXTO: começa no item 2; a introdução removida fica somente no relatório de referência. Mapas intermediários acompanham os itens 3.1,3.2,3.3.
+# CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; publicação remota é realizada separadamente.
+from pathlib import Path
+import json,html,datetime,shutil,io,base64
+import pandas as pd
+from PIL import Image
+from caminhos_teco import raiz_projeto</pre><h2>Código integral</h2><pre># ENTRADAS: documentar_microplasticos_teco.text; figuras/galeria.json e mapas 01-20; contagem_tipologias_bacias.csv.
+# SAÍDAS: página local do relatório HTML e docs/microplasticos no repositório; prévias públicas SVG com WebP, sem alterar figuras científicas originais.
+# TEXTO: começa no item 2; a introdução removida fica somente no relatório de referência. Mapas intermediários acompanham os itens 3.1,3.2,3.3.
+# CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; publicação remota é realizada separadamente.
+from pathlib import Path
+import json,html,datetime,shutil,io,base64
+import pandas as pd
+from PIL import Image
+from caminhos_teco import raiz_projeto
+import documentar_microplasticos_teco as doc
+R=raiz_projeto();O=R/&#x27;output/07_microplasticos&#x27;;D=R/&#x27;entrega_final/00_documentacao/Microplasticos&#x27;;REPO=R/&#x27;github/codiname-teco&#x27;;SITE=REPO/&#x27;docs/microplasticos&#x27;
+EXPLANATIONS={
+&#x27;01_waste&#x27;:&#x27;Percentual domiciliar sem coleta por serviço de limpeza, com geometria nativa dos setores. As contagens se referem ao setor inteiro; o recorte não localiza cada domicílio.&#x27;,
+&#x27;14_licensed_typologies&#x27;:&#x27;Registros estaduais de licenciamento agrupados pela atividade principal. A família de plásticos inclui os dois registros históricos de moldagem e reciclagem a seco. As demais famílias orientam a leitura dos processos e não têm emissões de microplásticos quantificadas.&#x27;,
+&#x27;15_licensed_linkage&#x27;:&#x27;O vínculo é documental: material plástico explícito, processo possível a verificar, manejo de resíduos/efluentes ou ausência de vínculo específico na descrição. As cores não representam níveis medidos de geração ou de risco.&#x27;,
+&#x27;16_waste_destinations&#x27;:&#x27;Todos os municípios do recorte declararam destinação a aterro sanitário regularizado na base de 2024. Os símbolos mostram instalações cadastradas visíveis no enquadramento. Não há atribuição automática do resíduo de um município a uma instalação nem traçado de transporte inferido.&#x27;,
+&#x27;17_selective_collection&#x27;:&#x27;Existência de coleta seletiva declarada em escala municipal em 2024. A presença do serviço não indica cobertura de todos os bairros nem percentual de recuperação de materiais.&#x27;,
+&#x27;18_waste_plans&#x27;:&#x27;Existência declarada de plano municipal de gestão de resíduos em 2024. O mapa não avalia implementação, fiscalização ou eficácia do plano.&#x27;,
+&#x27;19_waste_uncertainty&#x27;:&#x27;Diferença, em pontos percentuais, entre os limites superior e inferior do percentual sem coleta. Mostra a amplitude decorrente do sigilo ou da incompletude das categorias; não é um intervalo de confiança.&#x27;,
+&#x27;20_waste_pathways&#x27;:&#x27;Destino mais frequente entre as quatro categorias sem coleta quando todas são conhecidas. Registros sigilosos/incompletos ficam separados. O mapa não informa quantidade de plástico e não substitui a conexão hidrológica com o reservatório.&#x27;}
+
+# Imagens e texto editorial
+def figure(item,public):
+ src=&#x27;mapas/&#x27;+item[&#x27;svg&#x27;] if public else &#x27;../../03_mapas/14_microplasticos/&#x27;+item[&#x27;png&#x27;];link=src if public else &#x27;../../03_mapas/14_microplasticos/&#x27;+item[&#x27;svg&#x27;]
+ return &#x27;&lt;figure&gt;&lt;h3&gt;&#x27;+html.escape(item[&#x27;title&#x27;])+&#x27;&lt;/h3&gt;&lt;a href=&quot;&#x27;+link+&#x27;&quot;&gt;&lt;img loading=&quot;lazy&quot; src=&quot;&#x27;+src+&#x27;&quot; alt=&quot;&#x27;+html.escape(item[&#x27;title&#x27;])+&#x27;&quot;&gt;&lt;/a&gt;&lt;figcaption&gt;&#x27;+html.escape(EXPLANATIONS.get(item[&#x27;id&#x27;],&#x27;&#x27;))+&#x27;&lt;/figcaption&gt;&lt;/figure&gt;&#x27;
+def build(public,gallery):
+ md=doc.text();body=doc.html_body(&#x27;# Pressões potenciais de genes de resistência e microplásticos\n\n## 2.&#x27;+md.split(&#x27;## 2.&#x27;,1)[1]);items={g[&#x27;id&#x27;]:g for g in gallery}
+ counts=pd.read_csv(O/&#x27;tabelas/licencas_por_tipologia.csv&#x27;,sep=&#x27;;&#x27;).groupby([&#x27;TP_CODE&#x27;,&#x27;TP_NAME&#x27;]).size().reset_index(name=&#x27;Registros&#x27;)
+ tab=counts[[&#x27;TP_NAME&#x27;,&#x27;Registros&#x27;]].to_html(index=False,escape=True)
+ groups=[([&#x27;01_waste&#x27;,&#x27;19_waste_uncertainty&#x27;,&#x27;20_waste_pathways&#x27;],&#x27;&lt;h3&gt;3.2&#x27;),([&#x27;14_licensed_typologies&#x27;,&#x27;15_licensed_linkage&#x27;,&#x27;16_waste_destinations&#x27;],&#x27;&lt;h3&gt;3.3&#x27;),([&#x27;17_selective_collection&#x27;,&#x27;18_waste_plans&#x27;],&#x27;&lt;h2&gt;4.&#x27;)]
+ for ids,needle in groups:
+  extra=&#x27;&#x27;.join(figure(items[k],public) for k in ids)
+  if &#x27;14_licensed_typologies&#x27; in ids:extra=&#x27;&lt;p&gt;As tipologias abaixo representam atividades principais dos 49 registros de processo, e não necessariamente 49 empresas distintas ou em operação. O cadastro estadual precisa ser complementado por processos municipais. O vínculo potencial não foi transformado em peso ou taxa de emissão.&lt;/p&gt;&#x27;+tab+extra
+  body=body.replace(needle,extra+needle,1)
+ used={k for ids,_ in groups for k in ids};body+=&#x27;&lt;h2&gt;Mapas da classificação e produtos complementares&lt;/h2&gt;&#x27;+&#x27;&#x27;.join(figure(x,public) for x in gallery if x[&#x27;id&#x27;] not in used)
+ nav=&#x27;&lt;a href=&quot;../index.html&quot;&gt;Visualizador principal&lt;/a&gt;&#x27; if public else &#x27;&#x27;
+ nav+=&#x27;&lt;a href=&quot;Relatorio_ARG_microplasticos.md&quot;&gt;Texto de referência&lt;/a&gt;&lt;a href=&quot;Guia_codigos_microplasticos.html&quot;&gt;Guia dos scripts&lt;/a&gt;&#x27;
+ return &#x27;&lt;!doctype html&gt;&lt;html lang=&quot;pt-BR&quot;&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width&quot;&gt;&lt;title&gt;ARG e microplásticos | Metodologia e mapas&lt;/title&gt;&lt;style&gt;&#x27;+doc.CSS+&#x27;&lt;/style&gt;&lt;main&gt;&lt;nav&gt;&#x27;+nav+&#x27;&lt;/nav&gt;&#x27;+body+&#x27;&lt;/main&gt;&lt;/html&gt;&#x27;
+
+# Atualização local e do espelho GitHub
+def atualizar():
+ gallery=json.loads((O/&#x27;figuras/galeria.json&#x27;).read_text(&#x27;utf8&#x27;));SITE.mkdir(exist_ok=True,parents=True);(SITE/&#x27;mapas&#x27;).mkdir(exist_ok=True)
+ for g in gallery:
+  if int(g[&#x27;id&#x27;][:2])&lt;14:continue
+  with Image.open(O/&#x27;figuras&#x27;/g[&#x27;png&#x27;]) as im:
+   im.thumbnail((2400,2400));buf=io.BytesIO();im.save(buf,format=&#x27;WEBP&#x27;,quality=93,method=6);encoded=base64.b64encode(buf.getvalue()).decode();w,h=im.size
+  svg=f&#x27;&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; width=&quot;{w}&quot; height=&quot;{h}&quot; viewBox=&quot;0 0 {w} {h}&quot;&gt;&lt;image width=&quot;100%&quot; height=&quot;100%&quot; xlink:href=&quot;data:image/webp;base64,{encoded}&quot;/&gt;&lt;/svg&gt;&#x27;;(SITE/&#x27;mapas&#x27;/g[&#x27;svg&#x27;]).write_text(svg,encoding=&#x27;utf8&#x27;)
+ stamp=datetime.datetime.now().strftime(&#x27;%Y%m%d_%H%M%S&#x27;)
+ for p,public in [(D/&#x27;Relatorio_ARG_microplasticos.html&#x27;,False),(SITE/&#x27;index.html&#x27;,True)]:
+  if p.exists():
+   archive=R/&#x27;descontinuado&#x27;/stamp/&#x27;visualizador_antes_intermediarios&#x27;/(&#x27;online&#x27; if public else &#x27;local&#x27;)/p.name;archive.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,archive)
+  p.write_text(build(public,gallery),encoding=&#x27;utf8&#x27;)
+ md=doc.text();(D/&#x27;Relatorio_ARG_microplasticos.md&#x27;).write_text(md,encoding=&#x27;utf8&#x27;);(SITE/&#x27;Relatorio_ARG_microplasticos.md&#x27;).write_text(md,encoding=&#x27;utf8&#x27;)
+ for p in [D/&#x27;Relatorio_ARG_microplasticos.html&#x27;,SITE/&#x27;index.html&#x27;]:
+  s=p.read_text(&#x27;utf8&#x27;);assert &#x27;## 1.&#x27; not in s and &#x27;O que esta complementação permite avaliar&#x27; not in s;assert &#x27;Complementação metodológica e resultados exploratórios.&#x27; not in s;assert &#x27;Foi utilizado o mesmo arquivo CSV da pasta saneamento_ibge&#x27; in s;assert s.count(&#x27;&lt;figure&gt;&#x27;)==20
+ print(&#x27;Visualizadores atualizados: item 2 e vinte mapas&#x27;,flush=True)
+if __name__==&#x27;__main__&#x27;:atualizar()
+</pre>

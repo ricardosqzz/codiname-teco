@@ -1,4 +1,4 @@
-<!doctype html><meta charset="utf-8"><style>body{max-width:1100px;margin:30px auto;font:16px/1.65 Arial;color:#254851}pre{white-space:pre;overflow:auto;background:#eef3f4;padding:18px}a{color:#156e80}</style><h1>integrar_qgis_microplasticos.py</h1><p><a href="https://ricardosqzz.github.io/codiname-teco/microplasticos/Guia_codigos_microplasticos.html">Guia metodológico completo deste módulo</a></p><h2>Entradas e saídas</h2><pre># ENTRADAS: entrega_final/01_entradas/18_residuos,19_licenciamento; 02_saidas/06_microplasticos; projeto_teco.qgz e TECO_Consolidado.qgz.
+<!doctype html><meta charset="utf-8"><style>body{max-width:1100px;margin:30px auto;font:16px/1.6 Arial}pre{background:#edf3f5;overflow:auto;padding:18px}</style><h1>integrar_qgis_microplasticos.py</h1><p>revisão editorial e produtos intermediários de 18/11/2026</p><h2>Entradas e saídas</h2><pre># ENTRADAS: entrega_final/01_entradas/18_residuos,19_licenciamento; 02_saidas/06_microplasticos; projeto_teco.qgz e TECO_Consolidado.qgz.
 # CAMPOS: MP_INDEX, MP_CLASS, MP_K, MP_MORAN, MP_STAB; BACIA filtra os três reservatórios.
 # SAÍDAS: grupo Microplastics e seis layouts triplos em cada QGZ; estilos, nomes curtos, definições de campo e auditoria de validade.
 # CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; executar no Python do QGIS.
@@ -6,7 +6,7 @@ from pathlib import Path
 import os,json,datetime,shutil,sys
 os.environ[&#x27;QT_QPA_PLATFORM&#x27;]=&#x27;offscreen&#x27;
 from qgis.core import *
-from qgis.PyQt.QtGui import QColor,QFontDatabase,QFont</pre><h2>Funções</h2><ul><li>vector - linha 21</li><li>legend - linha 48</li><li>main - linha 63</li></ul><h2>Código integral</h2><pre># ENTRADAS: entrega_final/01_entradas/18_residuos,19_licenciamento; 02_saidas/06_microplasticos; projeto_teco.qgz e TECO_Consolidado.qgz.
+from qgis.PyQt.QtGui import QColor,QFontDatabase,QFont</pre><h2>Código integral</h2><pre># ENTRADAS: entrega_final/01_entradas/18_residuos,19_licenciamento; 02_saidas/06_microplasticos; projeto_teco.qgz e TECO_Consolidado.qgz.
 # CAMPOS: MP_INDEX, MP_CLASS, MP_K, MP_MORAN, MP_STAB; BACIA filtra os três reservatórios.
 # SAÍDAS: grupo Microplastics e seis layouts triplos em cada QGZ; estilos, nomes curtos, definições de campo e auditoria de validade.
 # CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; executar no Python do QGIS.
@@ -118,6 +118,9 @@ def main():
       if &#x27;S0&#x27; in text or &#x27;Multivariate&#x27; in text or &#x27;multivari&#x27; in text:item.setText(title)
     legend(layout,field,title);created.append(name)
   for sub in [inputs,allg,terrain,*per.values()]:sub.setExpanded(False)
+  if (F/&#x27;01_entradas/19_licenciamento/02_tipologias/lic_typology.shp&#x27;).exists():
+   from integrar_intermediarios_microplasticos import add_intermediates
+   add_intermediates(project,grp)
   project.setFilePathStorage(Qgis.FilePathType.Relative);assert project.write(str(target));reports.append({&#x27;project&#x27;:str(target),&#x27;new_layouts&#x27;:created,&#x27;microplastic_layers&#x27;:len(grp.findLayers()),&#x27;invalid_layers&#x27;:[l.name() for l in project.mapLayers().values() if not l.isValid()]})
   if target==R/&#x27;projeto_teco.qgz&#x27;:
    layout=manager.layoutByName(&#x27;MP | Microplastic pressure&#x27;);settings=QgsLayoutExporter.ImageExportSettings();settings.dpi=160;out=R/&#x27;temp/microplasticos/qgis_pressure.png&#x27;;assert QgsLayoutExporter(layout).exportToImage(str(out),settings)==QgsLayoutExporter.Success

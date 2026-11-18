@@ -1,0 +1,119 @@
+<!doctype html><meta charset="utf-8"><style>body{max-width:1100px;margin:30px auto;font:16px/1.6 Arial}pre{background:#edf3f5;overflow:auto;padding:18px}</style><h1>mapas_intermediarios_microplasticos.py</h1><p>revisão editorial e produtos intermediários de 18/11/2026</p><h2>Entradas e saídas</h2><pre># ENTRADAS: output/07_microplasticos/microplasticos.gpkg; licensing_screening (REC_ID,ACTIVITY,SOURCE), municipal_waste_plans e waste_census (V00399-00402,WASTE_LO,WASTE_HI).
+# CONTEXTO: mapas_microplasticos_teco.py fornece bacias, reservatórios, vias, enquadramentos e escala de impressão.
+# SAÍDAS: figuras 14-20; shapefiles 19_licenciamento/02_tipologias e 18_residuos/04_destinos,05_coleta,06_planos,07_lixo_intermediario; tabela, dicionário e auditoria.
+# CAMPOS: TP_CODE/TP_NAME agrupam atividades; MP_LINK qualifica vínculo documental, sem peso no índice; DOM_DEST e WASTE_UNC descrevem lixo censitário.
+# CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; classificação da atividade principal não comprova emissão ou operação atual.
+from pathlib import Path
+import json,unicodedata,datetime,shutil
+import numpy as np
+import pandas as pd</pre><h2>Código integral</h2><pre># ENTRADAS: output/07_microplasticos/microplasticos.gpkg; licensing_screening (REC_ID,ACTIVITY,SOURCE), municipal_waste_plans e waste_census (V00399-00402,WASTE_LO,WASTE_HI).
+# CONTEXTO: mapas_microplasticos_teco.py fornece bacias, reservatórios, vias, enquadramentos e escala de impressão.
+# SAÍDAS: figuras 14-20; shapefiles 19_licenciamento/02_tipologias e 18_residuos/04_destinos,05_coleta,06_planos,07_lixo_intermediario; tabela, dicionário e auditoria.
+# CAMPOS: TP_CODE/TP_NAME agrupam atividades; MP_LINK qualifica vínculo documental, sem peso no índice; DOM_DEST e WASTE_UNC descrevem lixo censitário.
+# CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; classificação da atividade principal não comprova emissão ou operação atual.
+from pathlib import Path
+import json,unicodedata,datetime,shutil
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+from matplotlib.colors import Normalize
+import mapas_microplasticos_teco as m
+R=m.R;O=m.O;F=R/&#x27;entrega_final&#x27;;D=F/&#x27;00_documentacao/Microplasticos&#x27;;stamp=datetime.datetime.now().strftime(&#x27;%Y%m%d_%H%M%S&#x27;)
+TYPES={1:(&#x27;Plastic processing / recycling&#x27;,&#x27;#b74e78&#x27;,&#x27;D&#x27;),2:(&#x27;Refining / chemical industry&#x27;,&#x27;#d19e45&#x27;,&#x27;o&#x27;),3:(&#x27;Metal / vehicle manufacturing&#x27;,&#x27;#7e7caf&#x27;,&#x27;o&#x27;),4:(&#x27;Waste / wastewater treatment&#x27;,&#x27;#589c87&#x27;,&#x27;s&#x27;),5:(&#x27;Fuel handling / transport&#x27;,&#x27;#8c9b9e&#x27;,&#x27;^&#x27;),6:(&#x27;Other activities / infrastructure&#x27;,&#x27;#9cbcc8&#x27;,&#x27;o&#x27;)}
+LINKS={0:(&#x27;No specific link in main activity&#x27;,&#x27;#bcc7c8&#x27;),1:(&#x27;Plastic material explicitly reported&#x27;,&#x27;#b74e78&#x27;),2:(&#x27;Possible process: verify details&#x27;,&#x27;#d7aa58&#x27;),3:(&#x27;Waste / effluent management&#x27;,&#x27;#589c87&#x27;)}
+DICTIONARY=[]
+
+# Agrupamento documental
+def norm(s):return &#x27;&#x27;.join(c for c in unicodedata.normalize(&#x27;NFKD&#x27;,str(s).lower()) if not unicodedata.combining(c))
+def typology(s):
+ s=norm(s)
+ if any(v in s for v in [&#x27;plastic&#x27;,&#x27;termoplastic&#x27;,&#x27;polimero&#x27;,&#x27;borracha&#x27;,&#x27;textil&#x27;,&#x27;lavander&#x27;]):return 1
+ if any(v in s for v in [&#x27;incinera&#x27;,&#x27;tratamento de esgoto&#x27;,&#x27;tratamento de residuos&#x27;]):return 4
+ if any(v in s for v in [&#x27;molas&#x27;,&#x27;estamparia&#x27;,&#x27;fundidos&#x27;,&#x27;metal&#x27;,&#x27;fabricacao de pecas&#x27;,&#x27;fabricacao de veiculos&#x27;]):return 3
+ if any(v in s for v in [&#x27;refino de petroleo&#x27;,&#x27;produtos quimicos&#x27;,&#x27;substancias quimicas&#x27;]):return 2
+ if any(v in s for v in [&#x27;combustive&#x27;,&#x27;lubrificant&#x27;,&#x27;gas liquefeito&#x27;,&#x27;transporte rodoviario&#x27;]):return 5
+ return 6
+def archive(p):
+ if p.exists():
+  dest=R/&#x27;descontinuado&#x27;/stamp/&#x27;intermediarios_microplasticos&#x27;/p.relative_to(R);dest.parent.mkdir(parents=True,exist_ok=True);shutil.move(str(p),str(dest))
+def shp(g,folder,name,fields):
+ p=F/folder;archive(p);p.mkdir(parents=True,exist_ok=True);x=g[list(fields)+[&#x27;geometry&#x27;]].copy();x.rename(columns={k:v[0] for k,v in fields.items()},inplace=True)
+ for c in x.select_dtypes(include=[&#x27;object&#x27;,&#x27;str&#x27;]).columns:
+  if c!=&#x27;geometry&#x27;:x[c]=x[c].map(lambda v:v[:250] if isinstance(v,str) else v)
+ target=p/(name+&#x27;.shp&#x27;);x.to_file(target,driver=&#x27;ESRI Shapefile&#x27;,encoding=&#x27;UTF-8&#x27;)
+ rows=[{&#x27;arquivo&#x27;:str(target.relative_to(F)).replace(&#x27;\\&#x27;,&#x27;/&#x27;),&#x27;campo_shp&#x27;:short,&#x27;campo_original&#x27;:field,&#x27;descricao&#x27;:desc,&#x27;unidade&#x27;:unit,&#x27;natureza&#x27;:&#x27;triagem documental / derivado&#x27;,&#x27;fonte_camada&#x27;:&#x27;output/07_microplasticos/microplasticos.gpkg&#x27;,&#x27;script_python&#x27;:&#x27;05_scripts/python/mapas_intermediarios_microplasticos.py&#x27;,&#x27;linha_referencia&#x27;:&#x27;&#x27;,&#x27;trecho_referencia&#x27;:field,&#x27;scripts_apoio&#x27;:&#x27;05_scripts/python/mapas_microplasticos_teco.py&#x27;} for field,(short,desc,unit) in fields.items()]
+ pd.DataFrame(rows).to_csv(p/&#x27;campos.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;);DICTIONARY.extend(rows)
+
+# Camadas intermediárias
+def prepare():
+ lic=m.lic.copy();lic[&#x27;TP_CODE&#x27;]=lic.ACTIVITY.map(typology);lic[&#x27;TP_NAME&#x27;]=lic.TP_CODE.map(lambda t:TYPES[t][0]);lic[&#x27;MP_LINK&#x27;]=lic.TP_CODE.map({1:1,2:2,3:2,4:3,5:0,6:0});lic[&#x27;MP_ROUTE&#x27;]=lic.MP_LINK.map(lambda x:LINKS[x][0])
+ lic.to_file(m.G,layer=&#x27;licensing_typology&#x27;,driver=&#x27;GPKG&#x27;)
+ fields={&#x27;REC_ID&#x27;:(&#x27;REC_ID&#x27;,&#x27;Identificador genérico do registro, sem identificação pessoal.&#x27;,&#x27;código&#x27;),&#x27;BACIA&#x27;:(&#x27;BACIA&#x27;,&#x27;Bacia intersectada pelo registro.&#x27;,&#x27;código&#x27;),&#x27;SOURCE&#x27;:(&#x27;SOURCE&#x27;,&#x27;SLA ou histórico estadual; não confirma operação atual.&#x27;,&#x27;cadastro&#x27;),&#x27;PROCESS&#x27;:(&#x27;PROCESS&#x27;,&#x27;Número público do processo; pode haver mais de um processo por empreendimento.&#x27;,&#x27;identificador&#x27;),&#x27;ACTIVITY&#x27;:(&#x27;ACTIVITY&#x27;,&#x27;Descrição da atividade principal; texto completo na tabela CSV.&#x27;,&#x27;texto&#x27;),&#x27;TP_CODE&#x27;:(&#x27;TP_CODE&#x27;,&#x27;1 plásticos; 2 refino/química; 3 metal/veículos; 4 resíduos/esgoto; 5 combustíveis/transporte; 6 outros/infraestrutura.&#x27;,&#x27;categoria&#x27;),&#x27;TP_NAME&#x27;:(&#x27;TP_NAME&#x27;,&#x27;Família de atividade principal para a leitura do mapa.&#x27;,&#x27;texto&#x27;),&#x27;MP_LINK&#x27;:(&#x27;MP_LINK&#x27;,&#x27;1 material plástico explícito; 2 processo possível a verificar; 3 manejo de resíduos/efluentes; 0 vínculo específico não identificado. Não é grau de emissão.&#x27;,&#x27;categoria&#x27;),&#x27;MP_ROUTE&#x27;:(&#x27;MP_ROUTE&#x27;,&#x27;Significado do vínculo documental, sem intensidade ou probabilidade atribuída.&#x27;,&#x27;texto&#x27;)}
+ shp(lic,&#x27;01_entradas/19_licenciamento/02_tipologias&#x27;,&#x27;lic_typology&#x27;,fields);lic.drop(columns=&#x27;geometry&#x27;).to_csv(O/&#x27;tabelas/licencas_por_tipologia.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+ rows=[]
+ for r in m.b.itertuples():
+  for _,q in lic[lic.BACIA.str.contains(r.id,na=False)].iterrows():rows.append({&#x27;BACIA&#x27;:r.id,&#x27;TP_CODE&#x27;:q.TP_CODE,&#x27;TP_NAME&#x27;:q.TP_NAME,&#x27;REC_ID&#x27;:q.REC_ID})
+ counts=pd.DataFrame(rows).groupby([&#x27;BACIA&#x27;,&#x27;TP_CODE&#x27;,&#x27;TP_NAME&#x27;]).size().reset_index(name=&#x27;RECORDS&#x27;);counts.to_csv(O/&#x27;tabelas/contagem_tipologias_bacias.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+ plans=gpd.read_file(m.G,layer=&#x27;municipal_waste_plans&#x27;);plans=gpd.overlay(plans,m.b[[&#x27;id&#x27;,&#x27;geometry&#x27;]],how=&#x27;intersection&#x27;,keep_geom_type=True).rename(columns={&#x27;id&#x27;:&#x27;BACIA&#x27;});plans[&#x27;COLLECT&#x27;]=plans.colsel_24.map({&#x27;Sim&#x27;:1,&#x27;Não&#x27;:0}).fillna(-1).astype(int);plans[&#x27;PLAN&#x27;]=plans.pmgirs_24.map({&#x27;Sim&#x27;:1,&#x27;Não&#x27;:0}).fillna(-1).astype(int)
+ common={&#x27;BACIA&#x27;:(&#x27;BACIA&#x27;,&#x27;Bacia do fragmento municipal; indicador se refere ao município inteiro.&#x27;,&#x27;código&#x27;),&#x27;nome&#x27;:(&#x27;MUNICIPAL&#x27;,&#x27;Município da declaração administrativa.&#x27;,&#x27;texto&#x27;),&#x27;geocodigo&#x27;:(&#x27;MUN_CODE&#x27;,&#x27;Código IBGE do município.&#x27;,&#x27;código&#x27;)}
+ shp(plans,&#x27;01_entradas/18_residuos/04_destinos&#x27;,&#x27;destinations&#x27;,{**common,&#x27;tiprsu_24&#x27;:(&#x27;DEST_2024&#x27;,&#x27;Tipologia municipal de destinação informada em 2024; não é rastreio do resíduo de cada bairro.&#x27;,&#x27;cadastro 2024&#x27;)})
+ shp(plans,&#x27;01_entradas/18_residuos/05_coleta&#x27;,&#x27;selective&#x27;,{**common,&#x27;COLLECT&#x27;:(&#x27;COLLECT&#x27;,&#x27;1 coleta seletiva declarada; 0 não; -1 sem dado. Não informa percentual de cobertura.&#x27;,&#x27;cadastro 2024&#x27;)})
+ shp(plans,&#x27;01_entradas/18_residuos/06_planos&#x27;,&#x27;waste_plan&#x27;,{**common,&#x27;PLAN&#x27;:(&#x27;PLAN&#x27;,&#x27;1 plano municipal declarado; 0 não; -1 sem dado. Não avalia implementação.&#x27;,&#x27;cadastro 2024&#x27;)})
+ w=m.waste.copy();w[&#x27;WASTE_UNC&#x27;]=w.WASTE_HI-w.WASTE_LO;vals=w[[f&#x27;V{i:05d}&#x27; for i in range(399,403)]].apply(pd.to_numeric,errors=&#x27;coerce&#x27;);complete=vals.notna().all(axis=1);w[&#x27;DOM_DEST&#x27;]=-1;w.loc[complete,&#x27;DOM_DEST&#x27;]=np.where(vals[complete].sum(axis=1)==0,0,vals[complete].to_numpy().argmax(axis=1)+1)
+ w.to_file(m.G,layer=&#x27;waste_intermediate&#x27;,driver=&#x27;GPKG&#x27;);shp(w,&#x27;01_entradas/18_residuos/07_lixo_intermediario&#x27;,&#x27;waste_detail&#x27;,{&#x27;setor_id&#x27;:(&#x27;SECTOR_ID&#x27;,&#x27;Setor censitário Censo 2022.&#x27;,&#x27;código&#x27;),&#x27;BACIA&#x27;:(&#x27;BACIA&#x27;,&#x27;Bacia do recorte do setor.&#x27;,&#x27;código&#x27;),&#x27;WASTE_UNC&#x27;:(&#x27;WASTE_UNC&#x27;,&#x27;Diferença entre os limites superior e inferior do percentual sem coleta; não é erro amostral.&#x27;,&#x27;pontos percentuais&#x27;),&#x27;DOM_DEST&#x27;:(&#x27;DOM_DEST&#x27;,&#x27;Destino mais frequente entre as quatro categorias sem coleta conhecidas: 1 queima; 2 enterra; 3 terreno/encosta/área pública; 4 outro; 0 nenhuma reportada; -1 incompleto/sigiloso. Empate resolvido pela ordem das categorias.&#x27;,&#x27;categoria&#x27;),&#x27;WASTE_QA&#x27;:(&#x27;WASTE_QA&#x27;,&#x27;Qualidade e condição da estimativa censitária.&#x27;,&#x27;categoria&#x27;)})
+ pd.DataFrame(DICTIONARY).to_csv(D/&#x27;Dicionario_intermediarios.csv&#x27;,sep=&#x27;;&#x27;,index=False,encoding=&#x27;utf-8-sig&#x27;)
+ return lic,plans,w,counts
+
+# Mapas das atividades
+def licensed(lic,field,title,key,groups):
+ fig,axes=m.start(title)
+ for ax,r in zip(axes,m.b.itertuples()):
+  sub=lic[lic.BACIA.str.contains(r.id,na=False)]
+  for value,entry in groups.items():
+   label,col,*marker=entry;g=sub[sub[field]==value]
+   if len(g):g.plot(ax=ax,color=col,edgecolor=&#x27;white&#x27;,linewidth=.45,marker=marker[0] if marker else &#x27;o&#x27;,markersize=34 if value==1 else 25,zorder=12)
+ m.finish(fig,axes,key,title,handles=[Line2D([],[],linestyle=&#x27;&#x27;,marker=e[2] if len(e)&gt;2 else &#x27;o&#x27;,color=e[1],label=e[0]) for e in groups.values()])
+def municipal(plans,field,title,key,groups,facilities=False):
+ fig,axes=m.start(title)
+ for ax,r in zip(axes,m.b.itertuples()):
+  sub=plans[plans.BACIA==r.id]
+  for value,(label,col) in groups.items():
+   g=sub[sub[field]==value]
+   if len(g):g.plot(ax=ax,facecolor=col,edgecolor=&#x27;#667d7c&#x27;,linewidth=.45,zorder=2)
+  if facilities:
+   frame=m.box(ax.get_xlim()[0],ax.get_ylim()[0],ax.get_xlim()[1],ax.get_ylim()[1]);g=m.fac[m.fac.intersects(frame)]
+   for typ,marker,col in [(&#x27;aterros_sanitarios&#x27;,&#x27;s&#x27;,&#x27;#8f5072&#x27;),(&#x27;transbordo&#x27;,&#x27;^&#x27;,&#x27;#c38e42&#x27;)]:
+    if len(g[g.TYPE==typ]):g[g.TYPE==typ].plot(ax=ax,marker=marker,color=col,edgecolor=&#x27;white&#x27;,markersize=38,zorder=12)
+ handles=[Patch(facecolor=col,edgecolor=&#x27;#667d7c&#x27;,label=label) for label,col in groups.values()]
+ if facilities:handles +=[Line2D([],[],linestyle=&#x27;&#x27;,marker=&#x27;s&#x27;,color=&#x27;#8f5072&#x27;,label=&#x27;Landfill: cadastral location&#x27;),Line2D([],[],linestyle=&#x27;&#x27;,marker=&#x27;^&#x27;,color=&#x27;#c38e42&#x27;,label=&#x27;Transfer station: cadastral location&#x27;)]
+ m.finish(fig,axes,key,title,handles=handles)
+
+# Execução e integração
+def main():
+ lic,plans,w,counts=prepare();m.gallery=[]
+ licensed(lic,&#x27;TP_CODE&#x27;,&#x27;Licensed activity records · source-related typologies&#x27;,&#x27;14_licensed_typologies&#x27;,TYPES)
+ licensed(lic,&#x27;MP_LINK&#x27;,&#x27;Licensed activities · documentary link to microplastics&#x27;,&#x27;15_licensed_linkage&#x27;,LINKS)
+ destinations={v:(&#x27;Regulated landfill: municipal declaration&#x27;,&#x27;#a8c7bc&#x27;) for v in plans.tiprsu_24.dropna().unique()};municipal(plans,&#x27;tiprsu_24&#x27;,&#x27;Solid-waste destination and registered facilities&#x27;,&#x27;16_waste_destinations&#x27;,destinations,True)
+ categories={1:(&#x27;Declared yes&#x27;,&#x27;#86b5ac&#x27;),0:(&#x27;Declared no&#x27;,&#x27;#d7b076&#x27;),-1:(&#x27;No information&#x27;,&#x27;#d5dcda&#x27;)}
+ municipal(plans,&#x27;COLLECT&#x27;,&#x27;Selective collection · municipal declaration, 2024&#x27;,&#x27;17_selective_collection&#x27;,categories)
+ municipal(plans,&#x27;PLAN&#x27;,&#x27;Municipal solid-waste management plan · 2024&#x27;,&#x27;18_waste_plans&#x27;,categories)
+ fig,axes=m.start(&#x27;Waste collection deficit · uncertainty from confidential counts&#x27;)
+ for ax,r in zip(axes,m.b.itertuples()):w[w.BACIA==r.id].plot(ax=ax,column=&#x27;WASTE_UNC&#x27;,cmap=m.CM,vmin=0,vmax=100,edgecolor=&#x27;#687c77&#x27;,linewidth=.12,missing_kwds={&#x27;color&#x27;:&#x27;#d5dcda&#x27;},zorder=2)
+ m.finish(fig,axes,&#x27;19_waste_uncertainty&#x27;,&#x27;Waste collection deficit · uncertainty from confidential counts&#x27;,bar=(m.CM,Normalize(0,100),&#x27;Upper minus lower bound (percentage points)&#x27;))
+ fig,axes=m.start(&#x27;Uncollected household waste · predominant reported destination&#x27;)
+ groups={-1:(&#x27;Confidential / incomplete&#x27;,&#x27;#cdd5d2&#x27;),0:(&#x27;None reported&#x27;,&#x27;#eef0e9&#x27;),1:(&#x27;Burned on property&#x27;,&#x27;#c98460&#x27;),2:(&#x27;Buried on property&#x27;,&#x27;#b7a16d&#x27;),3:(&#x27;Open land / slope / public space&#x27;,&#x27;#b15c76&#x27;),4:(&#x27;Other destination&#x27;,&#x27;#7ba5ac&#x27;)}
+ for ax,r in zip(axes,m.b.itertuples()):
+  sub=w[w.BACIA==r.id]
+  for value,(label,col) in groups.items():
+   if len(sub[sub.DOM_DEST==value]):sub[sub.DOM_DEST==value].plot(ax=ax,facecolor=col,edgecolor=&#x27;#718079&#x27;,linewidth=.12,zorder=2)
+ m.finish(fig,axes,&#x27;20_waste_pathways&#x27;,&#x27;Uncollected household waste · predominant reported destination&#x27;,handles=[Patch(facecolor=c,edgecolor=&#x27;#718079&#x27;,label=l) for l,c in groups.values()])
+ gallery=json.loads((m.F/&#x27;galeria.json&#x27;).read_text(&#x27;utf8&#x27;));new={x[&#x27;id&#x27;] for x in m.gallery};gallery=[x for x in gallery if x[&#x27;id&#x27;] not in new]+m.gallery;(m.F/&#x27;galeria.json&#x27;).write_text(json.dumps(gallery,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;)
+ target=F/&#x27;03_mapas/14_microplasticos&#x27;
+ for item in m.gallery:
+  for ext in [&#x27;png&#x27;,&#x27;svg&#x27;]:shutil.copy2(m.F/(item[&#x27;id&#x27;]+&#x27;.&#x27;+ext),target/(item[&#x27;id&#x27;]+&#x27;.&#x27;+ext))
+ shutil.copy2(m.F/&#x27;galeria.json&#x27;,target/&#x27;galeria.json&#x27;);shutil.copy2(Path(__file__),F/&#x27;05_scripts/python&#x27;/Path(__file__).name)
+ info={&#x27;new_maps&#x27;:len(m.gallery),&#x27;licensed_records&#x27;:len(lic),&#x27;explicit_plastic_records&#x27;:int((lic.MP_LINK==1).sum()),&#x27;typology_counts&#x27;:counts.to_dict(&#x27;records&#x27;),&#x27;no_index_recalculation&#x27;:True,&#x27;no_inferred_waste_transport_routes&#x27;:True};(D/&#x27;Intermediarios_licenciamento_residuos.json&#x27;).write_text(json.dumps(info,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(json.dumps({&#x27;maps&#x27;:len(m.gallery),&#x27;records&#x27;:len(lic)},ensure_ascii=True),flush=True)
+if __name__==&#x27;__main__&#x27;:main()
+</pre>

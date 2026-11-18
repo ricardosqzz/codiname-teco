@@ -1,0 +1,88 @@
+<!doctype html><meta charset="utf-8"><style>body{max-width:1100px;margin:30px auto;font:16px/1.6 Arial}pre{background:#edf3f5;overflow:auto;padding:18px}</style><h1>integrar_intermediarios_microplasticos.py</h1><p>revisão editorial e produtos intermediários de 18/11/2026</p><h2>Entradas e saídas</h2><pre># ENTRADAS: shapefiles de tipologias licenciadas e resíduos em entrega_final/01_entradas/18_residuos e 19_licenciamento; layouts atuais dos dois projetos QGIS.
+# CAMPOS: TP_CODE, MP_LINK, DEST_2024, COLLECT, PLAN, WASTE_UNC e DOM_DEST; BACIA filtra cada encarte.
+# SAÍDAS: grupo Intermediate inputs e sete layouts triplos; auditoria em 00_documentacao/Microplasticos.
+# CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; usar Python do QGIS. Não altera índices ou agrupamentos.
+from pathlib import Path
+import os,json,datetime,shutil
+os.environ[&#x27;QT_QPA_PLATFORM&#x27;]=&#x27;offscreen&#x27;
+from qgis.core import *
+from qgis.PyQt.QtGui import QColor,QFont,QFontDatabase</pre><h2>Código integral</h2><pre># ENTRADAS: shapefiles de tipologias licenciadas e resíduos em entrega_final/01_entradas/18_residuos e 19_licenciamento; layouts atuais dos dois projetos QGIS.
+# CAMPOS: TP_CODE, MP_LINK, DEST_2024, COLLECT, PLAN, WASTE_UNC e DOM_DEST; BACIA filtra cada encarte.
+# SAÍDAS: grupo Intermediate inputs e sete layouts triplos; auditoria em 00_documentacao/Microplasticos.
+# CAMINHOS: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; usar Python do QGIS. Não altera índices ou agrupamentos.
+from pathlib import Path
+import os,json,datetime,shutil
+os.environ[&#x27;QT_QPA_PLATFORM&#x27;]=&#x27;offscreen&#x27;
+from qgis.core import *
+from qgis.PyQt.QtGui import QColor,QFont,QFontDatabase
+from qgis.PyQt.QtCore import Qt
+from caminhos_teco import raiz_projeto
+R=raiz_projeto();F=R/&#x27;entrega_final&#x27;;NAMES={&#x27;pampulha&#x27;:&#x27;Pampulha&#x27;,&#x27;vargem_flores&#x27;:&#x27;Vargem das Flores&#x27;,&#x27;ibirite_regap&#x27;:&#x27;Ibirité / REGAP&#x27;}
+SPECS=[
+ (&#x27;Licensed typologies&#x27;,&#x27;19_licenciamento/02_tipologias/lic_typology.shp&#x27;,&#x27;TP_CODE&#x27;,[(1,&#x27;Plastic processing / recycling&#x27;,&#x27;#b74e78&#x27;),(2,&#x27;Refining / chemicals&#x27;,&#x27;#d19e45&#x27;),(3,&#x27;Metal / vehicles&#x27;,&#x27;#7e7caf&#x27;),(4,&#x27;Waste / wastewater&#x27;,&#x27;#589c87&#x27;),(5,&#x27;Fuel / transport&#x27;,&#x27;#8c9b9e&#x27;),(6,&#x27;Other / infrastructure&#x27;,&#x27;#9cbcc8&#x27;)]),
+ (&#x27;Documentary source linkage&#x27;,&#x27;19_licenciamento/02_tipologias/lic_typology.shp&#x27;,&#x27;MP_LINK&#x27;,[(0,&#x27;No specific link&#x27;,&#x27;#bcc7c8&#x27;),(1,&#x27;Plastic explicitly reported&#x27;,&#x27;#b74e78&#x27;),(2,&#x27;Process: verify details&#x27;,&#x27;#d7aa58&#x27;),(3,&#x27;Waste / effluent management&#x27;,&#x27;#589c87&#x27;)]),
+ (&#x27;Waste destination&#x27;,&#x27;18_residuos/04_destinos/destinations.shp&#x27;,&#x27;DEST_2024&#x27;,[(&#x27;AS Regularizado&#x27;,&#x27;Regulated landfill declaration&#x27;,&#x27;#a8c7bc&#x27;)]),
+ (&#x27;Selective collection&#x27;,&#x27;18_residuos/05_coleta/selective.shp&#x27;,&#x27;COLLECT&#x27;,[(1,&#x27;Declared yes&#x27;,&#x27;#86b5ac&#x27;),(0,&#x27;Declared no&#x27;,&#x27;#d7b076&#x27;),(-1,&#x27;No information&#x27;,&#x27;#d5dcda&#x27;)]),
+ (&#x27;Municipal waste plans&#x27;,&#x27;18_residuos/06_planos/waste_plan.shp&#x27;,&#x27;PLAN&#x27;,[(1,&#x27;Declared yes&#x27;,&#x27;#86b5ac&#x27;),(0,&#x27;Declared no&#x27;,&#x27;#d7b076&#x27;),(-1,&#x27;No information&#x27;,&#x27;#d5dcda&#x27;)]),
+ (&#x27;Waste uncertainty&#x27;,&#x27;18_residuos/07_lixo_intermediario/waste_detail.shp&#x27;,&#x27;WASTE_UNC&#x27;,[(0,&#x27;0–20 pp&#x27;,&#x27;#a8d9e6&#x27;),(1,&#x27;&gt;20–40 pp&#x27;,&#x27;#68b7a0&#x27;),(2,&#x27;&gt;40–60 pp&#x27;,&#x27;#e2d17d&#x27;),(3,&#x27;&gt;60–80 pp&#x27;,&#x27;#df995c&#x27;),(4,&#x27;&gt;80–100 pp&#x27;,&#x27;#b94854&#x27;)]),
+ (&#x27;Uncollected waste pathways&#x27;,&#x27;18_residuos/07_lixo_intermediario/waste_detail.shp&#x27;,&#x27;DOM_DEST&#x27;,[(-1,&#x27;Confidential / incomplete&#x27;,&#x27;#cdd5d2&#x27;),(0,&#x27;None reported&#x27;,&#x27;#eef0e9&#x27;),(1,&#x27;Burned&#x27;,&#x27;#c98460&#x27;),(2,&#x27;Buried&#x27;,&#x27;#b7a16d&#x27;),(3,&#x27;Open land / public space&#x27;,&#x27;#b15c76&#x27;),(4,&#x27;Other destination&#x27;,&#x27;#7ba5ac&#x27;)])]
+
+# Renderizadores
+def layer(project,group,spec,basin=None):
+ title,path,field,values=spec;lyr=QgsVectorLayer(str(F/&#x27;01_entradas&#x27;/path),title,&#x27;ogr&#x27;);assert lyr.isValid(),path
+ if basin:lyr.setSubsetString(&#x27;&quot;BACIA&quot;=\&#x27;&#x27;+basin+&#x27;\&#x27;&#x27;)
+ point=lyr.geometryType()==QgsWkbTypes.PointGeometry
+ def symbol(c,v):return QgsMarkerSymbol.createSimple({&#x27;name&#x27;:&#x27;diamond&#x27; if v==1 and field==&#x27;MP_LINK&#x27; or v==1 and field==&#x27;TP_CODE&#x27; else &#x27;circle&#x27;,&#x27;size&#x27;:&#x27;2.4&#x27;,&#x27;color&#x27;:c,&#x27;outline_color&#x27;:&#x27;white&#x27;}) if point else QgsFillSymbol.createSimple({&#x27;color&#x27;:c,&#x27;outline_color&#x27;:&#x27;#667d7c&#x27;,&#x27;outline_width&#x27;:&#x27;0.08&#x27;})
+ if field==&#x27;WASTE_UNC&#x27;:
+  ranges=[QgsRendererRange(v*20,(v+1)*20,symbol(c,v),label) for v,label,c in values];lyr.setRenderer(QgsGraduatedSymbolRenderer(field,ranges))
+ else:lyr.setRenderer(QgsCategorizedSymbolRenderer(field,[QgsRendererCategory(v,symbol(c,v),label) for v,label,c in values]))
+ project.addMapLayer(lyr,False);group.addLayer(lyr);return lyr
+
+# Legendas e layouts
+def add_layout(project,spec,all_layer,per):
+ title,path,field,values=spec;manager=project.layoutManager();template=manager.layoutByName(&#x27;Index S0&#x27;)
+ if not template:return
+ name=&#x27;Inputs | &#x27;+title;old=manager.layoutByName(name)
+ if old:manager.removeLayout(old)
+ layout=manager.duplicateLayout(template,name)
+ for item in list(layout.items()):
+  if isinstance(item,QgsLayoutItemMap):
+   layers=[];found=False
+   for lyr in item.layers():
+    source=lyr.source();lname=lyr.name().lower()
+    if lname==&#x27;s0&#x27; or &#x27;weighted_index.shp&#x27; in source.lower() or &#x27;teco_final.shp&#x27; in source.lower():
+     basin=next((k for k in NAMES if k in source or k in lyr.subsetString()),None);layers.append(per.get(basin,all_layer));found=True
+    else:layers.append(lyr)
+   if not found:layers.append(all_layer)
+   item.setLayers(layers);item.setKeepLayerSet(True);item.refresh()
+  elif isinstance(item,(QgsLayoutItemLabel,QgsLayoutItemLegend)) and item.positionWithUnits().y()&gt;=105:layout.removeLayoutItem(item)
+  elif isinstance(item,QgsLayoutItemLabel) and (&#x27;S0&#x27; in item.text() or &#x27;multivari&#x27; in item.text().lower()):item.setText(title)
+ for row in range((len(values)+2)//3):
+  cells=values[row*3:row*3+3];start=(300-76*len(cells))/2
+  for col,(_,label,color) in enumerate(cells):
+   x=start+76*col;y=111+row*6;sw=QgsLayoutItemLabel(layout);sw.setBackgroundEnabled(True);sw.setBackgroundColor(QColor(color));sw.attemptMove(QgsLayoutPoint(x,y+1));sw.attemptResize(QgsLayoutSize(3,1.8));layout.addLayoutItem(sw)
+   tx=QgsLayoutItemLabel(layout);tx.setText(label);tx.setFont(QFont(&#x27;Arial&#x27;,7));tx.attemptMove(QgsLayoutPoint(x+4,y));tx.attemptResize(QgsLayoutSize(70,5));layout.addLayoutItem(tx)
+
+# Integração reutilizável
+def add_intermediates(project,parent):
+ old=parent.findGroup(&#x27;Intermediate inputs&#x27;)
+ if old:
+  ids=[n.layerId() for n in old.findLayers()];parent.removeChildNode(old)
+  for i in ids:project.removeMapLayer(i)
+ group=parent.addGroup(&#x27;Intermediate inputs&#x27;);allg=group.addGroup(&#x27;All basins&#x27;);per={k:group.addGroup(v) for k,v in NAMES.items()}
+ for spec in SPECS:
+  all_layer=layer(project,allg,spec);basins={key:layer(project,sub,spec,key) for key,sub in per.items()};add_layout(project,spec,all_layer,basins)
+ group.setExpanded(False);return len(group.findLayers())
+
+# Execução nos projetos existentes
+def main():
+ rows=[];held=[];stamp=datetime.datetime.now().strftime(&#x27;%Y%m%d_%H%M%S&#x27;)
+ for target in [R/&#x27;projeto_teco.qgz&#x27;,F/&#x27;TECO_Consolidado.qgz&#x27;]:
+  dest=R/&#x27;descontinuado&#x27;/stamp/&#x27;qgis_antes_intermediarios&#x27;/target.name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(target,dest)
+  print(&#x27;PROJECT&#x27;,str(target),flush=True);project=QgsProject();assert project.read(str(target));held.append(project);parent=project.layerTreeRoot().findGroup(&#x27;Microplastics&#x27;);assert parent is not None;n=add_intermediates(project,parent);project.setFilePathStorage(Qgis.FilePathType.Relative);assert project.write(str(target));invalid=[l.name() for l in project.mapLayers().values() if not l.isValid()];assert not invalid,invalid;rows.append({&#x27;project&#x27;:str(target),&#x27;new_layers&#x27;:n,&#x27;new_layouts&#x27;:7,&#x27;invalid_layers&#x27;:invalid});print(&#x27;SAVED&#x27;,n,flush=True)
+ (F/&#x27;00_documentacao/Microplasticos/Conferencia_intermediarios_QGIS.json&#x27;).write_text(json.dumps(rows,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(json.dumps(rows,ensure_ascii=True))
+if __name__==&#x27;__main__&#x27;:
+ app=QgsApplication([],False);app.initQgis()
+ for f in [&#x27;arial.ttf&#x27;,&#x27;arialbd.ttf&#x27;]:QFontDatabase.addApplicationFont(&#x27;C:/Windows/Fonts/&#x27;+f)
+ main()
+</pre>

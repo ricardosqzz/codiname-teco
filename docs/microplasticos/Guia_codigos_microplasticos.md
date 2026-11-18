@@ -102,6 +102,48 @@ Trecho do arquivo, a partir da linha 14.
     report={**meta,'max_abs_difference':diff,'sources_reprocessed':False};(O/'validacao.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8');print(json.dumps({'records':len(g),'eligible':meta['n_valid'],'max_abs_difference':diff},ensure_ascii=True))
 ```
 
+## mapas_intermediarios_microplasticos.py
+
+Agrupa a atividade principal em tipologias documentais, sem atribuir emissão; produz sete mapas, camadas nativas e dicionários de resíduos e licenciamento. As hipóteses de conexão do processo com microplásticos permanecem separadas da classificação do índice.
+
+Trecho do arquivo, a partir da linha 21.
+
+```python
+def norm(s):return ''.join(c for c in unicodedata.normalize('NFKD',str(s).lower()) if not unicodedata.combining(c))
+def typology(s):
+ s=norm(s)
+ if any(v in s for v in ['plastic','termoplastic','polimero','borracha','textil','lavander']):return 1
+ if any(v in s for v in ['incinera','tratamento de esgoto','tratamento de residuos']):return 4
+```
+
+## integrar_intermediarios_microplasticos.py
+
+Inclui os produtos intermediários nos dois QGIS, com um grupo por bacia e sete layouts triplos. Os mapas mantêm o recorte do encarte, os atributos nativos e a distinção entre declaração municipal e fonte localizada.
+
+Trecho do arquivo, a partir da linha 58.
+
+```python
+# Integração reutilizável
+def add_intermediates(project,parent):
+ old=parent.findGroup('Intermediate inputs')
+ if old:
+  ids=[n.layerId() for n in old.findLayers()];parent.removeChildNode(old)
+```
+
+## atualizar_visualizador_intermediarios.py
+
+Monta o visualizador a partir do item 2, insere os mapas intermediários junto aos itens metodológicos e produz prévias públicas. Não exclui o texto introdutório do relatório de referência e não recalcula indicadores.
+
+Trecho do arquivo, a partir da linha 25.
+
+```python
+ return '<figure><h3>'+html.escape(item['title'])+'</h3><a href="'+link+'"><img loading="lazy" src="'+src+'" alt="'+html.escape(item['title'])+'"></a><figcaption>'+html.escape(EXPLANATIONS.get(item['id'],''))+'</figcaption></figure>'
+def build(public,gallery):
+ md=doc.text();body=doc.html_body('# Pressões potenciais de genes de resistência e microplásticos\n\n## 2.'+md.split('## 2.',1)[1]);items={g['id']:g for g in gallery}
+ counts=pd.read_csv(O/'tabelas/licencas_por_tipologia.csv',sep=';').groupby(['TP_CODE','TP_NAME']).size().reset_index(name='Registros')
+ tab=counts[['TP_NAME','Registros']].to_html(index=False,escape=True)
+```
+
 ## Ordem de execução
 
 1. Configurar a raiz e conferir entradas.

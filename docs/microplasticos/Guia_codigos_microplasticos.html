@@ -50,6 +50,27 @@ def pdf(md,gallery):
     assert diff&lt;1e-8,&#x27;Índice divergente do produto publicado&#x27;
     g.to_file(O/&#x27;classificacao_reproduzida.gpkg&#x27;,layer=&#x27;microplastic_pressure&#x27;,driver=&#x27;GPKG&#x27;)
     report={**meta,&#x27;max_abs_difference&#x27;:diff,&#x27;sources_reprocessed&#x27;:False};(O/&#x27;validacao.json&#x27;).write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;);print(json.dumps({&#x27;records&#x27;:len(g),&#x27;eligible&#x27;:meta[&#x27;n_valid&#x27;],&#x27;max_abs_difference&#x27;:diff},ensure_ascii=True))
+</code></pre><h2>mapas_intermediarios_microplasticos.py</h2>
+<p>Agrupa a atividade principal em tipologias documentais, sem atribuir emissão; produz sete mapas, camadas nativas e dicionários de resíduos e licenciamento. As hipóteses de conexão do processo com microplásticos permanecem separadas da classificação do índice.</p>
+<p>Trecho do arquivo, a partir da linha 21.</p><pre><code>def norm(s):return &#x27;&#x27;.join(c for c in unicodedata.normalize(&#x27;NFKD&#x27;,str(s).lower()) if not unicodedata.combining(c))
+def typology(s):
+ s=norm(s)
+ if any(v in s for v in [&#x27;plastic&#x27;,&#x27;termoplastic&#x27;,&#x27;polimero&#x27;,&#x27;borracha&#x27;,&#x27;textil&#x27;,&#x27;lavander&#x27;]):return 1
+ if any(v in s for v in [&#x27;incinera&#x27;,&#x27;tratamento de esgoto&#x27;,&#x27;tratamento de residuos&#x27;]):return 4
+</code></pre><h2>integrar_intermediarios_microplasticos.py</h2>
+<p>Inclui os produtos intermediários nos dois QGIS, com um grupo por bacia e sete layouts triplos. Os mapas mantêm o recorte do encarte, os atributos nativos e a distinção entre declaração municipal e fonte localizada.</p>
+<p>Trecho do arquivo, a partir da linha 58.</p><pre><code># Integração reutilizável
+def add_intermediates(project,parent):
+ old=parent.findGroup(&#x27;Intermediate inputs&#x27;)
+ if old:
+  ids=[n.layerId() for n in old.findLayers()];parent.removeChildNode(old)
+</code></pre><h2>atualizar_visualizador_intermediarios.py</h2>
+<p>Monta o visualizador a partir do item 2, insere os mapas intermediários junto aos itens metodológicos e produz prévias públicas. Não exclui o texto introdutório do relatório de referência e não recalcula indicadores.</p>
+<p>Trecho do arquivo, a partir da linha 25.</p><pre><code> return &#x27;&lt;figure&gt;&lt;h3&gt;&#x27;+html.escape(item[&#x27;title&#x27;])+&#x27;&lt;/h3&gt;&lt;a href=&quot;&#x27;+link+&#x27;&quot;&gt;&lt;img loading=&quot;lazy&quot; src=&quot;&#x27;+src+&#x27;&quot; alt=&quot;&#x27;+html.escape(item[&#x27;title&#x27;])+&#x27;&quot;&gt;&lt;/a&gt;&lt;figcaption&gt;&#x27;+html.escape(EXPLANATIONS.get(item[&#x27;id&#x27;],&#x27;&#x27;))+&#x27;&lt;/figcaption&gt;&lt;/figure&gt;&#x27;
+def build(public,gallery):
+ md=doc.text();body=doc.html_body(&#x27;# Pressões potenciais de genes de resistência e microplásticos\n\n## 2.&#x27;+md.split(&#x27;## 2.&#x27;,1)[1]);items={g[&#x27;id&#x27;]:g for g in gallery}
+ counts=pd.read_csv(O/&#x27;tabelas/licencas_por_tipologia.csv&#x27;,sep=&#x27;;&#x27;).groupby([&#x27;TP_CODE&#x27;,&#x27;TP_NAME&#x27;]).size().reset_index(name=&#x27;Registros&#x27;)
+ tab=counts[[&#x27;TP_NAME&#x27;,&#x27;Registros&#x27;]].to_html(index=False,escape=True)
 </code></pre><h2>Ordem de execução</h2>
 <p>1. Configurar a raiz e conferir entradas.</p>
 <p>2. Executar obter_residuos_licenciamento.py para nova consulta, ou preservar a exportação documentada.</p>

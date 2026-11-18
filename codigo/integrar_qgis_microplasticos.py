@@ -110,6 +110,9 @@ def main():
       if 'S0' in text or 'Multivariate' in text or 'multivari' in text:item.setText(title)
     legend(layout,field,title);created.append(name)
   for sub in [inputs,allg,terrain,*per.values()]:sub.setExpanded(False)
+  if (F/'01_entradas/19_licenciamento/02_tipologias/lic_typology.shp').exists():
+   from integrar_intermediarios_microplasticos import add_intermediates
+   add_intermediates(project,grp)
   project.setFilePathStorage(Qgis.FilePathType.Relative);assert project.write(str(target));reports.append({'project':str(target),'new_layouts':created,'microplastic_layers':len(grp.findLayers()),'invalid_layers':[l.name() for l in project.mapLayers().values() if not l.isValid()]})
   if target==R/'projeto_teco.qgz':
    layout=manager.layoutByName('MP | Microplastic pressure');settings=QgsLayoutExporter.ImageExportSettings();settings.dpi=160;out=R/'temp/microplasticos/qgis_pressure.png';assert QgsLayoutExporter(layout).exportToImage(str(out),settings)==QgsLayoutExporter.Success

@@ -30,7 +30,7 @@ A literatura sustenta a investigação de escoamento urbano e efluentes como rot
 
 ### 3.1 Destino do lixo no Censo 2022
 
-Foi aproveitado o CSV domiciliar já existente em saneamento_ibge, com o código do setor e as variáveis V00397 a V00402. V00397 representa coleta no domicílio pelo serviço de limpeza e V00398, depósito em caçamba desse serviço. V00399 a V00402 representam queima, enterramento, descarte em terreno/encosta/área pública e outros destinos. O denominador é o total de domicílios particulares permanentes ocupados, preservado da base censitária anterior.
+Foi utilizado o mesmo arquivo CSV da pasta saneamento_ibge, com o código do setor e as variáveis V00397 a V00402. V00397 representa coleta no domicílio pelo serviço de limpeza e V00398, depósito em caçamba desse serviço. V00399 a V00402 representam queima, enterramento, descarte em terreno/encosta/área pública e outros destinos. O denominador é o total de domicílios particulares permanentes ocupados, preservado da base censitária anterior.
 
 As contagens originais permanecem referidas ao setor inteiro, embora a geometria da camada seja o recorte pela bacia. ORIG_KM2 informa a área original e PART_KM2 informa o recorte. Para estimar a parcela dentro da bacia, a contagem é multiplicada pela razão entre a área recortada e a área original. Trata-se de alocação proporcional, com distribuição homogênea assumida dentro do setor. Não é uma contagem observada das casas localizadas no recorte.
 
