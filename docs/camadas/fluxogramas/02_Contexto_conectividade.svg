@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420mm" height="297mm" viewBox="0 0 2400 1700"><title>Contexto territorial e conectividade</title><desc>Camadas complementares ajudam a interpretar as manchas; não recebem pesos adicionais nos índices atuais.</desc>
+<rect x="0" y="0" width="2400" height="1700" rx="0" fill="#f4f7f9" stroke="none" stroke-width="2"/>
+<text x="60" y="80" font-family="Arial" font-size="47" font-weight="700" fill="#17384b">Contexto territorial e conectividade</text>
+<text x="60" y="125" font-family="Arial" font-size="25" font-weight="400" fill="#526d7b">Camadas complementares ajudam a interpretar as manchas; não recebem pesos adicionais nos índices atuais.</text>
+<text x="2225" y="80" font-family="Arial" font-size="30" font-weight="700" fill="#526d7b">2 / 2</text>
+<text x="60" y="205" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">RELEVO E ROTAS TOPOGRÁFICAS</text>
+<text x="1280" y="205" font-family="Arial" font-size="28" font-weight="700" fill="#62747d">CAMADAS DE CONTEXTO E CONFERÊNCIA</text>
+<rect x="60" y="245" width="1060" height="145" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="60" y="245" width="8" height="145" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="85" y="288" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">Copernicus GLO-30</text>
+<text x="85" y="328" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">MDE em SIRGAS 2000 / UTM 23S</text>
+<text x="85" y="361" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Base física de altitude, declividade e direção de fluxo</text>
+<rect x="60" y="465" width="505" height="195" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="60" y="465" width="8" height="195" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="85" y="508" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">Hipsometria e declividade</text>
+<text x="85" y="548" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Altitude em metros</text>
+<text x="85" y="581" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Inclinação em % • classes Embrapa</text>
+<text x="85" y="614" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Mapas de caracterização</text>
+<rect x="615" y="465" width="505" height="195" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="615" y="465" width="8" height="195" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="640" y="508" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">Direção e acumulação D8</text>
+<text x="640" y="548" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Um de oito pixels vizinhos</text>
+<text x="640" y="581" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Área contribuinte e percurso</text>
+<text x="640" y="614" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Conectividade topográfica</text>
+<polyline points="590,390 590,420 312,420 312,465" fill="none" stroke="#23769a" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="312,465 318.0,450.0 306.0,450.0" fill="#23769a"/>
+<polyline points="590,420 867,420 867,465" fill="none" stroke="#23769a" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="867,465 873.0,450.0 861.0,450.0" fill="#23769a"/>
+<rect x="60" y="745" width="505" height="200" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="60" y="745" width="8" height="200" rx="3" fill="#62747d" stroke="none" stroke-width="2"/>
+<text x="85" y="788" font-family="Arial" font-size="28" font-weight="700" fill="#62747d">Hidrografia e exutórios</text>
+<text x="85" y="828" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Cursos d’água mapeados</text>
+<text x="85" y="861" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Reservatório delimita o destino</text>
+<text x="85" y="894" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Exutórios orientam a área drenada</text>
+<rect x="615" y="745" width="505" height="200" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="615" y="745" width="8" height="200" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="640" y="788" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">Contribuição a montante</text>
+<text x="640" y="828" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Área contribuinte (km²)</text>
+<text x="640" y="861" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Distância hidrológica (km)</text>
+<text x="640" y="894" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Rotas topográficas candidatas</text>
+<polyline points="867,660 867,745" fill="none" stroke="#23769a" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="867,745 873.0,730.0 861.0,730.0" fill="#23769a"/>
+<polyline points="565,845 615,845" fill="none" stroke="#62747d" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="615,845 600.0,839.0 600.0,851.0" fill="#62747d"/>
+<rect x="60" y="1040" width="505" height="205" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="60" y="1040" width="8" height="205" rx="3" fill="#257b6c" stroke="none" stroke-width="2"/>
+<text x="85" y="1083" font-family="Arial" font-size="28" font-weight="700" fill="#257b6c">Índices espaciais da página 1</text>
+<text x="85" y="1123" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Índice de resistência</text>
+<text x="85" y="1156" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Índice de microplásticos</text>
+<text x="85" y="1189" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Cada tema é tratado separadamente</text>
+<rect x="615" y="1040" width="505" height="205" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="615" y="1040" width="8" height="205" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="640" y="1083" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">Pressão média a montante</text>
+<text x="640" y="1123" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Índice ponderado pela área</text>
+<text x="640" y="1156" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Agregação pelo caminho D8</text>
+<text x="640" y="1189" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Interromper percurso no reservatório</text>
+<polyline points="867,945 867,1040" fill="none" stroke="#23769a" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="867,1040 873.0,1025.0 861.0,1025.0" fill="#23769a"/>
+<polyline points="565,1140 615,1140" fill="none" stroke="#257b6c" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="615,1140 600.0,1134.0 600.0,1146.0" fill="#257b6c"/>
+<rect x="60" y="1320" width="1060" height="180" rx="16" fill="#e6eff3" stroke="#cbd9df" stroke-width="2"/>
+<text x="85" y="1360" font-family="Arial" font-size="28" font-weight="700" fill="#17384b">Como interpretar</text>
+<text x="85" y="1400" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">D8 não representa galerias pluviais, vazão ou transporte calibrado.</text>
+<text x="85" y="1434" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">O resultado não é uma concentração, carga ou probabilidade.</text>
+<text x="85" y="1468" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Distância em linha reta e distância hidrológica são camadas distintas.</text>
+<rect x="1280" y="245" width="1060" height="165" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="1280" y="245" width="8" height="165" rx="3" fill="#62747d" stroke="none" stroke-width="2"/>
+<text x="1305" y="288" font-family="Arial" font-size="28" font-weight="700" fill="#62747d">Uso e cobertura da terra • 2025</text>
+<text x="1305" y="328" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Classes nas unidades originais • ocupação e superfícies</text>
+<text x="1305" y="361" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Contextualiza urbanização e condições de escoamento.</text>
+<rect x="1280" y="485" width="1060" height="165" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="1280" y="485" width="8" height="165" rx="3" fill="#62747d" stroke="none" stroke-width="2"/>
+<text x="1305" y="528" font-family="Arial" font-size="28" font-weight="700" fill="#62747d">Licenciamento e gestão de resíduos</text>
+<text x="1305" y="568" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Tipologias, processos, aterros, transbordo e destinação</text>
+<text x="1305" y="601" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Coleta seletiva e planos são cadastros; sem peso automático.</text>
+<rect x="1280" y="725" width="1060" height="165" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="1280" y="725" width="8" height="165" rx="3" fill="#62747d" stroke="none" stroke-width="2"/>
+<text x="1305" y="768" font-family="Arial" font-size="28" font-weight="700" fill="#62747d">Rede de esgoto de BH e cadastro de ETE</text>
+<text x="1305" y="808" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Infraestrutura disponível e possíveis conexões</text>
+<text x="1305" y="841" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Não informa vazão nem comprova lançamento ou carga.</text>
+<rect x="1280" y="965" width="1060" height="165" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="1280" y="965" width="8" height="165" rx="3" fill="#62747d" stroke="none" stroke-width="2"/>
+<text x="1305" y="1008" font-family="Arial" font-size="28" font-weight="700" fill="#62747d">Pontos de coleta e microcosmos</text>
+<text x="1305" y="1048" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Gota para amostragem • losango para experimento in situ</text>
+<text x="1305" y="1081" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Referências amostrais, sem função de fonte no índice.</text>
+<rect x="1280" y="1205" width="1060" height="165" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="1280" y="1205" width="8" height="165" rx="3" fill="#62747d" stroke="none" stroke-width="2"/>
+<text x="1305" y="1248" font-family="Arial" font-size="28" font-weight="700" fill="#62747d">Internações por residência e filtros de causas</text>
+<text x="1305" y="1288" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Universo separado da produção hospitalar local</text>
+<text x="1305" y="1321" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Não constitui área de atendimento por CEP ou bairro.</text>
+<text x="1280" y="1450" font-family="Arial" font-size="25" font-weight="400" fill="#526d7b">Conferência: CNES, IBGE, SIH, IDE-Sisema e SINIR</text>
+<text x="1280" y="1485" font-family="Arial" font-size="25" font-weight="400" fill="#526d7b">mantêm seus períodos, cobertura e limitações.</text>
+<rect x="60" y="1580" width="2280" height="80" rx="16" fill="#17384b" stroke="none" stroke-width="2"/>
+<text x="85" y="1616" font-family="Arial" font-size="27" font-weight="700" fill="#ffffff">QGIS  •  Camadas nativas + caminhos D8 + índices independentes + reservatórios em destaque nos encartes</text>
+<text x="85" y="1648" font-family="Arial" font-size="23" font-weight="400" fill="#e6eff2">O fluxograma documenta a cadeia existente em Python / SIG. Não é um modelo executável do Modelador Gráfico do QGIS.</text>
+<polyline points="867,1245 867,1290" fill="none" stroke="#23769a" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="867,1290 873.0,1275.0 861.0,1275.0" fill="#23769a"/>
+<polyline points="1810,1370 1810,1410" fill="none" stroke="#62747d" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="1810,1410 1816.0,1395.0 1804.0,1395.0" fill="#62747d"/>
+</svg>

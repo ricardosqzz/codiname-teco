@@ -1,0 +1,1309 @@
+{
+  "01_bacias": {
+    "01_entradas/01_bacias/bacias.shp": [
+      {
+        "campo": "id",
+        "descricao": "Identificador da bacia hidrográfica: pampulha, vargem_flores ou ibirite_regap.",
+        "unidade": "código"
+      },
+      {
+        "campo": "reserv",
+        "descricao": "Nome do reservatório associado à delimitação da bacia ou ao exutório de referência.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "area_km2",
+        "descricao": "Área da bacia exclusiva, após retirar sobreposições entre as três bacias, calculada em SIRGAS 2000 / UTM 23S.",
+        "unidade": "km²"
+      },
+      {
+        "campo": "orig_km2",
+        "descricao": "Área da bacia integrada e suavizada antes do ajuste que elimina sobreposições com as outras bacias.",
+        "unidade": "km²"
+      },
+      {
+        "campo": "reduz_km2",
+        "descricao": "Área retirada da delimitação original para resolver sobreposições entre bacias; corresponde à diferença entre orig_km2 e area_km2, limitada a valores não negativos.",
+        "unidade": "km²"
+      },
+      {
+        "campo": "incl_pct",
+        "descricao": "Percentual da área do espelho do reservatório que permanece incluído na bacia exclusiva: 100 × área da interseção entre bacia e reservatório / área do reservatório. Não é percentual da bacia original preservada.",
+        "unidade": "% do reservatório"
+      },
+      {
+        "campo": "situacao",
+        "descricao": "Registro das verificações da delimitação, incluindo integração das áreas contribuintes do lago, possível truncamento do MDE e ajuste de sobreposição entre bacias.",
+        "unidade": "texto"
+      }
+    ]
+  },
+  "02_reservatorios": {
+    "01_entradas/02_reservatorios/reservatorios.shp": [
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia à qual pertence a feição ou o recorte: pampulha, vargem_flores ou ibirite_regap.",
+        "unidade": "código"
+      },
+      {
+        "campo": "NOME",
+        "descricao": "Nome do reservatório representado pelo polígono.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "AREA_KM2",
+        "descricao": "Área do polígono consolidado do espelho do reservatório, calculada em SIRGAS 2000 / UTM 23S; não é a área da bacia.",
+        "unidade": "km²"
+      }
+    ]
+  },
+  "04_esgotamento": {
+    "01_entradas/04_esgotamento/esgotamento.shp": [
+      {
+        "campo": "setor_id",
+        "descricao": "Código IBGE de 15 dígitos do setor censitário de origem, armazenado como texto. O mesmo setor pode ter recortes em bacias diferentes.",
+        "unidade": "código"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia à qual pertence a feição ou o recorte: pampulha, vargem_flores ou ibirite_regap.",
+        "unidade": "código"
+      },
+      {
+        "campo": "DOM_TOT",
+        "descricao": "Domicílios particulares permanentes ocupados do setor inteiro, variável V00001 da tabela Características do Domicílio - Parte 1 do Censo 2022. Ausências e sigilo não são convertidos em zero.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "DOM_REDE",
+        "descricao": "Domicílios particulares permanentes ocupados do setor com destinação à rede geral ou pluvial (V00309) ou a fossa séptica/filtro ligada à rede (V00310). A soma exige disponibilidade das duas parcelas e não comprova tratamento do esgoto.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "REDE_PCT",
+        "descricao": "Percentual observado de domicílios do setor com rede geral/pluvial ou fossa ligada à rede: 100 × (V00309 + V00310) / V00001. Denominador zero, ausência ou sigilo das parcelas permanecem nulos.",
+        "unidade": "% dos domicílios"
+      },
+      {
+        "campo": "SEM_REDE",
+        "descricao": "Percentual observado de domicílios do setor sem rede geral/pluvial ou fossa ligada à rede: 100 − REDE_PCT. Mantém as lacunas de publicação; não mede diretamente falta de tratamento.",
+        "unidade": "% dos domicílios"
+      },
+      {
+        "campo": "DESC_RIO",
+        "descricao": "Percentual de domicílios do setor com destinação à vala OU a rio, lago, córrego ou mar: 100 × (V00313 + V00314) / V00001. Exige ambas as categorias publicadas; não representa apenas lançamento em rio.",
+        "unidade": "% dos domicílios"
+      },
+      {
+        "campo": "REDE_DIR",
+        "descricao": "Domicílios particulares permanentes ocupados do setor cuja destinação do esgoto é a rede geral ou pluvial, variável V00309 do Censo 2022.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "FOSS_REDE",
+        "descricao": "Domicílios particulares permanentes ocupados do setor cuja destinação do esgoto é fossa séptica ou fossa filtro ligada à rede, variável V00310 do Censo 2022.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "FOSS_SREDE",
+        "descricao": "Domicílios particulares permanentes ocupados do setor cuja destinação do esgoto é fossa séptica ou fossa filtro não ligada à rede, variável V00311 do Censo 2022.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "FOSSA_RUD",
+        "descricao": "Domicílios particulares permanentes ocupados do setor cuja destinação do esgoto é fossa rudimentar ou buraco, variável V00312 do Censo 2022.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "VALA",
+        "descricao": "Domicílios particulares permanentes ocupados do setor cuja destinação do esgoto é vala, variável V00313 do Censo 2022.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "RIO_LAGO",
+        "descricao": "Domicílios particulares permanentes ocupados do setor cuja destinação do esgoto é rio, lago, córrego ou mar, variável V00314 do Censo 2022.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "OUTRO",
+        "descricao": "Domicílios particulares permanentes ocupados do setor com outra forma de destinação do esgoto, variável V00315 do Censo 2022.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "SEM_BANH",
+        "descricao": "Domicílios particulares permanentes ocupados do setor sem banheiro nem sanitário, categoria V00316 do Censo 2022.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "SIGILO_N",
+        "descricao": "Número de células com símbolo X nas nove variáveis censitárias de esgotamento utilizadas: V00001 e V00309 a V00316. Não é quantidade de domicílios nem de dados ausentes por outros motivos.",
+        "unidade": "variáveis com sigilo"
+      }
+    ]
+  },
+  "05_hidrografia": {
+    "01_entradas/05_hidrografia/hidrografia.shp": [
+      {
+        "campo": "id",
+        "descricao": "Identificador do trecho hidrográfico da base de origem, mantido após o recorte às bacias; pode repetir-se quando uma feição é dividida.",
+        "unidade": "identificador"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia à qual pertence a feição ou o recorte: pampulha, vargem_flores ou ibirite_regap.",
+        "unidade": "código"
+      },
+      {
+        "campo": "COMP_KM",
+        "descricao": "Comprimento da geometria linear após o recorte espacial, medido em SIRGAS 2000 / UTM 23S e dividido por 1.000.",
+        "unidade": "km"
+      }
+    ]
+  },
+  "06_vias_contexto": {
+    "01_entradas/06_vias_contexto/vias_contexto.shp": [
+      {
+        "campo": "ogc_fid",
+        "descricao": "Identificador original da feição viária no arquivo de origem; pode repetir-se quando uma via é dividida pelo recorte espacial.",
+        "unidade": "identificador"
+      },
+      {
+        "campo": "hier_legal",
+        "descricao": "Categoria de hierarquia viária informada na malha original. Expressa a classificação cadastral da via, sem estimar tráfego ou escoamento.",
+        "unidade": "categoria"
+      },
+      {
+        "campo": "TIPO_VIA",
+        "descricao": "Classe cartográfica derivada de hier_legal: Principal para ARTÉRIA PRIMÁRIA/EXPRESSA; Secundária / coletora para as demais arteriais e coletoras; Local para vias locais; Sem classe cadastrada nos outros casos. Não representa tráfego medido.",
+        "unidade": "categoria"
+      }
+    ]
+  },
+  "07_vias_bacias": {
+    "01_entradas/07_vias_bacias/vias_bacias.shp": [
+      {
+        "campo": "ogc_fid",
+        "descricao": "Identificador original da feição viária no arquivo de origem; pode repetir-se quando uma via é dividida pelo recorte espacial.",
+        "unidade": "identificador"
+      },
+      {
+        "campo": "hier_legal",
+        "descricao": "Categoria de hierarquia viária informada na malha original. Expressa a classificação cadastral da via, sem estimar tráfego ou escoamento.",
+        "unidade": "categoria"
+      },
+      {
+        "campo": "TIPO_VIA",
+        "descricao": "Classe cartográfica derivada de hier_legal: Principal para ARTÉRIA PRIMÁRIA/EXPRESSA; Secundária / coletora para as demais arteriais e coletoras; Local para vias locais; Sem classe cadastrada nos outros casos. Não representa tráfego medido.",
+        "unidade": "categoria"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia à qual pertence a feição ou o recorte: pampulha, vargem_flores ou ibirite_regap.",
+        "unidade": "código"
+      },
+      {
+        "campo": "COMP_KM",
+        "descricao": "Comprimento da geometria linear após o recorte espacial, medido em SIRGAS 2000 / UTM 23S e dividido por 1.000.",
+        "unidade": "km"
+      }
+    ]
+  },
+  "08_saude_local": {
+    "01_entradas/08_saude_local/saude_local.shp": [
+      {
+        "campo": "CNES",
+        "descricao": "Código de sete dígitos do estabelecimento no Cadastro Nacional de Estabelecimentos de Saúde, armazenado como texto para preservar zeros iniciais.",
+        "unidade": "código"
+      },
+      {
+        "campo": "NOME",
+        "descricao": "Nome do estabelecimento hospitalar informado no cadastro CNES utilizado na camada local.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "GRUPO",
+        "descricao": "Grupo assistencial atribuído ao tipo de estabelecimento CNES; na camada local atual, Hospital / hospital-dia identifica as instituições com produção SIH positiva dentro das bacias.",
+        "unidade": "categoria"
+      },
+      {
+        "campo": "TIPO",
+        "descricao": "Tipo de estabelecimento informado no CNES, como HOSPITAL GERAL ou HOSPITAL ESPECIALIZADO.",
+        "unidade": "categoria"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia à qual pertence a feição ou o recorte: pampulha, vargem_flores ou ibirite_regap.",
+        "unidade": "código"
+      },
+      {
+        "campo": "AIH_TODAS",
+        "descricao": "Total de autorizações de internação hospitalar normais (IDENT = 1) processadas no estabelecimento em 2016-2025, todas as causas e todas as origens dos pacientes. É produção hospitalar local, não total de residentes da bacia.",
+        "unidade": "internações no período"
+      },
+      {
+        "campo": "AIH_FILT",
+        "descricao": "Total de AIH normais processadas no estabelecimento em 2016-2025 com diagnóstico principal incluído no filtro A+B: etiologias bacterianas codificadas ou síndromes compatíveis. Considera pacientes de todas as origens; não confirma resistência antimicrobiana.",
+        "unidade": "internações A+B no período"
+      },
+      {
+        "campo": "AIH_ANO",
+        "descricao": "Média anual da produção hospitalar selecionada A+B: AIH_FILT / 10 anos, para 2016-2025. Não é média somente dos anos em que houve registro.",
+        "unidade": "internações A+B/ano"
+      },
+      {
+        "campo": "QA_MUN",
+        "descricao": "Verificação espacial do cadastro CNES: 1 quando o código do município cadastrado coincide com o município obtido pela localização do ponto; 0 quando não coincide.",
+        "unidade": "indicador 0/1"
+      },
+      {
+        "campo": "RES_NRMG",
+        "descricao": "Total oficial NRMG de internações de residentes de Belo Horizonte, Betim, Contagem e Ibirité atendidos no estabelecimento em 2016-2025. É o recorte histórico de quatro municípios, mantido em RES_NRMG; não é o total dos oito municípios nem a produção completa do hospital.",
+        "unidade": "internações no recorte anterior"
+      },
+      {
+        "campo": "RES_AB",
+        "descricao": "AIH normais do filtro A+B entre residentes dos quatro municípios da referência anterior (Belo Horizonte, Betim, Contagem e Ibirité), atendidos no estabelecimento em 2016-2025. Campo histórico mantido na camada local; não é o total dos oito municípios.",
+        "unidade": "internações A+B no recorte anterior"
+      }
+    ]
+  },
+  "10_exutorios": {
+    "01_entradas/10_exutorios/exutorios.shp": [
+      {
+        "campo": "id",
+        "descricao": "Identificador da bacia hidrográfica: pampulha, vargem_flores ou ibirite_regap.",
+        "unidade": "código"
+      },
+      {
+        "campo": "reserv",
+        "descricao": "Nome do reservatório associado à delimitação da bacia ou ao exutório de referência.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "metodo",
+        "descricao": "Procedimento usado para posicionar o exutório: candidato de saída D8 ou referência cartográfica da margem/hidrografia próxima ao vertedouro de Vargem das Flores.",
+        "unidade": "categoria"
+      },
+      {
+        "campo": "utm_e",
+        "descricao": "Coordenada leste do ponto de exutório de referência, em SIRGAS 2000 / UTM zona 23S (EPSG:31983).",
+        "unidade": "m"
+      },
+      {
+        "campo": "utm_n",
+        "descricao": "Coordenada norte do ponto de exutório de referência, em SIRGAS 2000 / UTM zona 23S (EPSG:31983).",
+        "unidade": "m"
+      },
+      {
+        "campo": "acum_cel",
+        "descricao": "Acumulação de células contribuintes D8 no pixel do exutório candidato original. Nula em Vargem das Flores após a mudança para referência cartográfica; a acumulação do ponto anterior não foi transferida.",
+        "unidade": "células de MDE"
+      },
+      {
+        "campo": "status",
+        "descricao": "Grau de conferência do exutório: candidato D8 sem verificação independente ou referência cartográfica conferida no EIA COPASA 2025 para Vargem das Flores.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "prec_m",
+        "descricao": "Resolução/precisão cartográfica aproximada de 30 m adotada para os pontos de referência; não é uma estimativa estatística de erro nem levantamento de campo.",
+        "unidade": "m aproximados"
+      }
+    ]
+  },
+  "11_pontos_coleta": {
+    "01_entradas/11_pontos_coleta/pontos_coleta.shp": [
+      {
+        "campo": "COLETA_ID",
+        "descricao": "Nome do ponto fornecido na camada de coleta. LP01-LP03, VF01-VF03 e IB01-IB03 são pontos de amostragem; Microcosm1 e Microcosm2 são locais de experimento in situ.",
+        "unidade": "código de ponto"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia à qual pertence a feição ou o recorte: pampulha, vargem_flores ou ibirite_regap.",
+        "unidade": "código"
+      }
+    ]
+  },
+  "14_rede_cadastral_BH": {
+    "01_entradas/14_rede_cadastral_BH/rede_BH.shp": [
+      {
+        "campo": "sit_rede",
+        "descricao": "Situação do trecho no cadastro de esgoto de Belo Horizonte: S com rede; N sem rede; NI sem informação; C sobreposição espacial de registros S e N, mantida como conflito.",
+        "unidade": "categoria S/N/NI/C"
+      },
+      {
+        "campo": "sit_nome",
+        "descricao": "Descrição textual da situação sit_rede: com rede cadastrada, sem rede cadastrada, sem informação ou conflito S/N na origem.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia à qual pertence a feição ou o recorte: pampulha, vargem_flores ou ibirite_regap.",
+        "unidade": "código"
+      },
+      {
+        "campo": "NOME_BACIA",
+        "descricao": "Nome do reservatório que identifica a bacia do trecho de rede ou da estação de tratamento.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "comp_m",
+        "descricao": "Comprimento do trecho cadastral de esgoto após consolidar geometrias coincidentes e recortar à interseção entre Belo Horizonte e as bacias.",
+        "unidade": "m"
+      }
+    ]
+  },
+  "15_ETE_cadastro": {
+    "01_entradas/15_ETE_cadastro/ETE.shp": [
+      {
+        "campo": "ete_id",
+        "descricao": "Identificador da estação de tratamento no cadastro IDE-Sisema utilizado no projeto; não é código CNES.",
+        "unidade": "identificador cadastral"
+      },
+      {
+        "campo": "mun_nome",
+        "descricao": "Nome do município informado no cadastro IDE-Sisema da estação de tratamento.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "fase_lic",
+        "descricao": "Fase do licenciamento registrada para a estação de tratamento na base IDE-Sisema consultada.",
+        "unidade": "categoria cadastral"
+      },
+      {
+        "campo": "situ_lic",
+        "descricao": "Situação do licenciamento registrada para a estação de tratamento na base IDE-Sisema consultada; não foi inferida a partir de sua proximidade ao reservatório.",
+        "unidade": "texto cadastral"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia à qual pertence a feição ou o recorte: pampulha, vargem_flores ou ibirite_regap.",
+        "unidade": "código"
+      },
+      {
+        "campo": "NOME_BACIA",
+        "descricao": "Nome do reservatório que identifica a bacia do trecho de rede ou da estação de tratamento.",
+        "unidade": "texto"
+      }
+    ]
+  },
+  "03_populacao": {
+    "01_entradas/03_populacao/populacao.shp": [
+      {
+        "campo": "setor_id",
+        "descricao": "Código IBGE de 15 dígitos do setor censitário de origem, armazenado como texto. O mesmo setor pode ter recortes em bacias diferentes.",
+        "unidade": "código"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia à qual pertence a feição ou o recorte: pampulha, vargem_flores ou ibirite_regap.",
+        "unidade": "código"
+      },
+      {
+        "campo": "POP_OFIC",
+        "descricao": "Total oficial de pessoas do setor censitário inteiro no Censo 2022, equivalente à variável básica V0001. Não se restringe ao recorte do setor dentro da bacia.",
+        "unidade": "pessoas"
+      },
+      {
+        "campo": "POP_REC",
+        "descricao": "População estimada no recorte do setor dentro da bacia: população do setor inteiro × fração da área do setor interceptada pela bacia.",
+        "unidade": "pessoas estimadas"
+      },
+      {
+        "campo": "DENS_POP",
+        "descricao": "Densidade populacional do setor inteiro: total oficial de pessoas / área original do setor em km². O valor é mantido nos recortes do mesmo setor.",
+        "unidade": "pessoas/km²"
+      },
+      {
+        "campo": "v0001",
+        "descricao": "Total de pessoas do setor censitário inteiro, variável básica V0001 do Censo 2022. É o total populacional; as variáveis V0002 a V0009 não devem ser somadas a ele.",
+        "unidade": "pessoas"
+      },
+      {
+        "campo": "v0002",
+        "descricao": "Total de domicílios do setor censitário inteiro, incluindo particulares permanentes ocupados, vagos ou de uso ocasional, particulares improvisados ocupados e coletivos com ou sem morador, variável básica V0002 do Censo 2022.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "v0003",
+        "descricao": "Total de domicílios particulares do setor censitário inteiro, incluindo permanentes ocupados, vagos ou de uso ocasional e improvisados ocupados, variável básica V0003 do Censo 2022.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "v0004",
+        "descricao": "Total de domicílios coletivos com ou sem morador no setor censitário inteiro, variável básica V0004 do Censo 2022.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "v0005",
+        "descricao": "Média de moradores por domicílio particular ocupado, considerando permanentes e improvisados ocupados no setor inteiro, variável básica V0005 do Censo 2022.",
+        "unidade": "pessoas/domicílio"
+      },
+      {
+        "campo": "v0006",
+        "descricao": "Percentual de domicílios particulares ocupados imputados pelo IBGE entre os domicílios particulares ocupados do setor inteiro, variável básica V0006 do Censo 2022.",
+        "unidade": "% dos domicílios particulares ocupados"
+      },
+      {
+        "campo": "v0007",
+        "descricao": "Total de domicílios particulares ocupados, permanentes e improvisados, no setor inteiro, variável básica V0007 do Censo 2022. Difere do denominador V00001, que considera apenas permanentes ocupados.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "v0008",
+        "descricao": "Total de domicílios particulares de uso ocasional no setor censitário inteiro, variável básica V0008 do Censo 2022.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "v0009",
+        "descricao": "Total de domicílios particulares permanentes vagos no setor censitário inteiro, variável básica V0009 do Censo 2022.",
+        "unidade": "domicílios"
+      }
+    ]
+  },
+  "09_saude_residencia": {
+    "01_entradas/09_saude_residencia/saude_residencia.shp": [
+      {
+        "campo": "CNES",
+        "descricao": "Código de sete dígitos do estabelecimento no Cadastro Nacional de Estabelecimentos de Saúde, armazenado como texto para preservar zeros iniciais.",
+        "unidade": "código"
+      },
+      {
+        "campo": "RES_RD",
+        "descricao": "Total bruto de AIH normais nos arquivos RD, 2016-2025, com residência nos oito municípios interceptados pelas bacias e atendimento no estabelecimento; inclui códigos de diagnóstico sem correspondência no dicionário utilizado.",
+        "unidade": "internações por residência"
+      },
+      {
+        "campo": "RES8_A",
+        "descricao": "AIH normais de residentes dos oito municípios (Belo Horizonte, Betim, Brumadinho, Contagem, Esmeraldas, Ibirité, Ribeirão das Neves e Sarzedo), processadas em 2016-2025: diagnóstico principal de etiologia bacteriana codificada, filtro A. Não constituem contagem de casos confirmados de resistência antimicrobiana.",
+        "unidade": "internações no período"
+      },
+      {
+        "campo": "RES8_B",
+        "descricao": "AIH normais de residentes dos oito municípios (Belo Horizonte, Betim, Brumadinho, Contagem, Esmeraldas, Ibirité, Ribeirão das Neves e Sarzedo), processadas em 2016-2025: diagnóstico principal de síndrome compatível, filtro B. Não constituem contagem de casos confirmados de resistência antimicrobiana.",
+        "unidade": "internações no período"
+      },
+      {
+        "campo": "RES8_AB",
+        "descricao": "AIH normais de residentes dos oito municípios (Belo Horizonte, Betim, Brumadinho, Contagem, Esmeraldas, Ibirité, Ribeirão das Neves e Sarzedo), processadas em 2016-2025: filtro amplo A+B, soma das categorias A e B. Não constituem contagem de casos confirmados de resistência antimicrobiana.",
+        "unidade": "internações no período"
+      },
+      {
+        "campo": "RES8_C",
+        "descricao": "AIH normais de residentes dos oito municípios (Belo Horizonte, Betim, Brumadinho, Contagem, Esmeraldas, Ibirité, Ribeirão das Neves e Sarzedo), processadas em 2016-2025: categoria C, condições associadas ou sequelas mantidas separadas do filtro principal A+B. Não constituem contagem de casos confirmados de resistência antimicrobiana.",
+        "unidade": "internações no período"
+      },
+      {
+        "campo": "RES8_SEM_D",
+        "descricao": "AIH normais de residentes dos oito municípios (Belo Horizonte, Betim, Brumadinho, Contagem, Esmeraldas, Ibirité, Ribeirão das Neves e Sarzedo), processadas em 2016-2025: código de diagnóstico sem correspondência no dicionário CID utilizado; mantido no total bruto, fora do filtro A+B. Não constituem contagem de casos confirmados de resistência antimicrobiana.",
+        "unidade": "internações no período"
+      },
+      {
+        "campo": "PROD_TOT",
+        "descricao": "AIH normais produzidas no estabelecimento, de pacientes de todas as origens, processadas em 2016-2025: todas as causas, inclusive diagnósticos sem descrição no dicionário. Não constituem contagem de casos confirmados de resistência antimicrobiana.",
+        "unidade": "internações no período"
+      },
+      {
+        "campo": "PROD_A",
+        "descricao": "AIH normais produzidas no estabelecimento, de pacientes de todas as origens, processadas em 2016-2025: diagnóstico principal de etiologia bacteriana codificada, filtro A. Não constituem contagem de casos confirmados de resistência antimicrobiana.",
+        "unidade": "internações no período"
+      },
+      {
+        "campo": "PROD_B",
+        "descricao": "AIH normais produzidas no estabelecimento, de pacientes de todas as origens, processadas em 2016-2025: diagnóstico principal de síndrome compatível, filtro B. Não constituem contagem de casos confirmados de resistência antimicrobiana.",
+        "unidade": "internações no período"
+      },
+      {
+        "campo": "PROD_AB",
+        "descricao": "AIH normais produzidas no estabelecimento, de pacientes de todas as origens, processadas em 2016-2025: filtro amplo A+B, soma das categorias A e B. Não constituem contagem de casos confirmados de resistência antimicrobiana.",
+        "unidade": "internações no período"
+      },
+      {
+        "campo": "PROD_C",
+        "descricao": "AIH normais produzidas no estabelecimento, de pacientes de todas as origens, processadas em 2016-2025: categoria C, condições associadas ou sequelas mantidas separadas do filtro principal A+B. Não constituem contagem de casos confirmados de resistência antimicrobiana.",
+        "unidade": "internações no período"
+      },
+      {
+        "campo": "PROD_SEM_D",
+        "descricao": "AIH normais produzidas no estabelecimento, de pacientes de todas as origens, processadas em 2016-2025: código de diagnóstico sem correspondência no dicionário CID utilizado; mantido no total bruto, fora do filtro A+B. Não constituem contagem de casos confirmados de resistência antimicrobiana.",
+        "unidade": "internações no período"
+      },
+      {
+        "campo": "NOME",
+        "descricao": "Nome do estabelecimento na identificação da rede hospitalar consultada no SIH/TabNet.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "AIH_RES",
+        "descricao": "Total oficial de internações, consulta NRMG/SIH por residência, de pacientes dos oito municípios interceptados pelas bacias, atendidos no estabelecimento em 2016-2025. Não se limita à população efetivamente residente nas bacias.",
+        "unidade": "internações por residência"
+      },
+      {
+        "campo": "DIF_RES",
+        "descricao": "Diferença entre o total residencial bruto dos RD e a consulta oficial NRMG do estabelecimento: RES_RD − AIH_NRMG. Preserva divergências de tabulação, em vez de ajustar os totais artificialmente.",
+        "unidade": "internações"
+      },
+      {
+        "campo": "MUN_CNES",
+        "descricao": "Código do município de localização do estabelecimento obtido no cadastro hospitalar/CNES. Não é município de residência do paciente.",
+        "unidade": "código municipal"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia à qual pertence a feição ou o recorte: pampulha, vargem_flores ou ibirite_regap.",
+        "unidade": "código"
+      },
+      {
+        "campo": "DIST_BAC_M",
+        "descricao": "Menor distância plana entre o ponto de localização do hospital e a união das três bacias, em SIRGAS 2000 / UTM 23S. É zero para pontos internos; não representa percurso rodoviário.",
+        "unidade": "m"
+      },
+      {
+        "campo": "SIT_ESP",
+        "descricao": "Situação da localização do hospital: dentro das bacias, fora das bacias ou coordenada pendente com produção confirmada. Não define a residência nem a área atendida pelos pacientes.",
+        "unidade": "categoria"
+      },
+      {
+        "campo": "AIH_A",
+        "descricao": "AIH normais de residentes dos oito municípios, atendidos no estabelecimento em 2016-2025, com diagnóstico principal de etiologia bacteriana explicitamente codificada no filtro A. Não comprova resistência antimicrobiana.",
+        "unidade": "internações do filtro A"
+      },
+      {
+        "campo": "AIH_B",
+        "descricao": "AIH normais de residentes dos oito municípios, atendidos no estabelecimento em 2016-2025, com diagnóstico principal de síndrome compatível com infecção bacteriana no filtro B, sem confirmação do agente.",
+        "unidade": "internações do filtro B"
+      },
+      {
+        "campo": "AIH_AB",
+        "descricao": "Soma AIH_A + AIH_B para residentes dos oito municípios em 2016-2025. Constitui o filtro amplo selecionado; não é produção hospitalar de todas as origens.",
+        "unidade": "internações do filtro A+B"
+      },
+      {
+        "campo": "AIH_AB_ANO",
+        "descricao": "Média anual do filtro A+B entre residentes dos oito municípios atendidos no estabelecimento em 2016-2025: AIH_AB / 10.",
+        "unidade": "internações A+B/ano"
+      }
+    ]
+  },
+  "17_estabelecimentos_2026": {
+    "01_entradas/17_estabelecimentos_2026/02_camadas/01_cnes_bacias/cnes_2026.shp": [
+      {
+        "campo": "CNES",
+        "descricao": "Código CNES de sete dígitos utilizado para cruzar a exportação ElastiCNES com a produção hospitalar SIH estadual; armazenado como texto.",
+        "unidade": "código"
+      },
+      {
+        "campo": "NOME_CNES",
+        "descricao": "Nome fantasia do estabelecimento na exportação ElastiCNES, competência 2026/09.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "NOME_SIH",
+        "descricao": "Nome do estabelecimento na tabela estadual SIH por local de internação enviada pelo usuário; pode diferir do nome atual do CNES. Nulo quando o código não aparece nessa tabela.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "TIPO_CNES",
+        "descricao": "Código e descrição do tipo de estabelecimento na exportação CNES de setembro de 2026, como hospital, consultório ou unidade ambulatorial.",
+        "unidade": "categoria cadastral"
+      },
+      {
+        "campo": "MUN_COD",
+        "descricao": "Código de seis dígitos do município de localização cadastrado no CNES, sem o dígito verificador IBGE. Não indica residência do paciente.",
+        "unidade": "código municipal"
+      },
+      {
+        "campo": "MUN_NOME",
+        "descricao": "Nome do município de localização do estabelecimento no cadastro CNES de setembro de 2026.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "COMP_CNES",
+        "descricao": "Competência da exportação ElastiCNES utilizada no cruzamento: 2026/09. Não é data de abertura do estabelecimento.",
+        "unidade": "ano/mês"
+      },
+      {
+        "campo": "ATIVO_CAD",
+        "descricao": "Status cadastral informado na exportação ElastiCNES recebida. Todos os 64.706 registros constam como ATIVO; a ausência de produção SIH recente não altera este campo.",
+        "unidade": "status cadastral"
+      },
+      {
+        "campo": "SUS_CAD",
+        "descricao": "Indicador de convênio SUS informado no cadastro ElastiCNES, preservado separadamente da presença efetiva de internações na consulta SIH.",
+        "unidade": "categoria cadastral"
+      },
+      {
+        "campo": "CEP",
+        "descricao": "CEP do endereço do estabelecimento informado pelo CNES. Não representa a lista de CEPs dos pacientes atendidos.",
+        "unidade": "código postal"
+      },
+      {
+        "campo": "ENDERECO",
+        "descricao": "Logradouro e complemento do endereço cadastral do estabelecimento, concatenados quando o complemento está informado.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "LAT",
+        "descricao": "Latitude em graus decimais extraída da primeira coordenada do campo location do ElastiCNES; usada na criação do ponto antes da reprojeção para EPSG:31983.",
+        "unidade": "graus decimais"
+      },
+      {
+        "campo": "LON",
+        "descricao": "Longitude em graus decimais extraída da segunda coordenada do campo location do ElastiCNES; usada na criação do ponto antes da reprojeção para EPSG:31983.",
+        "unidade": "graus decimais"
+      },
+      {
+        "campo": "SIH_HIST",
+        "descricao": "Indicador de correspondência do CNES com a tabela estadual SIH enviada, selecionada por processamento Jan/2015-Set/2026: 1 código encontrado; 0 código ausente. Ausência não comprova inexistência de atendimento ou desativação.",
+        "unidade": "indicador 0/1"
+      },
+      {
+        "campo": "INT_FONTE",
+        "descricao": "Total do estabelecimento em todas as 151 colunas mensais de atendimento da tabela SIH enviada, incluindo registros de 2014. Confere com a coluna Total da fonte; nulo para CNES ausente da consulta.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_15_26",
+        "descricao": "Soma das internações do estabelecimento por mês de atendimento de janeiro de 2015 a setembro de 2026, dentro da exportação por processamento Jan/2015-Set/2026. Todas as causas e origens dos pacientes; nulo para CNES ausente da consulta.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_24_26",
+        "descricao": "Soma das internações por atendimento entre janeiro de 2024 e setembro de 2026; define a janela operacional recente de 33 meses. Todas as causas e origens dos pacientes; nulo para CNES ausente da consulta.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_2024",
+        "descricao": "Internações SUS do estabelecimento nas colunas de atendimento de janeiro a dezembro de 2024, todas as causas e origens. Nulo se o CNES não consta na tabela estadual.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_2025",
+        "descricao": "Internações SUS do estabelecimento nas colunas de atendimento de janeiro a dezembro de 2025, todas as causas e origens. Nulo se o CNES não consta na tabela estadual.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_2026",
+        "descricao": "Internações SUS do estabelecimento nas colunas de atendimento de janeiro a setembro de 2026; período parcial, sujeito a atualização. Nulo se o CNES não consta na tabela estadual.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "ULT_ATEND",
+        "descricao": "Último mês de atendimento com contagem positiva de internações na tabela SIH enviada, no formato AAAA-MM. Não é data confirmada de encerramento da unidade.",
+        "unidade": "ano-mês"
+      },
+      {
+        "campo": "MES_REC",
+        "descricao": "Número de meses com internações positivas entre janeiro de 2024 e setembro de 2026, máximo 33. Não conta meses assinalados apenas com traço na exportação.",
+        "unidade": "meses com produção"
+      },
+      {
+        "campo": "SELEC_SIH",
+        "descricao": "Seleção operacional de atividade: 1 para CNES cadastrado como ATIVO e com INT_24_26 maior que zero; 0 nos demais casos. Na camada interna, aplica-se também a interseção do ponto com a bacia.",
+        "unidade": "indicador 0/1"
+      },
+      {
+        "campo": "DIST_BAC_M",
+        "descricao": "Menor distância plana do ponto cadastral à união das três bacias, em EPSG:31983. Zero para pontos internos; valor positivo para os hospitais auxiliares de conferência das bordas.",
+        "unidade": "m"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia intersectada pelo ponto cadastral do estabelecimento, incluindo pontos exatamente sobre o limite.",
+        "unidade": "código"
+      }
+    ],
+    "01_entradas/17_estabelecimentos_2026/02_camadas/02_selecao_sih/sih_atual.shp": [
+      {
+        "campo": "CNES",
+        "descricao": "Código CNES de sete dígitos utilizado para cruzar a exportação ElastiCNES com a produção hospitalar SIH estadual; armazenado como texto.",
+        "unidade": "código"
+      },
+      {
+        "campo": "NOME_CNES",
+        "descricao": "Nome fantasia do estabelecimento na exportação ElastiCNES, competência 2026/09.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "NOME_SIH",
+        "descricao": "Nome do estabelecimento na tabela estadual SIH por local de internação enviada pelo usuário; pode diferir do nome atual do CNES. Nulo quando o código não aparece nessa tabela.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "TIPO_CNES",
+        "descricao": "Código e descrição do tipo de estabelecimento na exportação CNES de setembro de 2026, como hospital, consultório ou unidade ambulatorial.",
+        "unidade": "categoria cadastral"
+      },
+      {
+        "campo": "MUN_COD",
+        "descricao": "Código de seis dígitos do município de localização cadastrado no CNES, sem o dígito verificador IBGE. Não indica residência do paciente.",
+        "unidade": "código municipal"
+      },
+      {
+        "campo": "MUN_NOME",
+        "descricao": "Nome do município de localização do estabelecimento no cadastro CNES de setembro de 2026.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "COMP_CNES",
+        "descricao": "Competência da exportação ElastiCNES utilizada no cruzamento: 2026/09. Não é data de abertura do estabelecimento.",
+        "unidade": "ano/mês"
+      },
+      {
+        "campo": "ATIVO_CAD",
+        "descricao": "Status cadastral informado na exportação ElastiCNES recebida. Todos os 64.706 registros constam como ATIVO; a ausência de produção SIH recente não altera este campo.",
+        "unidade": "status cadastral"
+      },
+      {
+        "campo": "SUS_CAD",
+        "descricao": "Indicador de convênio SUS informado no cadastro ElastiCNES, preservado separadamente da presença efetiva de internações na consulta SIH.",
+        "unidade": "categoria cadastral"
+      },
+      {
+        "campo": "CEP",
+        "descricao": "CEP do endereço do estabelecimento informado pelo CNES. Não representa a lista de CEPs dos pacientes atendidos.",
+        "unidade": "código postal"
+      },
+      {
+        "campo": "ENDERECO",
+        "descricao": "Logradouro e complemento do endereço cadastral do estabelecimento, concatenados quando o complemento está informado.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "LAT",
+        "descricao": "Latitude em graus decimais extraída da primeira coordenada do campo location do ElastiCNES; usada na criação do ponto antes da reprojeção para EPSG:31983.",
+        "unidade": "graus decimais"
+      },
+      {
+        "campo": "LON",
+        "descricao": "Longitude em graus decimais extraída da segunda coordenada do campo location do ElastiCNES; usada na criação do ponto antes da reprojeção para EPSG:31983.",
+        "unidade": "graus decimais"
+      },
+      {
+        "campo": "SIH_HIST",
+        "descricao": "Indicador de correspondência do CNES com a tabela estadual SIH enviada, selecionada por processamento Jan/2015-Set/2026: 1 código encontrado; 0 código ausente. Ausência não comprova inexistência de atendimento ou desativação.",
+        "unidade": "indicador 0/1"
+      },
+      {
+        "campo": "INT_FONTE",
+        "descricao": "Total do estabelecimento em todas as 151 colunas mensais de atendimento da tabela SIH enviada, incluindo registros de 2014. Confere com a coluna Total da fonte; nulo para CNES ausente da consulta.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_15_26",
+        "descricao": "Soma das internações do estabelecimento por mês de atendimento de janeiro de 2015 a setembro de 2026, dentro da exportação por processamento Jan/2015-Set/2026. Todas as causas e origens dos pacientes; nulo para CNES ausente da consulta.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_24_26",
+        "descricao": "Soma das internações por atendimento entre janeiro de 2024 e setembro de 2026; define a janela operacional recente de 33 meses. Todas as causas e origens dos pacientes; nulo para CNES ausente da consulta.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_2024",
+        "descricao": "Internações SUS do estabelecimento nas colunas de atendimento de janeiro a dezembro de 2024, todas as causas e origens. Nulo se o CNES não consta na tabela estadual.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_2025",
+        "descricao": "Internações SUS do estabelecimento nas colunas de atendimento de janeiro a dezembro de 2025, todas as causas e origens. Nulo se o CNES não consta na tabela estadual.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_2026",
+        "descricao": "Internações SUS do estabelecimento nas colunas de atendimento de janeiro a setembro de 2026; período parcial, sujeito a atualização. Nulo se o CNES não consta na tabela estadual.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "ULT_ATEND",
+        "descricao": "Último mês de atendimento com contagem positiva de internações na tabela SIH enviada, no formato AAAA-MM. Não é data confirmada de encerramento da unidade.",
+        "unidade": "ano-mês"
+      },
+      {
+        "campo": "MES_REC",
+        "descricao": "Número de meses com internações positivas entre janeiro de 2024 e setembro de 2026, máximo 33. Não conta meses assinalados apenas com traço na exportação.",
+        "unidade": "meses com produção"
+      },
+      {
+        "campo": "SELEC_SIH",
+        "descricao": "Seleção operacional de atividade: 1 para CNES cadastrado como ATIVO e com INT_24_26 maior que zero; 0 nos demais casos. Na camada interna, aplica-se também a interseção do ponto com a bacia.",
+        "unidade": "indicador 0/1"
+      },
+      {
+        "campo": "DIST_BAC_M",
+        "descricao": "Menor distância plana do ponto cadastral à união das três bacias, em EPSG:31983. Zero para pontos internos; valor positivo para os hospitais auxiliares de conferência das bordas.",
+        "unidade": "m"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia intersectada pelo ponto cadastral do estabelecimento, incluindo pontos exatamente sobre o limite.",
+        "unidade": "código"
+      }
+    ],
+    "01_entradas/17_estabelecimentos_2026/02_camadas/03_bordas/sih_bordas.shp": [
+      {
+        "campo": "CNES",
+        "descricao": "Código CNES de sete dígitos utilizado para cruzar a exportação ElastiCNES com a produção hospitalar SIH estadual; armazenado como texto.",
+        "unidade": "código"
+      },
+      {
+        "campo": "NOME_CNES",
+        "descricao": "Nome fantasia do estabelecimento na exportação ElastiCNES, competência 2026/09.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "NOME_SIH",
+        "descricao": "Nome do estabelecimento na tabela estadual SIH por local de internação enviada pelo usuário; pode diferir do nome atual do CNES. Nulo quando o código não aparece nessa tabela.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "TIPO_CNES",
+        "descricao": "Código e descrição do tipo de estabelecimento na exportação CNES de setembro de 2026, como hospital, consultório ou unidade ambulatorial.",
+        "unidade": "categoria cadastral"
+      },
+      {
+        "campo": "MUN_COD",
+        "descricao": "Código de seis dígitos do município de localização cadastrado no CNES, sem o dígito verificador IBGE. Não indica residência do paciente.",
+        "unidade": "código municipal"
+      },
+      {
+        "campo": "MUN_NOME",
+        "descricao": "Nome do município de localização do estabelecimento no cadastro CNES de setembro de 2026.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "COMP_CNES",
+        "descricao": "Competência da exportação ElastiCNES utilizada no cruzamento: 2026/09. Não é data de abertura do estabelecimento.",
+        "unidade": "ano/mês"
+      },
+      {
+        "campo": "ATIVO_CAD",
+        "descricao": "Status cadastral informado na exportação ElastiCNES recebida. Todos os 64.706 registros constam como ATIVO; a ausência de produção SIH recente não altera este campo.",
+        "unidade": "status cadastral"
+      },
+      {
+        "campo": "SUS_CAD",
+        "descricao": "Indicador de convênio SUS informado no cadastro ElastiCNES, preservado separadamente da presença efetiva de internações na consulta SIH.",
+        "unidade": "categoria cadastral"
+      },
+      {
+        "campo": "CEP",
+        "descricao": "CEP do endereço do estabelecimento informado pelo CNES. Não representa a lista de CEPs dos pacientes atendidos.",
+        "unidade": "código postal"
+      },
+      {
+        "campo": "ENDERECO",
+        "descricao": "Logradouro e complemento do endereço cadastral do estabelecimento, concatenados quando o complemento está informado.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "LAT",
+        "descricao": "Latitude em graus decimais extraída da primeira coordenada do campo location do ElastiCNES; usada na criação do ponto antes da reprojeção para EPSG:31983.",
+        "unidade": "graus decimais"
+      },
+      {
+        "campo": "LON",
+        "descricao": "Longitude em graus decimais extraída da segunda coordenada do campo location do ElastiCNES; usada na criação do ponto antes da reprojeção para EPSG:31983.",
+        "unidade": "graus decimais"
+      },
+      {
+        "campo": "SIH_HIST",
+        "descricao": "Indicador de correspondência do CNES com a tabela estadual SIH enviada, selecionada por processamento Jan/2015-Set/2026: 1 código encontrado; 0 código ausente. Ausência não comprova inexistência de atendimento ou desativação.",
+        "unidade": "indicador 0/1"
+      },
+      {
+        "campo": "INT_FONTE",
+        "descricao": "Total do estabelecimento em todas as 151 colunas mensais de atendimento da tabela SIH enviada, incluindo registros de 2014. Confere com a coluna Total da fonte; nulo para CNES ausente da consulta.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_15_26",
+        "descricao": "Soma das internações do estabelecimento por mês de atendimento de janeiro de 2015 a setembro de 2026, dentro da exportação por processamento Jan/2015-Set/2026. Todas as causas e origens dos pacientes; nulo para CNES ausente da consulta.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_24_26",
+        "descricao": "Soma das internações por atendimento entre janeiro de 2024 e setembro de 2026; define a janela operacional recente de 33 meses. Todas as causas e origens dos pacientes; nulo para CNES ausente da consulta.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_2024",
+        "descricao": "Internações SUS do estabelecimento nas colunas de atendimento de janeiro a dezembro de 2024, todas as causas e origens. Nulo se o CNES não consta na tabela estadual.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_2025",
+        "descricao": "Internações SUS do estabelecimento nas colunas de atendimento de janeiro a dezembro de 2025, todas as causas e origens. Nulo se o CNES não consta na tabela estadual.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "INT_2026",
+        "descricao": "Internações SUS do estabelecimento nas colunas de atendimento de janeiro a setembro de 2026; período parcial, sujeito a atualização. Nulo se o CNES não consta na tabela estadual.",
+        "unidade": "internações SUS registradas"
+      },
+      {
+        "campo": "ULT_ATEND",
+        "descricao": "Último mês de atendimento com contagem positiva de internações na tabela SIH enviada, no formato AAAA-MM. Não é data confirmada de encerramento da unidade.",
+        "unidade": "ano-mês"
+      },
+      {
+        "campo": "MES_REC",
+        "descricao": "Número de meses com internações positivas entre janeiro de 2024 e setembro de 2026, máximo 33. Não conta meses assinalados apenas com traço na exportação.",
+        "unidade": "meses com produção"
+      },
+      {
+        "campo": "SELEC_SIH",
+        "descricao": "Seleção operacional de atividade: 1 para CNES cadastrado como ATIVO e com INT_24_26 maior que zero; 0 nos demais casos. Na camada interna, aplica-se também a interseção do ponto com a bacia.",
+        "unidade": "indicador 0/1"
+      },
+      {
+        "campo": "DIST_BAC_M",
+        "descricao": "Menor distância plana do ponto cadastral à união das três bacias, em EPSG:31983. Zero para pontos internos; valor positivo para os hospitais auxiliares de conferência das bordas.",
+        "unidade": "m"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Identificador da bacia mais próxima do hospital externo, utilizado somente na conferência de estabelecimentos até 1,5 km dos limites. Não indica inclusão na bacia.",
+        "unidade": "código da bacia mais próxima"
+      }
+    ]
+  },
+  "18_residuos": {
+    "01_entradas/18_residuos/01_destino_lixo/waste_census.shp": [
+      {
+        "campo": "SECTOR_ID",
+        "descricao": "Código do setor censitário Censo 2022; contagens originais referem-se ao setor inteiro.",
+        "unidade": "código"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Bacia do recorte geométrico.",
+        "unidade": "código"
+      },
+      {
+        "campo": "HH_TOTAL",
+        "descricao": "Domicílios particulares permanentes ocupados do setor inteiro; denominador do destino do lixo.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "ORIG_KM2",
+        "descricao": "Área do setor inteiro antes do recorte; usada para alocação proporcional.",
+        "unidade": "km²"
+      },
+      {
+        "campo": "PART_KM2",
+        "descricao": "Área da interseção setor/bacia.",
+        "unidade": "km²"
+      },
+      {
+        "campo": "UNC_LO",
+        "descricao": "Limite inferior de domicílios sem coleta no setor inteiro.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "UNC_HI",
+        "descricao": "Limite superior de domicílios sem coleta no setor inteiro.",
+        "unidade": "domicílios"
+      },
+      {
+        "campo": "WASTE_PCT",
+        "descricao": "Ponto médio do intervalo percentual sem coleta do setor inteiro; não recalculado apenas para a geometria recortada.",
+        "unidade": "%"
+      },
+      {
+        "campo": "WASTE_LO",
+        "descricao": "Limite inferior de domicílios sem coleta / HH_TOTAL do setor inteiro × 100.",
+        "unidade": "%"
+      },
+      {
+        "campo": "WASTE_HI",
+        "descricao": "Limite superior de domicílios sem coleta / HH_TOTAL do setor inteiro × 100.",
+        "unidade": "%"
+      },
+      {
+        "campo": "WASTE_EST",
+        "descricao": "1 se usado ponto médio de intervalo de sigilo; 0 se combinado exato ou inválido, conferir QA.",
+        "unidade": "0/1"
+      },
+      {
+        "campo": "WASTE_QA",
+        "descricao": "exact_combined: combinado exato; interval_midpoint: hipótese central; no_households: sem domicílios; inconsistent_or_missing: excluir.",
+        "unidade": "categoria"
+      }
+    ],
+    "01_entradas/18_residuos/02_instalacoes/waste_fac.shp": [
+      {
+        "campo": "BACIA",
+        "descricao": "Bacia contribuinte.",
+        "unidade": "código"
+      },
+      {
+        "campo": "REC_ID",
+        "descricao": "Identificador genérico do registro; não identifica pessoa física.",
+        "unidade": "código"
+      },
+      {
+        "campo": "TYPE",
+        "descricao": "Tipo do cadastro: aterro sanitário, transbordo ou disposição precária.",
+        "unidade": "categoria"
+      },
+      {
+        "campo": "MUNICIPAL",
+        "descricao": "Município informado no cadastro da instalação.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "STATUS",
+        "descricao": "Situação informada pelo cadastro, sem inspeção de campo.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "SHARED",
+        "descricao": "Indicação cadastral de uso compartilhado; não comprova capacidade de recebimento.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "IN_BASIN",
+        "descricao": "1 se ponto intersecta uma das bacias, 0 se apenas no contexto regional de 20 km.",
+        "unidade": "0/1"
+      },
+      {
+        "campo": "CHECK",
+        "descricao": "Pendência de verificar operação, resíduos aceitos e vínculo com o município gerador.",
+        "unidade": "texto"
+      }
+    ],
+    "01_entradas/18_residuos/03_planos/waste_plans.shp": [
+      {
+        "campo": "MUNICIPAL",
+        "descricao": "Município do polígono; indicador administrativo, não medição em 500 m.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "MUN_CODE",
+        "descricao": "Código municipal IBGE.",
+        "unidade": "código"
+      },
+      {
+        "campo": "PLAN_2024",
+        "descricao": "Existência informada de plano de gestão integrada em 2024.",
+        "unidade": "cadastro"
+      },
+      {
+        "campo": "SEL_2024",
+        "descricao": "Existência informada de coleta seletiva em 2024; não é percentual de cobertura.",
+        "unidade": "cadastro"
+      },
+      {
+        "campo": "DEST_2024",
+        "descricao": "Tipologia declarada de destinação final municipal em 2024.",
+        "unidade": "cadastro"
+      }
+    ],
+    "01_entradas/18_residuos/04_destinos/destinations.shp": [
+      {
+        "campo": "BACIA",
+        "descricao": "Bacia do fragmento municipal; indicador se refere ao município inteiro.",
+        "unidade": "código"
+      },
+      {
+        "campo": "MUNICIPAL",
+        "descricao": "Município da declaração administrativa.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "MUN_CODE",
+        "descricao": "Código IBGE do município.",
+        "unidade": "código"
+      },
+      {
+        "campo": "DEST_2024",
+        "descricao": "Tipologia municipal de destinação informada em 2024; não é rastreio do resíduo de cada bairro.",
+        "unidade": "cadastro 2024"
+      }
+    ],
+    "01_entradas/18_residuos/05_coleta/selective.shp": [
+      {
+        "campo": "BACIA",
+        "descricao": "Bacia do fragmento municipal; indicador se refere ao município inteiro.",
+        "unidade": "código"
+      },
+      {
+        "campo": "MUNICIPAL",
+        "descricao": "Município da declaração administrativa.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "MUN_CODE",
+        "descricao": "Código IBGE do município.",
+        "unidade": "código"
+      },
+      {
+        "campo": "COLLECT",
+        "descricao": "1 coleta seletiva declarada; 0 não; -1 sem dado. Não informa percentual de cobertura.",
+        "unidade": "cadastro 2024"
+      }
+    ],
+    "01_entradas/18_residuos/06_planos/waste_plan.shp": [
+      {
+        "campo": "BACIA",
+        "descricao": "Bacia do fragmento municipal; indicador se refere ao município inteiro.",
+        "unidade": "código"
+      },
+      {
+        "campo": "MUNICIPAL",
+        "descricao": "Município da declaração administrativa.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "MUN_CODE",
+        "descricao": "Código IBGE do município.",
+        "unidade": "código"
+      },
+      {
+        "campo": "PLAN",
+        "descricao": "1 plano municipal declarado; 0 não; -1 sem dado. Não avalia implementação.",
+        "unidade": "cadastro 2024"
+      }
+    ],
+    "01_entradas/18_residuos/07_lixo_intermediario/waste_detail.shp": [
+      {
+        "campo": "SECTOR_ID",
+        "descricao": "Setor censitário Censo 2022.",
+        "unidade": "código"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Bacia do recorte do setor.",
+        "unidade": "código"
+      },
+      {
+        "campo": "WASTE_UNC",
+        "descricao": "Diferença entre os limites superior e inferior do percentual sem coleta; não é erro amostral.",
+        "unidade": "pontos percentuais"
+      },
+      {
+        "campo": "DOM_DEST",
+        "descricao": "Destino mais frequente entre as quatro categorias sem coleta conhecidas: 1 queima; 2 enterra; 3 terreno/encosta/área pública; 4 outro; 0 nenhuma reportada; -1 incompleto/sigiloso. Empate resolvido pela ordem das categorias.",
+        "unidade": "categoria"
+      },
+      {
+        "campo": "WASTE_QA",
+        "descricao": "Qualidade e condição da estimativa censitária.",
+        "unidade": "categoria"
+      }
+    ]
+  },
+  "19_licenciamento": {
+    "01_entradas/19_licenciamento/01_triagem/licensing.shp": [
+      {
+        "campo": "BACIA",
+        "descricao": "Bacia contribuinte.",
+        "unidade": "código"
+      },
+      {
+        "campo": "REC_ID",
+        "descricao": "Identificador genérico do registro; não identifica pessoa física.",
+        "unidade": "código"
+      },
+      {
+        "campo": "SOURCE",
+        "descricao": "Cadastro SLA ou histórico estadual 2013–2019; registros não equivalem a estabelecimentos únicos.",
+        "unidade": "cadastro"
+      },
+      {
+        "campo": "PROCESS",
+        "descricao": "Número público do processo de licenciamento.",
+        "unidade": "identificador"
+      },
+      {
+        "campo": "ACT_CODE",
+        "descricao": "Código da atividade principal do cadastro ambiental, não CNAE.",
+        "unidade": "código"
+      },
+      {
+        "campo": "ACTIVITY",
+        "descricao": "Descrição da atividade principal; texto completo em licencas_triagem.csv.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "STATUS",
+        "descricao": "Situação SLA ou modalidade do processo histórico; não confirma operação atual.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "VALIDITY",
+        "descricao": "Validade conforme cadastro; histórico pode informar duração e não data final.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "ISSUED",
+        "descricao": "Data de emissão SLA ou ano do processo histórico.",
+        "unidade": "data/ano"
+      },
+      {
+        "campo": "MP_CAND",
+        "descricao": "1 se descrição menciona plástico, termoplástico, borracha, têxtil, lavanderia, resina ou polímero; requer leitura do processo.",
+        "unidade": "0/1"
+      },
+      {
+        "campo": "REVIEW",
+        "descricao": "Estado de triagem: verificar processo e operação antes de utilizar como fonte quantitativa.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "URL",
+        "descricao": "Consulta pública de origem do processo.",
+        "unidade": "URL"
+      }
+    ],
+    "01_entradas/19_licenciamento/02_tipologias/lic_typology.shp": [
+      {
+        "campo": "REC_ID",
+        "descricao": "Identificador genérico do registro, sem identificação pessoal.",
+        "unidade": "código"
+      },
+      {
+        "campo": "BACIA",
+        "descricao": "Bacia intersectada pelo registro.",
+        "unidade": "código"
+      },
+      {
+        "campo": "SOURCE",
+        "descricao": "SLA ou histórico estadual; não confirma operação atual.",
+        "unidade": "cadastro"
+      },
+      {
+        "campo": "PROCESS",
+        "descricao": "Número público do processo; pode haver mais de um processo por empreendimento.",
+        "unidade": "identificador"
+      },
+      {
+        "campo": "ACTIVITY",
+        "descricao": "Descrição da atividade principal; texto completo na tabela CSV.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "TP_CODE",
+        "descricao": "1 plásticos; 2 refino/química; 3 metal/veículos; 4 resíduos/esgoto; 5 combustíveis/transporte; 6 outros/infraestrutura.",
+        "unidade": "categoria"
+      },
+      {
+        "campo": "TP_NAME",
+        "descricao": "Família de atividade principal para a leitura do mapa.",
+        "unidade": "texto"
+      },
+      {
+        "campo": "MP_LINK",
+        "descricao": "1 material plástico explícito; 2 processo possível a verificar; 3 manejo de resíduos/efluentes; 0 vínculo específico não identificado. Não é grau de emissão.",
+        "unidade": "categoria"
+      },
+      {
+        "campo": "MP_ROUTE",
+        "descricao": "Significado do vínculo documental, sem intensidade ou probabilidade atribuída.",
+        "unidade": "texto"
+      }
+    ]
+  }
+}

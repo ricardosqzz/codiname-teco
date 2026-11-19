@@ -1,0 +1,242 @@
+<!doctype html><meta charset="utf-8"><title>gerar_fluxogramas_camadas.py</title><style>body{max-width:1150px;margin:auto;padding:30px;font:16px/1.65 Arial;color:#17384b}pre{white-space:pre-wrap;background:#eef3f5;padding:20px;font:13px/1.55 Consolas}</style><h1>gerar_fluxogramas_camadas.py</h1><p>Gera dois fluxogramas das camadas, adiciona layout documental aos projetos QGIS e exporta imagens e PDF vetorial. Não recalcula índices.</p><h2>Representação do fluxo</h2><p>Os campos são rótulos documentais. O código não lê valores de população, internações ou saneamento para refazer os índices. As definições acompanham o guia das camadas.</p><h2>Desenho vetorial</h2><p>As funções text, rect, box e arrow constroem elementos SVG com coordenadas explícitas, cores por função e fontes Arial. indices e contexto organizam as duas páginas.</p><h2>Integração QGIS</h2><p>integrar abre cada projeto, guarda nome, fonte, provedor e validade das camadas, adiciona o layout e verifica a preservação desses elementos e dos layouts anteriores. QgsLayoutExporter produz as imagens.</p><h2>PDF</h2><p>pdf_vetorial lê os elementos SVG e os reproduz com ReportLab, incorporando Arial. O documento conserva formas vetoriais e texto pesquisável, evitando transformar a figura inteira em uma fotografia.</p><h2>Reprodução</h2><p>A raiz é resolvida por caminhos_teco e TECO_PROJECT_ROOT. A pasta de fontes pode ser alterada por DOCUMENT_FONT_DIR. Execute com o Python do QGIS. --somente-svg atualiza apenas os SVG e não modifica os projetos.</p><h2>Trecho de indices</h2><pre><code>def indices():
+    begin(&#x27;Das camadas de entrada aos índices&#x27;,&#x27;Processamento em Python • organização das camadas e apresentação no QGIS&#x27;,1)
+    box(60,175,650,150,&#x27;1  Base territorial&#x27;,[&#x27;Bacias • reservatórios • exutórios&#x27;,&#x27;Pampulha / Vargem das Flores / Ibirité&#x27;],size=25)
+    box(875,175,650,150,&#x27;2  Preparação espacial&#x27;,[&#x27;SIRGAS 2000 / UTM 23S • EPSG:31983&#x27;,&#x27;Validar geometrias e recortar pela bacia&#x27;],size=25)
+    box(1690,175,650,150,&#x27;3  Suporte da classificação&#x27;,[&#x27;Círculos de raio 500 m, recortados&#x27;,&#x27;Chave: GRID_ID + BACIA&#x27;],size=25)
+    arrow([(710,250),(875,250)]);arrow([(1525,250),(1690,250)])
+    sources=[(&#x27;IBGE • População 2022&#x27;,[&#x27;Total de pessoas V0001&#x27;,&#x27;Rateio por área do recorte&#x27;,&#x27;POP_DENS • habitantes/km²&#x27;]),(&#x27;IBGE • Esgotamento 2022&#x27;,[&#x27;Rede geral/pluvial + fossa ligada&#x27;,&#x27;Percentual e densidade sem rede&#x27;,&#x27;SEM_REDE / SEWER_DENS&#x27;]),(&#x27;CNES + SIH/SUS&#x27;,[&#x27;Localizar unidades e conferir atividade&#x27;,&#x27;Média anual • 2016–2025&#x27;,&#x27;AIH_LOCAL • todas as causas&#x27;]),(&#x27;IBGE • Destinação do lixo&#x27;,[&#x27;Coleta e demais destinações&#x27;,&#x27;Preservar sigilo e hipóteses&#x27;,&#x27;WASTE_DENS • domicílios/km²&#x27;]),(&#x27;Vias mapeadas&#x27;,[&#x27;Recortar e somar comprimentos&#x27;,&#x27;Comprimento / área do suporte&#x27;,&#x27;ROAD_DENS • km/km²&#x27;])]
+    for i,(title,lines) in enumerate(sources):
+        x=60+465*i;box(x,400,416,205,title,lines,size=22);arrow([(x+208,605),(x+208,665)])
+    box(60,665,2280,125,&#x27;4  Agregação no mesmo suporte&#x27;,[&#x27;Contagens, percentuais e comprimentos nos círculos de 500 m • cobertura e lacunas identificadas • círculos sobrepostos não são somados&#x27;],size=24)
+    arrow([(2340,250),(2370,250),(2370,727),(2340,727)],&#x27;blue&#x27;)
+    box(250,870,840,250,&#x27;5A  Pressão associada à resistência&#x27;,[&#x27;POP_DENS → ln(1 + x)&#x27;,&#x27;SEM_REDE → percentual, sem logaritmo&#x27;,&#x27;AIH_LOCAL → ln(1 + x)&#x27;,&#x27;Min-max entre unidades elegíveis • S0: pesos 1, 1, 1&#x27;,&#x27;Internações são atividade hospitalar, não genes medidos.&#x27;],&#x27;green&#x27;,24)
+    box(1310,870,840,250,&#x27;5B  Pressão potencial de microplásticos&#x27;,[&#x27;POP_DENS + SEWER_DENS&#x27;,&#x27;WASTE_DENS + ROAD_DENS&#x27;,&#x27;Todas passam por ln(1 + x) e min-max&#x27;,&#x27;S0: pesos 1, 1, 1, 1&#x27;,&#x27;Densidades são indicadores, não massas de microplásticos.&#x27;],&#x27;blue&#x27;,24)
+    arrow([(670,790),(670,870)],&#x27;green&#x27;);arrow([(1730,790),(1730,870)],&#x27;blue&#x27;)
+    text(60,1195,[&#x27;6  Análises independentes para cada tema&#x27;],27,bold=True)
+    boxes=[(60,&#x27;Índice multicritério&#x27;,[&#x27;Média ponderada das entradas&#x27;,&#x27;Escore de 0 a 100&#x27;,&#x27;Cinco classes fixas e quintis&#x27;,&#x27;Índice S0 alimenta o Moran&#x27;],&#x27;green&#x27;),(650,&#x27;Moran global e local&#x27;,[&#x27;Entrada: escore S0 e vizinhança&#x27;,&#x27;ARG: Queen • MP: 8 vizinhos&#x27;,&#x27;999 permutações + FDR de 5%&#x27;,&#x27;HH / LL / HL / LH / não significativo&#x27;],&#x27;purple&#x27;),(1240,&#x27;K-means&#x27;,[&#x27;Entrada: matriz normalizada&#x27;,&#x27;Pesos aplicados às variáveis&#x27;,&#x27;Testar K e comparar silhueta&#x27;,&#x27;Saída: perfis multivariados&#x27;],&#x27;blue&#x27;),(1830,&#x27;Sensibilidade dos pesos&#x27;,[&#x27;Comparar S0 e cenários S1–S4&#x27;,&#x27;Recalcular escores e grupos&#x27;,&#x27;Concordância / estabilidade&#x27;,&#x27;Não representa probabilidade&#x27;],&#x27;orange&#x27;)]
+    for x,title,lines,color in boxes:box(x,1255,510,225,title,lines,color,22)
+    S.append(&#x27;&lt;polyline points=&quot;670,1120 670,1225 1730,1225 1730,1120&quot; fill=&quot;none&quot; stroke=&quot;#90a6af&quot; stroke-width=&quot;3.2&quot;/&gt;&#x27;)</code></pre><h2>Trecho de integrar</h2><pre><code>def integrar(paths):
+    os.environ[&#x27;QT_QPA_PLATFORM&#x27;]=&#x27;offscreen&#x27;
+    from qgis.core import QgsApplication,QgsProject,QgsPrintLayout,QgsLayoutItemPage,QgsLayoutItemPicture,QgsLayoutPoint,QgsLayoutSize,QgsLayoutExporter
+    from qgis.PyQt.QtGui import QFontDatabase
+    app=QgsApplication([],False);app.initQgis()
+    for font in [&#x27;arial.ttf&#x27;,&#x27;arialbd.ttf&#x27;]:
+        p=Path(&#x27;C:/Windows/Fonts&#x27;)/font
+        if p.exists():QFontDatabase.addApplicationFont(str(p))
+    reports=[]
+    for target in [R/&#x27;projeto_teco.qgz&#x27;,F/&#x27;TECO_Consolidado.qgz&#x27;]:
+        project=QgsProject();assert project.read(str(target)),str(target)
+        before={k:(v.name(),v.source(),v.providerType(),v.isValid()) for k,v in project.mapLayers().items()}
+        old_names=[x.name() for x in project.layoutManager().layouts() if x.name()!=&#x27;Workflow | Layers&#x27;]
+        archive(target)
+        old=project.layoutManager().layoutByName(&#x27;Workflow | Layers&#x27;)
+        if old:project.layoutManager().removeLayout(old)
+        layout=QgsPrintLayout(project);layout.initializeDefaults();layout.setName(&#x27;Workflow | Layers&#x27;)
+        layout.pageCollection().pages()[0].setPageSize(QgsLayoutSize(420,297))</code></pre><h2>Trecho de pdf_vetorial</h2><pre><code>def pdf_vetorial(paths):
+    import xml.etree.ElementTree as ET
+    from reportlab.pdfgen import canvas
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.lib.colors import HexColor
+    from reportlab.lib.units import mm
+    fonts=Path(os.environ.get(&#x27;DOCUMENT_FONT_DIR&#x27;,&#x27;C:/Windows/Fonts&#x27;))
+    pdfmetrics.registerFont(TTFont(&#x27;FlowArial&#x27;,str(fonts/&#x27;arial.ttf&#x27;)))
+    pdfmetrics.registerFont(TTFont(&#x27;FlowArialBold&#x27;,str(fonts/&#x27;arialbd.ttf&#x27;)))
+    target=O/&#x27;Fluxo_camadas_QGIS.pdf&#x27;;archive(target)
+    c=canvas.Canvas(str(target),pagesize=(420*mm,297*mm),pageCompression=1)
+    c.setTitle(&#x27;Fluxo das camadas no projeto QGIS&#x27;);c.setAuthor(&#x27;Projeto dos reservatórios urbanos&#x27;)
+    for path in paths:
+        c.saveState();c.translate(0,297*mm);c.scale(420*mm/2400,-297*mm/1700)
+        for e in ET.parse(path).getroot():
+            tag=e.tag.split(&#x27;}&#x27;)[-1];a=e.attrib
+            if tag not in [&#x27;rect&#x27;,&#x27;polyline&#x27;,&#x27;polygon&#x27;,&#x27;text&#x27;]:continue</code></pre><h2>Código integral</h2><pre><code># Caminhos: TECO_PROJECT_ROOT ou codigo/caminhos_projeto.json; executar no Python do QGIS.
+# Entradas: 00_documentacao/Guia_objetivo_camadas_TECO.md e 01_entradas da entrega_final.
+# Campos representados: POP_DENS, SEM_REDE, AIH_LOCAL, SEWER_DENS, WASTE_DENS, ROAD_DENS, GRID_ID e BACIA.
+# Projetos: projeto_teco.qgz e entrega_final/TECO_Consolidado.qgz; preserva camadas e layouts existentes.
+# Saídas: 00_documentacao/Fluxogramas; dois SVG, dois PNG, PDF de duas páginas e auditoria JSON.
+# Saída QGIS: layout Workflow | Layers; fluxograma documental, sem reexecutar índices ou alterar atributos.
+from pathlib import Path
+import os,sys,json,html,hashlib,datetime,shutil,math
+from caminhos_teco import raiz_projeto
+
+# Caminhos
+R=raiz_projeto();F=R/&#x27;entrega_final&#x27;;O=F/&#x27;00_documentacao/Fluxogramas&#x27;
+STAMP=datetime.datetime.now().strftime(&#x27;%Y%m%d_%H%M%S&#x27;)
+COL={&#x27;ink&#x27;:&#x27;#17384b&#x27;,&#x27;blue&#x27;:&#x27;#23769a&#x27;,&#x27;green&#x27;:&#x27;#257b6c&#x27;,&#x27;purple&#x27;:&#x27;#78569a&#x27;,&#x27;orange&#x27;:&#x27;#b87825&#x27;,&#x27;gray&#x27;:&#x27;#62747d&#x27;,&#x27;line&#x27;:&#x27;#90a6af&#x27;}
+S=[]
+
+# Elementos vetoriais
+def text(x,y,lines,size=24,color=None,bold=False,gap=33):
+    for i,line in enumerate(lines):
+        S.append(f&#x27;&lt;text x=&quot;{x}&quot; y=&quot;{y+i*gap}&quot; font-family=&quot;Arial&quot; font-size=&quot;{size}&quot; font-weight=&quot;{700 if bold else 400}&quot; fill=&quot;{color or COL[&quot;ink&quot;]}&quot;&gt;{html.escape(str(line))}&lt;/text&gt;&#x27;)
+
+def rect(x,y,w,h,fill,stroke=&#x27;none&#x27;,rx=16):
+    S.append(f&#x27;&lt;rect x=&quot;{x}&quot; y=&quot;{y}&quot; width=&quot;{w}&quot; height=&quot;{h}&quot; rx=&quot;{rx}&quot; fill=&quot;{fill}&quot; stroke=&quot;{stroke}&quot; stroke-width=&quot;2&quot;/&gt;&#x27;)
+
+def box(x,y,w,h,title,lines,color=&#x27;blue&#x27;,size=24):
+    c=COL[color];rect(x,y,w,h,&#x27;#ffffff&#x27;,&#x27;#cbd9df&#x27;);rect(x,y,8,h,c,rx=3)
+    text(x+25,y+43,[title],28,c,True)
+    text(x+25,y+83,lines,size,gap=33)
+
+def arrow(points,color=&#x27;line&#x27;,dashed=False):
+    c=COL.get(color,color);p=&#x27; &#x27;.join(f&#x27;{x},{y}&#x27; for x,y in points)
+    S.append(f&#x27;&lt;polyline points=&quot;{p}&quot; fill=&quot;none&quot; stroke=&quot;{c}&quot; stroke-width=&quot;3.2&quot; stroke-linejoin=&quot;round&quot;&#x27;+(&#x27; stroke-dasharray=&quot;10 8&quot;&#x27; if dashed else &#x27;&#x27;)+&#x27;/&gt;&#x27;)
+    a,b=points[-2:];dx=b[0]-a[0];dy=b[1]-a[1];n=math.hypot(dx,dy);ux,uy=dx/n,dy/n
+    tip=[b,(b[0]-15*ux+6*uy,b[1]-15*uy-6*ux),(b[0]-15*ux-6*uy,b[1]-15*uy+6*ux)]
+    S.append(&#x27;&lt;polygon points=&quot;&#x27;+&#x27; &#x27;.join(f&#x27;{x},{y}&#x27; for x,y in tip)+f&#x27;&quot; fill=&quot;{c}&quot;/&gt;&#x27;)
+
+def begin(title,subtitle,page):
+    S.clear();S.append(&#x27;&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;420mm&quot; height=&quot;297mm&quot; viewBox=&quot;0 0 2400 1700&quot;&gt;&lt;title&gt;&#x27;+html.escape(title)+&#x27;&lt;/title&gt;&lt;desc&gt;&#x27;+html.escape(subtitle)+&#x27;&lt;/desc&gt;&#x27;)
+    rect(0,0,2400,1700,&#x27;#f4f7f9&#x27;,rx=0);text(60,80,[title],47,bold=True)
+    text(60,125,[subtitle],25,&#x27;#526d7b&#x27;);text(2225,80,[f&#x27;{page} / 2&#x27;],30,&#x27;#526d7b&#x27;,True)
+
+def end(name):
+    S.append(&#x27;&lt;/svg&gt;&#x27;);p=O/name;p.write_text(&#x27;\n&#x27;.join(S),encoding=&#x27;utf8&#x27;);return p
+
+def archive(path):
+    if path.exists():
+        dest=R/&#x27;descontinuado&#x27;/STAMP/&#x27;fluxogramas&#x27;/path.relative_to(R);dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(path,dest)
+
+# Entradas e índices
+def indices():
+    begin(&#x27;Das camadas de entrada aos índices&#x27;,&#x27;Processamento em Python • organização das camadas e apresentação no QGIS&#x27;,1)
+    box(60,175,650,150,&#x27;1  Base territorial&#x27;,[&#x27;Bacias • reservatórios • exutórios&#x27;,&#x27;Pampulha / Vargem das Flores / Ibirité&#x27;],size=25)
+    box(875,175,650,150,&#x27;2  Preparação espacial&#x27;,[&#x27;SIRGAS 2000 / UTM 23S • EPSG:31983&#x27;,&#x27;Validar geometrias e recortar pela bacia&#x27;],size=25)
+    box(1690,175,650,150,&#x27;3  Suporte da classificação&#x27;,[&#x27;Círculos de raio 500 m, recortados&#x27;,&#x27;Chave: GRID_ID + BACIA&#x27;],size=25)
+    arrow([(710,250),(875,250)]);arrow([(1525,250),(1690,250)])
+    sources=[(&#x27;IBGE • População 2022&#x27;,[&#x27;Total de pessoas V0001&#x27;,&#x27;Rateio por área do recorte&#x27;,&#x27;POP_DENS • habitantes/km²&#x27;]),(&#x27;IBGE • Esgotamento 2022&#x27;,[&#x27;Rede geral/pluvial + fossa ligada&#x27;,&#x27;Percentual e densidade sem rede&#x27;,&#x27;SEM_REDE / SEWER_DENS&#x27;]),(&#x27;CNES + SIH/SUS&#x27;,[&#x27;Localizar unidades e conferir atividade&#x27;,&#x27;Média anual • 2016–2025&#x27;,&#x27;AIH_LOCAL • todas as causas&#x27;]),(&#x27;IBGE • Destinação do lixo&#x27;,[&#x27;Coleta e demais destinações&#x27;,&#x27;Preservar sigilo e hipóteses&#x27;,&#x27;WASTE_DENS • domicílios/km²&#x27;]),(&#x27;Vias mapeadas&#x27;,[&#x27;Recortar e somar comprimentos&#x27;,&#x27;Comprimento / área do suporte&#x27;,&#x27;ROAD_DENS • km/km²&#x27;])]
+    for i,(title,lines) in enumerate(sources):
+        x=60+465*i;box(x,400,416,205,title,lines,size=22);arrow([(x+208,605),(x+208,665)])
+    box(60,665,2280,125,&#x27;4  Agregação no mesmo suporte&#x27;,[&#x27;Contagens, percentuais e comprimentos nos círculos de 500 m • cobertura e lacunas identificadas • círculos sobrepostos não são somados&#x27;],size=24)
+    arrow([(2340,250),(2370,250),(2370,727),(2340,727)],&#x27;blue&#x27;)
+    box(250,870,840,250,&#x27;5A  Pressão associada à resistência&#x27;,[&#x27;POP_DENS → ln(1 + x)&#x27;,&#x27;SEM_REDE → percentual, sem logaritmo&#x27;,&#x27;AIH_LOCAL → ln(1 + x)&#x27;,&#x27;Min-max entre unidades elegíveis • S0: pesos 1, 1, 1&#x27;,&#x27;Internações são atividade hospitalar, não genes medidos.&#x27;],&#x27;green&#x27;,24)
+    box(1310,870,840,250,&#x27;5B  Pressão potencial de microplásticos&#x27;,[&#x27;POP_DENS + SEWER_DENS&#x27;,&#x27;WASTE_DENS + ROAD_DENS&#x27;,&#x27;Todas passam por ln(1 + x) e min-max&#x27;,&#x27;S0: pesos 1, 1, 1, 1&#x27;,&#x27;Densidades são indicadores, não massas de microplásticos.&#x27;],&#x27;blue&#x27;,24)
+    arrow([(670,790),(670,870)],&#x27;green&#x27;);arrow([(1730,790),(1730,870)],&#x27;blue&#x27;)
+    text(60,1195,[&#x27;6  Análises independentes para cada tema&#x27;],27,bold=True)
+    boxes=[(60,&#x27;Índice multicritério&#x27;,[&#x27;Média ponderada das entradas&#x27;,&#x27;Escore de 0 a 100&#x27;,&#x27;Cinco classes fixas e quintis&#x27;,&#x27;Índice S0 alimenta o Moran&#x27;],&#x27;green&#x27;),(650,&#x27;Moran global e local&#x27;,[&#x27;Entrada: escore S0 e vizinhança&#x27;,&#x27;ARG: Queen • MP: 8 vizinhos&#x27;,&#x27;999 permutações + FDR de 5%&#x27;,&#x27;HH / LL / HL / LH / não significativo&#x27;],&#x27;purple&#x27;),(1240,&#x27;K-means&#x27;,[&#x27;Entrada: matriz normalizada&#x27;,&#x27;Pesos aplicados às variáveis&#x27;,&#x27;Testar K e comparar silhueta&#x27;,&#x27;Saída: perfis multivariados&#x27;],&#x27;blue&#x27;),(1830,&#x27;Sensibilidade dos pesos&#x27;,[&#x27;Comparar S0 e cenários S1–S4&#x27;,&#x27;Recalcular escores e grupos&#x27;,&#x27;Concordância / estabilidade&#x27;,&#x27;Não representa probabilidade&#x27;],&#x27;orange&#x27;)]
+    for x,title,lines,color in boxes:box(x,1255,510,225,title,lines,color,22)
+    S.append(&#x27;&lt;polyline points=&quot;670,1120 670,1225 1730,1225 1730,1120&quot; fill=&quot;none&quot; stroke=&quot;#90a6af&quot; stroke-width=&quot;3.2&quot;/&gt;&#x27;)
+    S.append(&#x27;&lt;polyline points=&quot;315,1225 2085,1225&quot; fill=&quot;none&quot; stroke=&quot;#90a6af&quot; stroke-width=&quot;3.2&quot;/&gt;&#x27;)
+    for x in [315,1495,2085]:arrow([(x,1225),(x,1255)],&#x27;gray&#x27;)
+    arrow([(570,1370),(650,1370)],&#x27;purple&#x27;)
+    text(60,1535,[&#x27;K-means compara perfis de entradas; Moran verifica a associação espacial do índice; D8 pertence ao fluxo da página 2.&#x27;],25,&#x27;#526d7b&#x27;)
+    rect(60,1580,2280,80,&#x27;#17384b&#x27;);text(85,1616,[&#x27;QGIS  •  Entradas nas unidades originais + resultados da classificação em hexágonos + tabelas e encartes por bacia&#x27;],27,&#x27;#ffffff&#x27;,True)
+    text(85,1648,[&#x27;As transformações servem ao cálculo; população, percentuais e distâncias continuam disponíveis nas unidades de origem.&#x27;],23,&#x27;#e6eff2&#x27;)
+    for x in [315,905,1495,2085]:arrow([(x,1480),(x,1510)],&#x27;gray&#x27;)
+    return end(&#x27;01_Entradas_indices.svg&#x27;)
+
+# Camadas complementares e drenagem
+def contexto():
+    begin(&#x27;Contexto territorial e conectividade&#x27;,&#x27;Camadas complementares ajudam a interpretar as manchas; não recebem pesos adicionais nos índices atuais.&#x27;,2)
+    text(60,205,[&#x27;RELEVO E ROTAS TOPOGRÁFICAS&#x27;],28,COL[&#x27;blue&#x27;],True)
+    text(1280,205,[&#x27;CAMADAS DE CONTEXTO E CONFERÊNCIA&#x27;],28,COL[&#x27;gray&#x27;],True)
+    box(60,245,1060,145,&#x27;Copernicus GLO-30&#x27;,[&#x27;MDE em SIRGAS 2000 / UTM 23S&#x27;,&#x27;Base física de altitude, declividade e direção de fluxo&#x27;],size=25)
+    box(60,465,505,195,&#x27;Hipsometria e declividade&#x27;,[&#x27;Altitude em metros&#x27;,&#x27;Inclinação em % • classes Embrapa&#x27;,&#x27;Mapas de caracterização&#x27;],size=24)
+    box(615,465,505,195,&#x27;Direção e acumulação D8&#x27;,[&#x27;Um de oito pixels vizinhos&#x27;,&#x27;Área contribuinte e percurso&#x27;,&#x27;Conectividade topográfica&#x27;],size=24)
+    arrow([(590,390),(590,420),(312,420),(312,465)],&#x27;blue&#x27;);arrow([(590,420),(867,420),(867,465)],&#x27;blue&#x27;)
+    box(60,745,505,200,&#x27;Hidrografia e exutórios&#x27;,[&#x27;Cursos d’água mapeados&#x27;,&#x27;Reservatório delimita o destino&#x27;,&#x27;Exutórios orientam a área drenada&#x27;],&#x27;gray&#x27;,24)
+    box(615,745,505,200,&#x27;Contribuição a montante&#x27;,[&#x27;Área contribuinte (km²)&#x27;,&#x27;Distância hidrológica (km)&#x27;,&#x27;Rotas topográficas candidatas&#x27;],&#x27;blue&#x27;,24)
+    arrow([(867,660),(867,745)],&#x27;blue&#x27;);arrow([(565,845),(615,845)],&#x27;gray&#x27;)
+    box(60,1040,505,205,&#x27;Índices espaciais da página 1&#x27;,[&#x27;Índice de resistência&#x27;,&#x27;Índice de microplásticos&#x27;,&#x27;Cada tema é tratado separadamente&#x27;],&#x27;green&#x27;,24)
+    box(615,1040,505,205,&#x27;Pressão média a montante&#x27;,[&#x27;Índice ponderado pela área&#x27;,&#x27;Agregação pelo caminho D8&#x27;,&#x27;Interromper percurso no reservatório&#x27;],&#x27;blue&#x27;,24)
+    arrow([(867,945),(867,1040)],&#x27;blue&#x27;);arrow([(565,1140),(615,1140)],&#x27;green&#x27;)
+    rect(60,1320,1060,180,&#x27;#e6eff3&#x27;,&#x27;#cbd9df&#x27;);text(85,1360,[&#x27;Como interpretar&#x27;],28,bold=True)
+    text(85,1400,[&#x27;D8 não representa galerias pluviais, vazão ou transporte calibrado.&#x27;,&#x27;O resultado não é uma concentração, carga ou probabilidade.&#x27;,&#x27;Distância em linha reta e distância hidrológica são camadas distintas.&#x27;],24,gap=34)
+    contexts=[(245,&#x27;Uso e cobertura da terra • 2025&#x27;,[&#x27;Classes nas unidades originais • ocupação e superfícies&#x27;,&#x27;Contextualiza urbanização e condições de escoamento.&#x27;]),(485,&#x27;Licenciamento e gestão de resíduos&#x27;,[&#x27;Tipologias, processos, aterros, transbordo e destinação&#x27;,&#x27;Coleta seletiva e planos são cadastros; sem peso automático.&#x27;]),(725,&#x27;Rede de esgoto de BH e cadastro de ETE&#x27;,[&#x27;Infraestrutura disponível e possíveis conexões&#x27;,&#x27;Não informa vazão nem comprova lançamento ou carga.&#x27;]),(965,&#x27;Pontos de coleta e microcosmos&#x27;,[&#x27;Gota para amostragem • losango para experimento in situ&#x27;,&#x27;Referências amostrais, sem função de fonte no índice.&#x27;]),(1205,&#x27;Internações por residência e filtros de causas&#x27;,[&#x27;Universo separado da produção hospitalar local&#x27;,&#x27;Não constitui área de atendimento por CEP ou bairro.&#x27;])]
+    for y,title,lines in contexts:box(1280,y,1060,165,title,lines,&#x27;gray&#x27;,25)
+    text(1280,1450,[&#x27;Conferência: CNES, IBGE, SIH, IDE-Sisema e SINIR&#x27;,&#x27;mantêm seus períodos, cobertura e limitações.&#x27;],25,&#x27;#526d7b&#x27;,gap=35)
+    rect(60,1580,2280,80,&#x27;#17384b&#x27;);text(85,1616,[&#x27;QGIS  •  Camadas nativas + caminhos D8 + índices independentes + reservatórios em destaque nos encartes&#x27;],27,&#x27;#ffffff&#x27;,True)
+    text(85,1648,[&#x27;O fluxograma documenta a cadeia existente em Python / SIG. Não é um modelo executável do Modelador Gráfico do QGIS.&#x27;],23,&#x27;#e6eff2&#x27;)
+    arrow([(867,1245),(867,1290)],&#x27;blue&#x27;);arrow([(1810,1370),(1810,1410)],&#x27;gray&#x27;)
+    return end(&#x27;02_Contexto_conectividade.svg&#x27;)
+
+# Layout QGIS e exportação
+def integrar(paths):
+    os.environ[&#x27;QT_QPA_PLATFORM&#x27;]=&#x27;offscreen&#x27;
+    from qgis.core import QgsApplication,QgsProject,QgsPrintLayout,QgsLayoutItemPage,QgsLayoutItemPicture,QgsLayoutPoint,QgsLayoutSize,QgsLayoutExporter
+    from qgis.PyQt.QtGui import QFontDatabase
+    app=QgsApplication([],False);app.initQgis()
+    for font in [&#x27;arial.ttf&#x27;,&#x27;arialbd.ttf&#x27;]:
+        p=Path(&#x27;C:/Windows/Fonts&#x27;)/font
+        if p.exists():QFontDatabase.addApplicationFont(str(p))
+    reports=[]
+    for target in [R/&#x27;projeto_teco.qgz&#x27;,F/&#x27;TECO_Consolidado.qgz&#x27;]:
+        project=QgsProject();assert project.read(str(target)),str(target)
+        before={k:(v.name(),v.source(),v.providerType(),v.isValid()) for k,v in project.mapLayers().items()}
+        old_names=[x.name() for x in project.layoutManager().layouts() if x.name()!=&#x27;Workflow | Layers&#x27;]
+        archive(target)
+        old=project.layoutManager().layoutByName(&#x27;Workflow | Layers&#x27;)
+        if old:project.layoutManager().removeLayout(old)
+        layout=QgsPrintLayout(project);layout.initializeDefaults();layout.setName(&#x27;Workflow | Layers&#x27;)
+        layout.pageCollection().pages()[0].setPageSize(QgsLayoutSize(420,297))
+        page=QgsLayoutItemPage(layout);page.setPageSize(QgsLayoutSize(420,297));layout.pageCollection().addPage(page)
+        for i,p in enumerate(paths):
+            picture=QgsLayoutItemPicture(layout);layout.addLayoutItem(picture);picture.attemptMove(QgsLayoutPoint(0,0),True,False,i);picture.attemptResize(QgsLayoutSize(420,297));picture.setPicturePath(str(p))
+        project.layoutManager().addLayout(layout)
+        after={k:(v.name(),v.source(),v.providerType(),v.isValid()) for k,v in project.mapLayers().items()}
+        assert before==after,&#x27;Camadas alteradas&#x27;
+        assert all(project.layoutManager().layoutByName(n) for n in old_names),&#x27;Layout anterior ausente&#x27;
+        assert project.write(str(target))
+        if target==F/&#x27;TECO_Consolidado.qgz&#x27;:
+            exporter=QgsLayoutExporter(layout);settings=QgsLayoutExporter.PdfExportSettings();settings.dpi=200
+            assert exporter.exportToPdf(str(O/&#x27;Fluxo_camadas_QGIS.pdf&#x27;),settings)==QgsLayoutExporter.Success
+            image_settings=QgsLayoutExporter.ImageExportSettings();image_settings.dpi=145
+            assert exporter.exportToImage(str(O/&#x27;Fluxo_camadas_QGIS.png&#x27;),image_settings)==QgsLayoutExporter.Success
+            del exporter
+        reports.append({&#x27;projeto&#x27;:str(target),&#x27;camadas&#x27;:len(before),&#x27;validas&#x27;:sum(v[3] for v in before.values()),&#x27;camadas_preservadas&#x27;:True,&#x27;layouts_anteriores_preservados&#x27;:True,&#x27;layout&#x27;:&#x27;Workflow | Layers&#x27;,&#x27;paginas&#x27;:2})
+        print(&#x27;Layout salvo: &#x27;+str(target),flush=True)
+        del picture,page,layout
+        project.clear()
+        del project
+    app.exitQgis();return reports
+
+# PDF vetorial com texto pesquisável
+def pdf_vetorial(paths):
+    import xml.etree.ElementTree as ET
+    from reportlab.pdfgen import canvas
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.lib.colors import HexColor
+    from reportlab.lib.units import mm
+    fonts=Path(os.environ.get(&#x27;DOCUMENT_FONT_DIR&#x27;,&#x27;C:/Windows/Fonts&#x27;))
+    pdfmetrics.registerFont(TTFont(&#x27;FlowArial&#x27;,str(fonts/&#x27;arial.ttf&#x27;)))
+    pdfmetrics.registerFont(TTFont(&#x27;FlowArialBold&#x27;,str(fonts/&#x27;arialbd.ttf&#x27;)))
+    target=O/&#x27;Fluxo_camadas_QGIS.pdf&#x27;;archive(target)
+    c=canvas.Canvas(str(target),pagesize=(420*mm,297*mm),pageCompression=1)
+    c.setTitle(&#x27;Fluxo das camadas no projeto QGIS&#x27;);c.setAuthor(&#x27;Projeto dos reservatórios urbanos&#x27;)
+    for path in paths:
+        c.saveState();c.translate(0,297*mm);c.scale(420*mm/2400,-297*mm/1700)
+        for e in ET.parse(path).getroot():
+            tag=e.tag.split(&#x27;}&#x27;)[-1];a=e.attrib
+            if tag not in [&#x27;rect&#x27;,&#x27;polyline&#x27;,&#x27;polygon&#x27;,&#x27;text&#x27;]:continue
+            fill=a.get(&#x27;fill&#x27;,&#x27;none&#x27;);stroke=a.get(&#x27;stroke&#x27;,&#x27;none&#x27;)
+            if fill!=&#x27;none&#x27;:c.setFillColor(HexColor(fill))
+            if stroke!=&#x27;none&#x27;:c.setStrokeColor(HexColor(stroke))
+            c.setLineWidth(float(a.get(&#x27;stroke-width&#x27;,1)))
+            c.setDash([float(v) for v in a.get(&#x27;stroke-dasharray&#x27;,&#x27;&#x27;).split()])
+            if tag==&#x27;rect&#x27;:
+                c.roundRect(float(a[&#x27;x&#x27;]),float(a[&#x27;y&#x27;]),float(a[&#x27;width&#x27;]),float(a[&#x27;height&#x27;]),float(a.get(&#x27;rx&#x27;,0)),stroke=int(stroke!=&#x27;none&#x27;),fill=int(fill!=&#x27;none&#x27;))
+            elif tag in [&#x27;polyline&#x27;,&#x27;polygon&#x27;]:
+                pts=[tuple(map(float,p.split(&#x27;,&#x27;))) for p in a[&#x27;points&#x27;].split()];shape=c.beginPath();shape.moveTo(*pts[0])
+                for point in pts[1:]:shape.lineTo(*point)
+                if tag==&#x27;polygon&#x27;:shape.close()
+                c.drawPath(shape,stroke=int(stroke!=&#x27;none&#x27;),fill=int(fill!=&#x27;none&#x27;))
+            else:
+                c.saveState();c.translate(float(a[&#x27;x&#x27;]),float(a[&#x27;y&#x27;]));c.scale(1,-1);c.setFont(&#x27;FlowArialBold&#x27; if int(a.get(&#x27;font-weight&#x27;,400))&gt;=600 else &#x27;FlowArial&#x27;,float(a[&#x27;font-size&#x27;]));c.drawString(0,0,e.text or &#x27;&#x27;);c.restoreState()
+        c.restoreState();c.showPage()
+    c.save()
+
+# Execução e registro
+def main():
+    O.mkdir(parents=True,exist_ok=True)
+    for p in O.glob(&#x27;*&#x27;):
+        if p.is_file():archive(p)
+    paths=[indices(),contexto()]
+    reports=[] if &#x27;--somente-svg&#x27; in sys.argv else integrar(paths)
+    if &#x27;--somente-svg&#x27; not in sys.argv:pdf_vetorial(paths)
+    record={&#x27;data&#x27;:datetime.datetime.now().isoformat(),&#x27;tipo&#x27;:&#x27;Fluxograma documental; não altera cálculos, pesos ou resultados&#x27;,&#x27;campos&#x27;:[&#x27;POP_DENS&#x27;,&#x27;SEM_REDE&#x27;,&#x27;AIH_LOCAL&#x27;,&#x27;SEWER_DENS&#x27;,&#x27;WASTE_DENS&#x27;,&#x27;ROAD_DENS&#x27;,&#x27;GRID_ID&#x27;,&#x27;BACIA&#x27;],&#x27;paginas&#x27;:[{&#x27;arquivo&#x27;:p.name,&#x27;sha256&#x27;:hashlib.sha256(p.read_bytes()).hexdigest()} for p in paths],&#x27;qgis&#x27;:reports,&#x27;script&#x27;:&#x27;05_scripts/python/gerar_fluxogramas_camadas.py&#x27;}
+    (O/&#x27;Auditoria_fluxogramas.json&#x27;).write_text(json.dumps(record,ensure_ascii=False,indent=2),encoding=&#x27;utf8&#x27;)
+    print(json.dumps(record,ensure_ascii=False),flush=True)
+
+if __name__==&#x27;__main__&#x27;:main()
+</code></pre>

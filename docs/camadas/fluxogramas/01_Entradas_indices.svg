@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420mm" height="297mm" viewBox="0 0 2400 1700"><title>Das camadas de entrada aos índices</title><desc>Processamento em Python • organização das camadas e apresentação no QGIS</desc>
+<rect x="0" y="0" width="2400" height="1700" rx="0" fill="#f4f7f9" stroke="none" stroke-width="2"/>
+<text x="60" y="80" font-family="Arial" font-size="47" font-weight="700" fill="#17384b">Das camadas de entrada aos índices</text>
+<text x="60" y="125" font-family="Arial" font-size="25" font-weight="400" fill="#526d7b">Processamento em Python • organização das camadas e apresentação no QGIS</text>
+<text x="2225" y="80" font-family="Arial" font-size="30" font-weight="700" fill="#526d7b">1 / 2</text>
+<rect x="60" y="175" width="650" height="150" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="60" y="175" width="8" height="150" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="85" y="218" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">1  Base territorial</text>
+<text x="85" y="258" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Bacias • reservatórios • exutórios</text>
+<text x="85" y="291" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Pampulha / Vargem das Flores / Ibirité</text>
+<rect x="875" y="175" width="650" height="150" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="875" y="175" width="8" height="150" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="900" y="218" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">2  Preparação espacial</text>
+<text x="900" y="258" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">SIRGAS 2000 / UTM 23S • EPSG:31983</text>
+<text x="900" y="291" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Validar geometrias e recortar pela bacia</text>
+<rect x="1690" y="175" width="650" height="150" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="1690" y="175" width="8" height="150" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="1715" y="218" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">3  Suporte da classificação</text>
+<text x="1715" y="258" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Círculos de raio 500 m, recortados</text>
+<text x="1715" y="291" font-family="Arial" font-size="25" font-weight="400" fill="#17384b">Chave: GRID_ID + BACIA</text>
+<polyline points="710,250 875,250" fill="none" stroke="#90a6af" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="875,250 860.0,244.0 860.0,256.0" fill="#90a6af"/>
+<polyline points="1525,250 1690,250" fill="none" stroke="#90a6af" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="1690,250 1675.0,244.0 1675.0,256.0" fill="#90a6af"/>
+<rect x="60" y="400" width="416" height="205" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="60" y="400" width="8" height="205" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="85" y="443" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">IBGE • População 2022</text>
+<text x="85" y="483" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Total de pessoas V0001</text>
+<text x="85" y="516" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Rateio por área do recorte</text>
+<text x="85" y="549" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">POP_DENS • habitantes/km²</text>
+<polyline points="268,605 268,665" fill="none" stroke="#90a6af" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="268,665 274.0,650.0 262.0,650.0" fill="#90a6af"/>
+<rect x="525" y="400" width="416" height="205" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="525" y="400" width="8" height="205" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="550" y="443" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">IBGE • Esgotamento 2022</text>
+<text x="550" y="483" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Rede geral/pluvial + fossa ligada</text>
+<text x="550" y="516" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Percentual e densidade sem rede</text>
+<text x="550" y="549" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">SEM_REDE / SEWER_DENS</text>
+<polyline points="733,605 733,665" fill="none" stroke="#90a6af" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="733,665 739.0,650.0 727.0,650.0" fill="#90a6af"/>
+<rect x="990" y="400" width="416" height="205" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="990" y="400" width="8" height="205" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="1015" y="443" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">CNES + SIH/SUS</text>
+<text x="1015" y="483" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Localizar unidades e conferir atividade</text>
+<text x="1015" y="516" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Média anual • 2016–2025</text>
+<text x="1015" y="549" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">AIH_LOCAL • todas as causas</text>
+<polyline points="1198,605 1198,665" fill="none" stroke="#90a6af" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="1198,665 1204.0,650.0 1192.0,650.0" fill="#90a6af"/>
+<rect x="1455" y="400" width="416" height="205" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="1455" y="400" width="8" height="205" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="1480" y="443" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">IBGE • Destinação do lixo</text>
+<text x="1480" y="483" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Coleta e demais destinações</text>
+<text x="1480" y="516" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Preservar sigilo e hipóteses</text>
+<text x="1480" y="549" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">WASTE_DENS • domicílios/km²</text>
+<polyline points="1663,605 1663,665" fill="none" stroke="#90a6af" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="1663,665 1669.0,650.0 1657.0,650.0" fill="#90a6af"/>
+<rect x="1920" y="400" width="416" height="205" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="1920" y="400" width="8" height="205" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="1945" y="443" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">Vias mapeadas</text>
+<text x="1945" y="483" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Recortar e somar comprimentos</text>
+<text x="1945" y="516" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Comprimento / área do suporte</text>
+<text x="1945" y="549" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">ROAD_DENS • km/km²</text>
+<polyline points="2128,605 2128,665" fill="none" stroke="#90a6af" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="2128,665 2134.0,650.0 2122.0,650.0" fill="#90a6af"/>
+<rect x="60" y="665" width="2280" height="125" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="60" y="665" width="8" height="125" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="85" y="708" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">4  Agregação no mesmo suporte</text>
+<text x="85" y="748" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Contagens, percentuais e comprimentos nos círculos de 500 m • cobertura e lacunas identificadas • círculos sobrepostos não são somados</text>
+<polyline points="2340,250 2370,250 2370,727 2340,727" fill="none" stroke="#23769a" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="2340,727 2355.0,733.0 2355.0,721.0" fill="#23769a"/>
+<rect x="250" y="870" width="840" height="250" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="250" y="870" width="8" height="250" rx="3" fill="#257b6c" stroke="none" stroke-width="2"/>
+<text x="275" y="913" font-family="Arial" font-size="28" font-weight="700" fill="#257b6c">5A  Pressão associada à resistência</text>
+<text x="275" y="953" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">POP_DENS → ln(1 + x)</text>
+<text x="275" y="986" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">SEM_REDE → percentual, sem logaritmo</text>
+<text x="275" y="1019" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">AIH_LOCAL → ln(1 + x)</text>
+<text x="275" y="1052" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Min-max entre unidades elegíveis • S0: pesos 1, 1, 1</text>
+<text x="275" y="1085" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Internações são atividade hospitalar, não genes medidos.</text>
+<rect x="1310" y="870" width="840" height="250" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="1310" y="870" width="8" height="250" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="1335" y="913" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">5B  Pressão potencial de microplásticos</text>
+<text x="1335" y="953" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">POP_DENS + SEWER_DENS</text>
+<text x="1335" y="986" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">WASTE_DENS + ROAD_DENS</text>
+<text x="1335" y="1019" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Todas passam por ln(1 + x) e min-max</text>
+<text x="1335" y="1052" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">S0: pesos 1, 1, 1, 1</text>
+<text x="1335" y="1085" font-family="Arial" font-size="24" font-weight="400" fill="#17384b">Densidades são indicadores, não massas de microplásticos.</text>
+<polyline points="670,790 670,870" fill="none" stroke="#257b6c" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="670,870 676.0,855.0 664.0,855.0" fill="#257b6c"/>
+<polyline points="1730,790 1730,870" fill="none" stroke="#23769a" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="1730,870 1736.0,855.0 1724.0,855.0" fill="#23769a"/>
+<text x="60" y="1195" font-family="Arial" font-size="27" font-weight="700" fill="#17384b">6  Análises independentes para cada tema</text>
+<rect x="60" y="1255" width="510" height="225" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="60" y="1255" width="8" height="225" rx="3" fill="#257b6c" stroke="none" stroke-width="2"/>
+<text x="85" y="1298" font-family="Arial" font-size="28" font-weight="700" fill="#257b6c">Índice multicritério</text>
+<text x="85" y="1338" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Média ponderada das entradas</text>
+<text x="85" y="1371" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Escore de 0 a 100</text>
+<text x="85" y="1404" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Cinco classes fixas e quintis</text>
+<text x="85" y="1437" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Índice S0 alimenta o Moran</text>
+<rect x="650" y="1255" width="510" height="225" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="650" y="1255" width="8" height="225" rx="3" fill="#78569a" stroke="none" stroke-width="2"/>
+<text x="675" y="1298" font-family="Arial" font-size="28" font-weight="700" fill="#78569a">Moran global e local</text>
+<text x="675" y="1338" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Entrada: escore S0 e vizinhança</text>
+<text x="675" y="1371" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">ARG: Queen • MP: 8 vizinhos</text>
+<text x="675" y="1404" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">999 permutações + FDR de 5%</text>
+<text x="675" y="1437" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">HH / LL / HL / LH / não significativo</text>
+<rect x="1240" y="1255" width="510" height="225" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="1240" y="1255" width="8" height="225" rx="3" fill="#23769a" stroke="none" stroke-width="2"/>
+<text x="1265" y="1298" font-family="Arial" font-size="28" font-weight="700" fill="#23769a">K-means</text>
+<text x="1265" y="1338" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Entrada: matriz normalizada</text>
+<text x="1265" y="1371" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Pesos aplicados às variáveis</text>
+<text x="1265" y="1404" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Testar K e comparar silhueta</text>
+<text x="1265" y="1437" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Saída: perfis multivariados</text>
+<rect x="1830" y="1255" width="510" height="225" rx="16" fill="#ffffff" stroke="#cbd9df" stroke-width="2"/>
+<rect x="1830" y="1255" width="8" height="225" rx="3" fill="#b87825" stroke="none" stroke-width="2"/>
+<text x="1855" y="1298" font-family="Arial" font-size="28" font-weight="700" fill="#b87825">Sensibilidade dos pesos</text>
+<text x="1855" y="1338" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Comparar S0 e cenários S1–S4</text>
+<text x="1855" y="1371" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Recalcular escores e grupos</text>
+<text x="1855" y="1404" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Concordância / estabilidade</text>
+<text x="1855" y="1437" font-family="Arial" font-size="22" font-weight="400" fill="#17384b">Não representa probabilidade</text>
+<polyline points="670,1120 670,1225 1730,1225 1730,1120" fill="none" stroke="#90a6af" stroke-width="3.2"/>
+<polyline points="315,1225 2085,1225" fill="none" stroke="#90a6af" stroke-width="3.2"/>
+<polyline points="315,1225 315,1255" fill="none" stroke="#62747d" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="315,1255 321.0,1240.0 309.0,1240.0" fill="#62747d"/>
+<polyline points="1495,1225 1495,1255" fill="none" stroke="#62747d" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="1495,1255 1501.0,1240.0 1489.0,1240.0" fill="#62747d"/>
+<polyline points="2085,1225 2085,1255" fill="none" stroke="#62747d" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="2085,1255 2091.0,1240.0 2079.0,1240.0" fill="#62747d"/>
+<polyline points="570,1370 650,1370" fill="none" stroke="#78569a" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="650,1370 635.0,1364.0 635.0,1376.0" fill="#78569a"/>
+<text x="60" y="1535" font-family="Arial" font-size="25" font-weight="400" fill="#526d7b">K-means compara perfis de entradas; Moran verifica a associação espacial do índice; D8 pertence ao fluxo da página 2.</text>
+<rect x="60" y="1580" width="2280" height="80" rx="16" fill="#17384b" stroke="none" stroke-width="2"/>
+<text x="85" y="1616" font-family="Arial" font-size="27" font-weight="700" fill="#ffffff">QGIS  •  Entradas nas unidades originais + resultados da classificação em hexágonos + tabelas e encartes por bacia</text>
+<text x="85" y="1648" font-family="Arial" font-size="23" font-weight="400" fill="#e6eff2">As transformações servem ao cálculo; população, percentuais e distâncias continuam disponíveis nas unidades de origem.</text>
+<polyline points="315,1480 315,1510" fill="none" stroke="#62747d" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="315,1510 321.0,1495.0 309.0,1495.0" fill="#62747d"/>
+<polyline points="905,1480 905,1510" fill="none" stroke="#62747d" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="905,1510 911.0,1495.0 899.0,1495.0" fill="#62747d"/>
+<polyline points="1495,1480 1495,1510" fill="none" stroke="#62747d" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="1495,1510 1501.0,1495.0 1489.0,1495.0" fill="#62747d"/>
+<polyline points="2085,1480 2085,1510" fill="none" stroke="#62747d" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="2085,1510 2091.0,1495.0 2079.0,1495.0" fill="#62747d"/>
+</svg>

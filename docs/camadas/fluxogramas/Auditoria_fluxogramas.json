@@ -1,0 +1,45 @@
+{
+  "data": "2026-11-19T15:36:20.501542",
+  "tipo": "Fluxograma documental; não altera cálculos, pesos ou resultados",
+  "campos": [
+    "POP_DENS",
+    "SEM_REDE",
+    "AIH_LOCAL",
+    "SEWER_DENS",
+    "WASTE_DENS",
+    "ROAD_DENS",
+    "GRID_ID",
+    "BACIA"
+  ],
+  "paginas": [
+    {
+      "arquivo": "01_Entradas_indices.svg",
+      "sha256": "f54a764f341917723c43d2ff7112f6f961e71afbccc29c6ff2d114fb4b67ec81"
+    },
+    {
+      "arquivo": "02_Contexto_conectividade.svg",
+      "sha256": "baf08b913e92e32488ad3370284bb748c4ec6a7c466c67962b129fde498d3cd0"
+    }
+  ],
+  "qgis": [
+    {
+      "projeto": "E:\\teco\\projeto_teco.qgz",
+      "camadas": 280,
+      "validas": 280,
+      "camadas_preservadas": true,
+      "layouts_anteriores_preservados": true,
+      "layout": "Workflow | Layers",
+      "paginas": 2
+    },
+    {
+      "projeto": "E:\\teco\\entrega_final\\TECO_Consolidado.qgz",
+      "camadas": 280,
+      "validas": 280,
+      "camadas_preservadas": true,
+      "layouts_anteriores_preservados": true,
+      "layout": "Workflow | Layers",
+      "paginas": 2
+    }
+  ],
+  "script": "05_scripts/python/gerar_fluxogramas_camadas.py"
+}
